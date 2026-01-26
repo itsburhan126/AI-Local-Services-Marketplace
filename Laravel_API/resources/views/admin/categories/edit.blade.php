@@ -1,0 +1,135 @@
+@extends('layouts.admin')
+
+@section('title', 'Edit Category')
+
+@section('content')
+<div class="content-transition">
+    <div class="flex items-center gap-4 mb-8">
+        <a href="{{ route('admin.categories.index') }}" class="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-500 hover:text-indigo-600 hover:shadow-md transition-all">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 font-jakarta">Edit Category</h1>
+            <p class="text-gray-500 mt-1">Update category information</p>
+        </div>
+    </div>
+
+    <div class="glass-panel rounded-2xl p-8 max-w-3xl">
+        <form action="{{ route('admin.categories.update', $category->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+            @csrf
+            @method('PUT')
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Name -->
+                <div class="space-y-2">
+                    <label class="text-sm font-semibold text-gray-700">Category Name</label>
+                    <input type="text" name="name" value="{{ old('name', $category->name) }}" required
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white/50">
+                    @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-sm font-semibold text-gray-700">Category Type</label>
+                    <select name="type" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white/50">
+                        <option value="local_service" {{ old('type', $category->type ?? 'local_service') === 'local_service' ? 'selected' : '' }}>Local Service</option>
+                        <option value="freelancer" {{ old('type', $category->type ?? '') === 'freelancer' ? 'selected' : '' }}>Freelancer</option>
+                    </select>
+                    @error('type') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+
+                <!-- Parent -->
+                <div class="space-y-2">
+                    <label class="text-sm font-semibold text-gray-700">Parent Category</label>
+                    <select name="parent_id" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white/50">
+                        <option value="">None (Root Category)</option>
+                        @foreach($parents as $parent)
+                            <option value="{{ $parent->id }}" {{ $category->parent_id == $parent->id ? 'selected' : '' }}>
+                                {{ $parent->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('parent_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <!-- Commission -->
+            <div class="space-y-2">
+                <label class="text-sm font-semibold text-gray-700">Commission Rate (%)</label>
+                <div class="relative">
+                    <input type="number" name="commission_rate" step="0.01" min="0" max="100" value="{{ old('commission_rate', $category->commission_rate) }}"
+                        class="w-full pl-4 pr-10 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all bg-white/50">
+                    <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-gray-500">
+                        <i class="fas fa-percent text-sm"></i>
+                    </div>
+                </div>
+                @error('commission_rate') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+            </div>
+
+            <!-- Image -->
+            <div class="space-y-2">
+                <label class="text-sm font-semibold text-gray-700">Cover Image</label>
+                @if($category->image)
+                    <div class="mb-3 w-24 h-24 rounded-xl overflow-hidden shadow-sm border border-gray-200">
+                        <img src="{{ $category->image }}" class="w-full h-full object-cover">
+                    </div>
+                @endif
+                <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-indigo-500 hover:bg-indigo-50/30 transition-all cursor-pointer relative group">
+                    <input type="file" name="image" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                    <div class="space-y-2">
+                        <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-500 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                            <i class="fas fa-cloud-upload-alt text-xl"></i>
+                        </div>
+                        <p class="text-sm text-gray-600 font-medium">Change image</p>
+                    </div>
+                </div>
+                @error('image') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+            </div>
+
+            <div class="pt-4">
+                <button type="submit" class="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-0.5">
+                    Update Category
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeSelect = document.getElementById('category-type');
+    const parentSelect = document.getElementById('parent-category');
+    
+    function filterParents() {
+        const selectedType = typeSelect.value;
+        const options = parentSelect.options;
+        
+        for (let i = 0; i < options.length; i++) {
+            const option = options[i];
+            const parentType = option.getAttribute('data-type');
+            
+            if (!option.value) {
+                // Always show "None" option
+                option.style.display = '';
+                continue;
+            }
+            
+            if (parentType && parentType !== selectedType) {
+                option.style.display = 'none';
+                option.disabled = true;
+                if (parentSelect.value === option.value) {
+                    parentSelect.value = "";
+                }
+            } else {
+                option.style.display = '';
+                option.disabled = false;
+            }
+        }
+    }
+
+    if (typeSelect && parentSelect) {
+        typeSelect.addEventListener('change', filterParents);
+        filterParents(); // Run on load
+    }
+});
+</script>
+@endsection
