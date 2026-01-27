@@ -11,6 +11,8 @@ import '../../../auth/data/models/user_model.dart';
 import '../../data/services/recently_viewed_service.dart';
 import '../../data/services/gig_service.dart';
 import 'package:flutter_customer/core/constants/api_constants.dart';
+import '../widgets/all_reviews_bottom_sheet.dart';
+import 'package:flutter_customer/core/widgets/custom_avatar.dart';
 
 class FreelancerServiceDetailsPage extends StatefulWidget {
   final Map<String, dynamic>? service;
@@ -492,11 +494,10 @@ class _FreelancerServiceDetailsPageState extends State<FreelancerServiceDetailsP
                 children: [
                   Stack(
                     children: [
-                      CircleAvatar(
-                        radius: 28,
-                        backgroundImage: image != null ? CachedNetworkImageProvider(image) : null,
-                        backgroundColor: Colors.grey[100],
-                        child: image == null ? const Icon(Icons.person, color: Colors.grey) : null,
+                      CustomAvatar(
+                        imageUrl: image,
+                        name: name,
+                        size: 56,
                       ),
                       Positioned(
                         bottom: 0,
@@ -911,19 +912,38 @@ class _FreelancerServiceDetailsPageState extends State<FreelancerServiceDetailsP
             )
           else
             ...reviewsList.take(3).map((review) {
-              final reviewerName = review['reviewer_name'] ?? 'Anonymous';
+              String reviewerName = 'Anonymous';
+              final user = review['user'];
+              if (user != null) {
+                final firstName = user['first_name'] ?? '';
+                final lastName = user['last_name'] ?? '';
+                final fullName = '$firstName $lastName'.trim();
+                if (fullName.isNotEmpty) {
+                  reviewerName = fullName;
+                } else if (user['name'] != null) {
+                  reviewerName = user['name'];
+                }
+              } else if (review['reviewer_name'] != null) {
+                reviewerName = review['reviewer_name'];
+              }
+
               final reviewText = review['review'] ?? '';
               final reviewRating = (review['rating'] as num?)?.toDouble() ?? 0.0;
               final reviewDate = review['created_at'] != null 
                   ? DateFormat('MMM d').format(DateTime.parse(review['created_at'])) 
                   : '';
               
+              String? profileImage = user != null ? user['profile_image'] : null;
+              if (profileImage != null && !profileImage.startsWith('http')) {
+                  profileImage = '${ApiConstants.baseUrl}/storage/$profileImage';
+              }
+
               return Padding(
                 padding: const EdgeInsets.only(bottom: 24),
                 child: _buildReviewItem(
                   reviewerName, 
-                  'Verified User', // We might not have country in simple review model yet
-                  'https://ui-avatars.com/api/?name=$reviewerName&background=random', 
+                  'Verified User', 
+                  profileImage, 
                   reviewText,
                   reviewRating,
                   reviewDate
@@ -934,7 +954,17 @@ class _FreelancerServiceDetailsPageState extends State<FreelancerServiceDetailsP
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
-                onPressed: () {},
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => AllReviewsBottomSheet(
+                      reviews: reviewsList,
+                      avgRating: double.tryParse(rating) ?? 0.0,
+                    ),
+                  );
+                },
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: Colors.grey[300]!),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -948,15 +978,16 @@ class _FreelancerServiceDetailsPageState extends State<FreelancerServiceDetailsP
     );
   }
 
-  Widget _buildReviewItem(String name, String country, String image, String text, double rating, String date) {
+  Widget _buildReviewItem(String name, String country, String? imageUrl, String text, double rating, String date) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundImage: NetworkImage(image),
+            CustomAvatar(
+              imageUrl: imageUrl,
+              name: name,
+              size: 40,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -1077,12 +1108,10 @@ class _FreelancerServiceDetailsPageState extends State<FreelancerServiceDetailsP
                 children: [
                   Row(
                     children: [
-                      CircleAvatar(
-                        radius: 10,
-                        backgroundImage: sellerImage.toString().isNotEmpty 
-                            ? CachedNetworkImageProvider(sellerImage.toString()) 
-                            : null,
-                        child: sellerImage.toString().isEmpty ? const Icon(Icons.person, size: 12, color: Colors.grey) : null,
+                      CustomAvatar(
+                        imageUrl: sellerImage.toString(),
+                        name: sellerName.toString(),
+                        size: 20,
                       ),
                       const SizedBox(width: 8),
                       Expanded(

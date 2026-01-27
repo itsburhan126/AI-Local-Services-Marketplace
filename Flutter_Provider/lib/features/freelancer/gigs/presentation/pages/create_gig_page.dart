@@ -853,12 +853,16 @@ class _CreateGigPageState extends ConsumerState<CreateGigPage> {
                   children: [
                     Expanded(
                       child: DropdownButtonFormField<int>(
+                        isExpanded: true,
+                        isDense: true,
                         value: package.deliveryDays,
-                        decoration: _inputDecoration('Delivery', Icons.schedule),
+                        decoration: _inputDecoration('Delivery', Icons.schedule).copyWith(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                        ),
                         items: [1, 2, 3, 4, 5, 6, 7, 10, 14, 21, 30]
                             .map((days) => DropdownMenuItem(
                                   value: days,
-                                  child: Text('$days Days'),
+                                  child: FittedBox(child: Text('$days Days')),
                                 ))
                             .toList(),
                         onChanged: (v) {
@@ -883,12 +887,15 @@ class _CreateGigPageState extends ConsumerState<CreateGigPage> {
                     Expanded(
                       child: DropdownButtonFormField<int>(
                         isExpanded: true,
+                        isDense: true,
                         value: package.revisions,
-                        decoration: _inputDecoration('Revisions', Icons.repeat),
+                        decoration: _inputDecoration('Revisions', Icons.repeat).copyWith(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                        ),
                         items: List.generate(11, (i) => i)
                             .map((r) => DropdownMenuItem(
                                   value: r,
-                                  child: Text(r == 0 ? 'No Rev.' : '$r Rev.'),
+                                  child: FittedBox(child: Text(r == 0 ? 'No Rev.' : '$r Rev.')),
                                 ))
                             .toList(),
                         onChanged: (v) {

@@ -76,7 +76,7 @@ class GigController extends Controller
                 'extras', 
                 'faqs',
                 'relatedTags',
-                'reviews'
+                'reviews.user'
             ])
             ->find($id);
 

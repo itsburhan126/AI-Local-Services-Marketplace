@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_customer/core/widgets/custom_avatar.dart';
 
 class TestimonialsSection extends StatelessWidget {
   final List<dynamic> items;
@@ -70,10 +71,10 @@ class TestimonialsSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundImage: CachedNetworkImageProvider(image),
-                backgroundColor: Colors.grey[200],
+              CustomAvatar(
+                imageUrl: image,
+                name: name,
+                size: 40,
               ),
               const SizedBox(width: 12),
               Expanded(

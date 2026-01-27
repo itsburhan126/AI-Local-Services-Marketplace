@@ -8,6 +8,8 @@ import 'dart:ui';
 import '../providers/booking_provider.dart';
 import 'package:flutter_customer/core/constants/api_constants.dart';
 
+import 'package:flutter_customer/core/widgets/custom_avatar.dart';
+
 class BookingsPage extends StatefulWidget {
   const BookingsPage({super.key});
 
@@ -287,13 +289,12 @@ class _BookingsPageState extends State<BookingsPage> with SingleTickerProviderSt
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    CircleAvatar(
-                      radius: 12,
-                      backgroundColor: Colors.grey[200],
-                      backgroundImage: booking['provider_image'] != null
-                          ? NetworkImage('${ApiConstants.baseUrl}/${booking['provider_image']}'.replaceAll('//', '/').replaceFirst('http:/', 'http://').replaceFirst('https:/', 'https://'))
+                    CustomAvatar(
+                      imageUrl: booking['provider_image'] != null
+                          ? '${ApiConstants.baseUrl}/${booking['provider_image']}'.replaceAll('//', '/').replaceFirst('http:/', 'http://').replaceFirst('https:/', 'https://')
                           : null,
-                      child: booking['provider_image'] == null ? const Icon(Icons.person, size: 16, color: Colors.grey) : null,
+                      name: booking['provider_name'],
+                      size: 24,
                     ),
                     const SizedBox(width: 8),
                     Text(

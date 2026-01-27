@@ -33,7 +33,7 @@ class GigController extends Controller
     public function show($id)
     {
         $gig = Gig::where('provider_id', auth()->id())
-            ->with(['category', 'serviceType', 'packages', 'faqs', 'tags'])
+            ->with(['category', 'serviceType', 'packages', 'faqs', 'relatedTags'])
             ->findOrFail($id);
 
         return response()->json([

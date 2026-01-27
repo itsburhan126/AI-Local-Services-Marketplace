@@ -13,6 +13,10 @@ import 'package:flutter/services.dart';
 import 'flash_sale_section.dart';
 import 'trust_safety_section.dart';
 
+import 'package:flutter_customer/core/widgets/custom_avatar.dart';
+import 'package:flutter_customer/features/auth/presentation/providers/auth_provider.dart';
+import 'package:flutter_customer/core/constants/api_constants.dart';
+
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
 
@@ -166,61 +170,64 @@ class _HomeViewState extends State<HomeView> {
   // --- Widgets ---
 
   Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Consumer<AuthProvider>(
+      builder: (context, auth, _) {
+        final user = auth.user;
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Good Morning,',
-              style: GoogleFonts.plusJakartaSans(
-                color: Colors.grey[600],
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.5,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Good Morning,',
+                  style: GoogleFonts.plusJakartaSans(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Find Your Service',
+                  style: GoogleFonts.plusJakartaSans(
+                    color: const Color(0xFF0F172A),
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              'Find Your Service',
-              style: GoogleFonts.plusJakartaSans(
-                color: const Color(0xFF0F172A),
-                fontSize: 26,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.5,
+            Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: CustomAvatar(
+                imageUrl: (user?.profileImage != null && !user!.profileImage!.startsWith('http'))
+                    ? '${ApiConstants.baseUrl}/storage/${user!.profileImage}'
+                    : user?.profileImage,
+                name: user?.name,
+                size: 44,
               ),
             ),
           ],
-        ),
-        Container(
-          padding: const EdgeInsets.all(3),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: const LinearGradient(
-              colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF6366F1).withValues(alpha: 0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: CircleAvatar(
-            radius: 24,
-            backgroundColor: Colors.white,
-            child: CircleAvatar(
-              radius: 22,
-              backgroundImage: const NetworkImage('https://i.pravatar.cc/150?img=12'),
-              onBackgroundImageError: (_, __) => const Icon(Icons.person),
-            ),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -766,10 +773,10 @@ class _HomeViewState extends State<HomeView> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      CircleAvatar(
-                        radius: 10,
-                        backgroundColor: Colors.grey[200],
-                        backgroundImage: const NetworkImage('https://i.pravatar.cc/150?img=5'),
+                      CustomAvatar(
+                        imageUrl: 'https://i.pravatar.cc/150?img=5',
+                        name: providerName,
+                        size: 20,
                       ),
                       const SizedBox(width: 8),
                       Expanded(

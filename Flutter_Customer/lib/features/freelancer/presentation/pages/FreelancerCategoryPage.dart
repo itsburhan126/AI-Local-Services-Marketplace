@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_customer/core/widgets/custom_avatar.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_customer/core/constants/api_constants.dart';
 import '../../../home/data/home_service.dart';
@@ -381,14 +382,10 @@ class _FreelancerCategoryPageState extends State<FreelancerCategoryPage> {
                     // Provider Info
                     Row(
                       children: [
-                        CircleAvatar(
-                          radius: 10,
-                          backgroundColor: Colors.grey[200],
-                          backgroundImage: providerImage.isNotEmpty 
-                              ? NetworkImage(providerImage) 
-                              : const AssetImage('assets/images/placeholder.png') as ImageProvider,
-                          onBackgroundImageError: (_, __) {},
-                          child: null,
+                        CustomAvatar(
+                          imageUrl: providerImage,
+                          name: providerName,
+                          size: 20,
                         ),
                         const SizedBox(width: 8),
                         Expanded(

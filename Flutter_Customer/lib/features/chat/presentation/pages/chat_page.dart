@@ -7,8 +7,10 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../providers/chat_provider.dart';
 import '../../data/models/chat_conversation_model.dart';
+import '../providers/chat_provider.dart';
+import 'package:flutter_customer/core/constants/api_constants.dart';
+import 'package:flutter_customer/core/widgets/custom_avatar.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -468,30 +470,12 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             Stack(
               children: [
-                Container(
-                  width: 58,
-                  height: 58,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF6366F1).withValues(alpha: 0.08),
-                    shape: BoxShape.circle,
-                    image: otherUser.profileImage != null
-                        ? DecorationImage(
-                            image: NetworkImage(otherUser.profileImage!),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
-                  ),
-                  alignment: Alignment.center,
-                  child: otherUser.profileImage == null
-                      ? Text(
-                          initials,
-                          style: GoogleFonts.plusJakartaSans(
-                            color: const Color(0xFF6366F1),
-                            fontWeight: FontWeight.w700,
-                            fontSize: 18,
-                          ),
-                        )
-                      : null,
+                CustomAvatar(
+                  imageUrl: (otherUser.profileImage != null && !otherUser.profileImage!.startsWith('http'))
+                      ? '${ApiConstants.baseUrl}/storage/${otherUser.profileImage}'
+                      : otherUser.profileImage,
+                  name: otherUser.name,
+                  size: 58,
                 ),
                 if (otherUser.isOnline)
                   Positioned(

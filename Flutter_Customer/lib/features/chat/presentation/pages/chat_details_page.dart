@@ -17,6 +17,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../features/ai/presentation/widgets/ai_options_sheet.dart';
 
+import 'package:flutter_customer/core/widgets/custom_avatar.dart';
+
 import '../../../auth/data/models/user_model.dart';
 import '../../data/models/chat_message_model.dart';
 import 'dart:convert';
@@ -168,14 +170,10 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
                 },
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundImage: widget.otherUser.profileImage != null
-                          ? CachedNetworkImageProvider(widget.otherUser.profileImage!)
-                          : null,
-                      child: widget.otherUser.profileImage == null
-                          ? Text(widget.otherUser.name?[0] ?? '?', style: const TextStyle(fontWeight: FontWeight.bold))
-                          : null,
+                    CustomAvatar(
+                      imageUrl: widget.otherUser.profileImage,
+                      name: widget.otherUser.name,
+                      size: 40,
                     ),
                     const SizedBox(width: 12),
                     Column(

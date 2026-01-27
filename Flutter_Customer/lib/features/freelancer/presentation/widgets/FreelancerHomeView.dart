@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import '../../../home/presentation/providers/home_provider.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/widgets/custom_avatar.dart';
+import '../../../../core/constants/api_constants.dart';
 import 'FreelancerHomeContent.dart';
 
 class FreelancerHomeView extends StatefulWidget {
@@ -105,14 +108,24 @@ class _FreelancerHomeViewState extends State<FreelancerHomeView> {
               ),
             ],
           ),
-          child: CircleAvatar(
-            radius: 24,
-            backgroundColor: Colors.white,
-            child: CircleAvatar(
-              radius: 22,
-              backgroundImage: const AssetImage('assets/images/placeholder.png'),
-              onBackgroundImageError: (_, __) => const Icon(Icons.person),
-            ),
+          child: Consumer<AuthProvider>(
+            builder: (context, auth, _) {
+              final user = auth.user;
+              return Container(
+                padding: const EdgeInsets.all(2),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: CustomAvatar(
+                  imageUrl: (user?.profileImage != null && !user!.profileImage!.startsWith('http'))
+                      ? '${ApiConstants.baseUrl}/storage/${user!.profileImage}'
+                      : user?.profileImage,
+                  name: user?.name,
+                  size: 44,
+                ),
+              );
+            },
           ),
         ),
       ],

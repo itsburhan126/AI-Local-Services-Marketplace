@@ -11,6 +11,7 @@ import '../../../home/presentation/widgets/spark_interest_section.dart';
 import '../../../home/presentation/widgets/testimonials_section.dart';
 import '../../../home/presentation/widgets/flash_sale_section.dart';
 import '../../../home/presentation/widgets/trust_safety_section.dart';
+import 'package:flutter_customer/core/constants/api_constants.dart';
 
 class FreelancerHomeContent extends StatefulWidget {
   const FreelancerHomeContent({super.key});
@@ -308,8 +309,13 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
   }
 
   Widget _buildCategoryItem(BuildContext context, dynamic cat, int index) {
-    final iconValue = cat['image'] ?? cat['icon'];
+    var iconValue = cat['image'] ?? cat['icon'];
     final name = cat['name'] as String? ?? 'Unknown';
+    
+    if (iconValue is String && !iconValue.startsWith('http') && !iconValue.startsWith('assets')) {
+        iconValue = '${ApiConstants.baseUrl}/storage/$iconValue';
+    }
+
     final isUrl = iconValue is String && (iconValue.startsWith('http') || iconValue.startsWith('assets'));
 
     return GestureDetector(
@@ -446,7 +452,10 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
   }
 
   Widget _buildGigCard(BuildContext context, dynamic gig) {
-    final imageUrl = gig['thumbnail'] ?? gig['image'] ?? '';
+    var imageUrl = gig['thumbnail'] ?? gig['image'] ?? '';
+    if (imageUrl.toString().isNotEmpty && !imageUrl.toString().startsWith('http') && !imageUrl.toString().startsWith('assets')) {
+         imageUrl = '${ApiConstants.baseUrl}/storage/$imageUrl';
+    }
     final hasImage = imageUrl.toString().isNotEmpty;
 
     return GestureDetector(
@@ -585,6 +594,11 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
   }
 
   Widget _buildSingleBanner(dynamic banner) {
+    var imageUrl = banner['image_url'] ?? banner['image'] ?? '';
+    if (imageUrl.toString().isNotEmpty && !imageUrl.toString().startsWith('http')) {
+        imageUrl = '${ApiConstants.baseUrl}/storage/$imageUrl';
+    }
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       height: 160,
@@ -602,7 +616,7 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: CachedNetworkImage(
-          imageUrl: banner['image_url'] ?? banner['image'] ?? '',
+          imageUrl: imageUrl,
           fit: BoxFit.cover,
         ),
       ),
@@ -700,7 +714,7 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
               ],
             ),
           ),
-          Image.asset('assets/images/gift_box.png', height: 80, errorBuilder: (_,__,___) => const Icon(Icons.card_giftcard, size: 60, color: Colors.white)),
+          const Icon(Icons.card_giftcard, size: 80, color: Colors.white),
         ],
       ),
     );

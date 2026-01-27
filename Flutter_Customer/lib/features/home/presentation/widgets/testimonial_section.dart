@@ -68,12 +68,10 @@ class TestimonialsSection extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(color: const Color(0xFFE2E8F0), width: 2),
                 ),
-                child: CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.grey[100],
-                  backgroundImage: CachedNetworkImageProvider(
-                    item['image'] ?? 'https://i.pravatar.cc/150',
-                  ),
+                child: CustomAvatar(
+                  imageUrl: item['image'],
+                  name: item['user'],
+                  size: 40,
                 ),
               ),
               const SizedBox(width: 12),

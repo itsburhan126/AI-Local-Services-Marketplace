@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/booking_provider.dart';
 import 'package:flutter_customer/core/constants/api_constants.dart';
 
@@ -137,16 +138,17 @@ class _RatingPageState extends State<RatingPage> {
                 color: Colors.grey[100],
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.grey[200]!, width: 4),
-                image: imageUrl != null
-                    ? DecorationImage(
-                        image: NetworkImage(imageUrl),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
               ),
-              child: imageUrl == null
-                  ? const Icon(Icons.cleaning_services, size: 40, color: Colors.grey)
-                  : null,
+              child: imageUrl != null
+                  ? ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl!,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(color: Colors.grey[100]),
+                        errorWidget: (context, url, error) => const Icon(Icons.cleaning_services, size: 40, color: Colors.grey),
+                      ),
+                    )
+                  : const Icon(Icons.cleaning_services, size: 40, color: Colors.grey),
             ).animate().scale(duration: 500.ms, curve: Curves.easeOutBack),
             
             const SizedBox(height: 24),

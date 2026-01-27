@@ -9,8 +9,9 @@ import '../../../../auth/data/models/user_model.dart';
 import '../../../../chat/presentation/pages/chat_details_page.dart';
 import '../providers/booking_provider.dart';
 import '../../../../support/presentation/pages/support_page.dart';
-import 'rating_page.dart';
+import 'package:flutter_customer/features/freelancer/bookings/presentation/pages/rating_page.dart';
 import 'package:flutter_customer/core/constants/api_constants.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class BookingDetailsPage extends StatelessWidget {
   final Map<String, dynamic>? booking;
@@ -101,13 +102,18 @@ class BookingDetailsPage extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(12),
-                          image: imageUrl != null 
-                              ? DecorationImage(image: NetworkImage(imageUrl), fit: BoxFit.cover)
-                              : null,
                         ),
-                        child: imageUrl == null 
-                            ? const Icon(Icons.cleaning_services, color: Colors.grey) 
-                            : null,
+                        child: imageUrl != null 
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: CachedNetworkImage(
+                                  imageUrl: imageUrl!, 
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => Container(color: Colors.grey[200]),
+                                  errorWidget: (context, url, error) => const Icon(Icons.cleaning_services, color: Colors.grey),
+                                ),
+                              )
+                            : const Icon(Icons.cleaning_services, color: Colors.grey),
                       ),
                       const SizedBox(width: 16),
                       Expanded(

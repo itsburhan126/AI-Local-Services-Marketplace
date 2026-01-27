@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_customer/core/widgets/custom_avatar.dart';
 
 class FreelancerProfilePage extends StatefulWidget {
   final Map<String, dynamic> provider;
@@ -155,11 +156,12 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
                                 ),
                               ],
                             ),
-                            child: CircleAvatar(
-                              radius: 55,
-                              backgroundImage: (image.isNotEmpty && !image.contains('default.png') && !image.contains('via.placeholder.com'))
-                                  ? CachedNetworkImageProvider(image)
-                                  : const AssetImage('assets/images/placeholder.png') as ImageProvider,
+                            child: CustomAvatar(
+                              imageUrl: (image.isNotEmpty && !image.contains('default.png') && !image.contains('via.placeholder.com'))
+                                  ? image
+                                  : null,
+                              name: name,
+                              size: 110,
                             ),
                           ).animate().scale(duration: 400.ms, curve: Curves.easeOutBack),
                           
@@ -604,9 +606,10 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
             children: [
               Row(
                 children: [
-                  CircleAvatar(
-                    backgroundImage: CachedNetworkImageProvider('https://i.pravatar.cc/150?img=${index + 10}'),
-                    radius: 20,
+                  CustomAvatar(
+                    imageUrl: 'https://i.pravatar.cc/150?img=${index + 10}',
+                    name: 'Client Name ${index + 1}',
+                    size: 40,
                   ),
                   const SizedBox(width: 12),
                   Column(

@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../../../home/presentation/providers/home_provider.dart';
 import 'package:flutter_customer/core/constants/api_constants.dart';
 import '../../../home/data/home_service.dart';
+import 'package:flutter_customer/core/widgets/custom_avatar.dart';
 
 class NewGigsPage extends StatefulWidget {
   const NewGigsPage({super.key});
@@ -389,14 +390,10 @@ class _NewGigsPageState extends State<NewGigsPage> {
                   children: [
                     Row(
                       children: [
-                        CircleAvatar(
-                          radius: 10,
-                          backgroundColor: Colors.grey[200],
-                          backgroundImage: providerImage.isNotEmpty 
-                              ? NetworkImage(providerImage) 
-                              : const AssetImage('assets/images/placeholder.png') as ImageProvider,
-                          onBackgroundImageError: (_, __) {},
-                          child: null,
+                        CustomAvatar(
+                          imageUrl: providerImage,
+                          name: providerName,
+                          size: 20,
                         ),
                         const SizedBox(width: 8),
                         Expanded(

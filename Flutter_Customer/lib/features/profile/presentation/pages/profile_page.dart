@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import 'package:flutter_customer/features/freelancer/bookings/presentation/providers/booking_provider.dart';
+import 'package:flutter_customer/core/widgets/custom_avatar.dart';
+import 'package:flutter_customer/core/constants/api_constants.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -58,17 +60,12 @@ class _ProfilePageState extends State<ProfilePage> {
                           shape: BoxShape.circle,
                           border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2), width: 2),
                         ),
-                        child: CircleAvatar(
-                          radius: 40,
-                          backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                          child: Text(
-                            user?.name?.substring(0, 1).toUpperCase() ?? 'U',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
+                        child: CustomAvatar(
+                          imageUrl: (user?.profileImage != null && !user!.profileImage!.startsWith('http')) 
+                              ? '${ApiConstants.baseUrl}/storage/${user!.profileImage}' 
+                              : user?.profileImage,
+                          name: user?.name,
+                          size: 80,
                         ),
                       ),
                       const SizedBox(width: 20),

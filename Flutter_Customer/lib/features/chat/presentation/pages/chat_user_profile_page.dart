@@ -24,25 +24,22 @@ class ChatUserProfilePage extends StatelessWidget {
               onPressed: () => Navigator.pop(context),
             ),
             flexibleSpace: FlexibleSpaceBar(
-              background: user.profileImage != null
-                  ? CachedNetworkImage(
-                      imageUrl: user.profileImage!,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(color: Colors.grey[200]),
-                      errorWidget: (context, url, error) => Container(
-                        color: Colors.grey[200],
-                        child: const Icon(Icons.person, size: 80, color: Colors.grey),
-                      ),
-                    )
-                  : Container(
-                      color: Colors.grey[200],
-                      child: Center(
-                        child: Text(
-                          user.name?[0].toUpperCase() ?? 'U',
-                          style: const TextStyle(fontSize: 80, fontWeight: FontWeight.bold, color: Colors.grey),
-                        ),
-                      ),
+              background: CachedNetworkImage(
+                imageUrl: (user.profileImage != null && user.profileImage!.isNotEmpty)
+                    ? user.profileImage!
+                    : 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(user.name ?? 'User')}&background=random&size=500',
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(color: Colors.grey[200]),
+                errorWidget: (context, url, error) => Container(
+                  color: Colors.grey[200],
+                  child: Center(
+                    child: Text(
+                      user.name?[0].toUpperCase() ?? 'U',
+                      style: const TextStyle(fontSize: 80, fontWeight: FontWeight.bold, color: Colors.grey),
                     ),
+                  ),
+                ),
+              ),
             ),
           ),
           SliverToBoxAdapter(

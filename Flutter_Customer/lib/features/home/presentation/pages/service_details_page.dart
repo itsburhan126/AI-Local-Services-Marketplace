@@ -9,6 +9,7 @@ import '../../../chat/presentation/pages/chat_details_page.dart';
 import '../../../auth/data/models/user_model.dart';
 import 'package:flutter_customer/features/freelancer/data/services/gig_service.dart';
 import '../providers/home_provider.dart';
+import '../../../../core/widgets/custom_avatar.dart';
 
 class ServiceDetailsPage extends StatefulWidget {
   final Map<String, dynamic>? service;
@@ -119,6 +120,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
     final providerMap = service?['provider'];
     final providerName = (providerMap is Map && providerMap['name'] != null) ? providerMap['name'] as String : 'Clean Pro Services';
     final providerId = (providerMap is Map && providerMap['id'] != null) ? providerMap['id'] as int? : null;
+    final providerImage = (providerMap is Map) ? _safeImageUrl(providerMap['profile_image'] ?? providerMap['image']) : null;
     final rating = service?['rating']?.toString() ?? '4.8';
     final reviews = service?['reviews']?.toString() ?? '120';
     
@@ -333,10 +335,10 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            const CircleAvatar(
-                              radius: 28,
-                              backgroundColor: Color(0xFFE2E8F0),
-                              child: Icon(Icons.person, color: Color(0xFF64748B)),
+                            CustomAvatar(
+                              imageUrl: providerImage,
+                              name: providerName,
+                              size: 56,
                             ),
                             const SizedBox(width: 16),
                             Expanded(
