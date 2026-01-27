@@ -196,6 +196,12 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading && _service == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final service = _service;
     final images = _getImages();
     final packages = (service?['packages'] as List<dynamic>?) ?? [];
@@ -222,8 +228,10 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
                       const Divider(height: 1, color: Color(0xFFE2E8F0)),
                       _buildSellerProfile(context, service),
                       const Divider(height: 32, thickness: 8, color: Color(0xFFF8FAFC)),
-                      _buildPackageSection(context, packages, selectedPackage),
-                      const Divider(height: 32, thickness: 8, color: Color(0xFFF8FAFC)),
+                      if (packages.isNotEmpty) ...[
+                        _buildPackageSection(context, packages, selectedPackage),
+                        const Divider(height: 32, thickness: 8, color: Color(0xFFF8FAFC)),
+                      ],
                       _buildDescriptionSection(context, service),
                       const Divider(height: 32, thickness: 8, color: Color(0xFFF8FAFC)),
                       _buildPortfolioSection(context),
@@ -242,7 +250,8 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
               ),
             ],
           ),
-          _buildBottomBar(context, selectedPackage, service),
+          if (packages.isNotEmpty)
+            _buildBottomBar(context, selectedPackage, service),
         ],
       ),
     );
@@ -250,26 +259,12 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
 
   Widget _buildSliverAppBar(BuildContext context, List<String> images) {
     return SliverAppBar(
-      expandedHeight: 320,
+      expandedHeight: 300,
       pinned: true,
       backgroundColor: Colors.white,
       elevation: 0,
-      leading: Container(
-        margin: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.9),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8),
-          ],
-        ),
-        child: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black, size: 20),
-          onPressed: () => context.pop(),
-        ),
-      ),
-      actions: [
-        Container(
+      leading: SafeArea(
+        child: Container(
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.9),
@@ -279,36 +274,57 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
             ],
           ),
           child: IconButton(
-            icon: const Icon(Icons.share_outlined, color: Colors.black, size: 20),
-            onPressed: _shareGig,
+            icon: const Icon(Icons.arrow_back, color: Colors.black, size: 20),
+            onPressed: () => context.pop(),
           ),
         ),
-        Container(
-          margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.9),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8),
-            ],
-          ),
-          child: IconButton(
-            icon: Icon(
-              _isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded, 
-              color: _isFavorite ? Colors.red : Colors.black, 
-              size: 20
+      ),
+      actions: [
+        SafeArea(
+          child: Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.9),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8),
+              ],
             ),
-            onPressed: _toggleFavorite,
+            child: IconButton(
+              icon: const Icon(Icons.share_outlined, color: Colors.black, size: 20),
+              onPressed: _shareGig,
+            ),
+          ),
+        ),
+        SafeArea(
+          child: Container(
+            margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.9),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8),
+              ],
+            ),
+            child: IconButton(
+              icon: Icon(
+                _isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded, 
+                color: _isFavorite ? Colors.red : Colors.black, 
+                size: 20
+              ),
+              onPressed: _toggleFavorite,
+            ),
           ),
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(
+          fit: StackFit.expand,
           children: [
             CarouselSlider(
               carouselController: _carouselController,
               options: CarouselOptions(
-                height: 360,
+                height: 340, // Slightly taller than expandedHeight to cover
                 viewportFraction: 1.0,
                 enableInfiniteScroll: images.length > 1,
                 onPageChanged: (index, reason) {
@@ -320,10 +336,9 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
               items: images.map((img) {
                 return Builder(
                   builder: (BuildContext context) {
-                    // Check for empty string or local asset path
                     if (img.isEmpty || !img.startsWith('http')) {
-                      return Image.asset(
-                        'assets/images/placeholder.png',
+                      return CachedNetworkImage(
+                        imageUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
                         fit: BoxFit.cover,
                         width: double.infinity,
                       );
@@ -332,12 +347,12 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
                       imageUrl: img,
                       fit: BoxFit.cover,
                       width: double.infinity,
-                      placeholder: (context, url) => Image.asset(
-                        'assets/images/placeholder.png',
-                        fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: Colors.grey[200],
+                        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
                       ),
-                      errorWidget: (context, url, error) => Image.asset(
-                        'assets/images/placeholder.png',
+                      errorWidget: (context, url, error) => CachedNetworkImage(
+                        imageUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
                         fit: BoxFit.cover,
                       ),
                     );
@@ -429,7 +444,7 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
 
   Widget _buildHeaderSection(BuildContext context, Map<String, dynamic>? service) {
     final category = _asString(service?['category'], fallback: 'Gig Category');
-    final title = _asString(service?['name'], fallback: 'I will do professional freelancer work for you');
+    final title = _asString(service?['title'] ?? service?['name'], fallback: 'I will do professional freelancer work for you');
     
     final reviewsList = (service?['reviews'] as List?) ?? [];
     final reviewsCount = reviewsList.length;
@@ -663,14 +678,14 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
                         color: isSelected ? Colors.white : Colors.transparent,
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.05),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                )
-                              ]
-                            : null,
+                          ? [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.03),
+                                blurRadius: 6,
+                                offset: const Offset(0, 0),
+                              )
+                            ]
+                          : null,
                       ),
                       alignment: Alignment.center,
                       child: Text(
@@ -1139,9 +1154,9 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
           border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
@@ -1151,12 +1166,20 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
             ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
               child: CachedNetworkImage(
-                imageUrl: image.toString(),
+                imageUrl: image.toString().isEmpty || !image.toString().startsWith('http') 
+                    ? 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop'
+                    : image.toString(),
                 height: 140,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                placeholder: (context, url) => Container(color: Colors.grey[200]),
-                errorWidget: (context, url, error) => Container(color: Colors.grey[200], child: const Icon(Icons.error)),
+                placeholder: (context, url) => Container(
+                  color: Colors.grey[200],
+                  child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                ),
+                errorWidget: (context, url, error) => CachedNetworkImage(
+                   imageUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
+                   fit: BoxFit.cover,
+                ),
               ),
             ),
             Padding(

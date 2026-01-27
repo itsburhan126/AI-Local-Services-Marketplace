@@ -115,6 +115,10 @@ class AppRouter {
         builder: (context, state) => const NewGigsPage(),
       ),
       GoRoute(
+        path: '/popular',
+        builder: (context, state) => const NewGigsPage(),
+      ),
+      GoRoute(
         path: '/order-upgrade',
         builder: (context, state) {
           final bookingData = state.extra as Map<String, dynamic>;

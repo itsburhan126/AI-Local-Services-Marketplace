@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
@@ -63,7 +64,7 @@ class _BookingsPageState extends State<BookingsPage> with SingleTickerProviderSt
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
-                  offset: const Offset(0, 4),
+                  offset: const Offset(0, 0),
                 ),
               ],
             ),
@@ -76,7 +77,7 @@ class _BookingsPageState extends State<BookingsPage> with SingleTickerProviderSt
                   BoxShadow(
                     color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
                     blurRadius: 8,
-                    offset: const Offset(0, 4),
+                    offset: const Offset(0, 0),
                   ),
                 ],
               ),
@@ -134,7 +135,7 @@ class _BookingsPageState extends State<BookingsPage> with SingleTickerProviderSt
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 20,
-                    offset: const Offset(0, 10),
+                    offset: const Offset(0, 0),
                   ),
                 ],
               ),
@@ -189,8 +190,8 @@ class _BookingsPageState extends State<BookingsPage> with SingleTickerProviderSt
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            blurRadius: 6,
+            offset: const Offset(0, 0),
           ),
         ],
         border: Border.all(color: Colors.white, width: 2),
@@ -212,10 +213,17 @@ class _BookingsPageState extends State<BookingsPage> with SingleTickerProviderSt
                       height: 70,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
-                        image: DecorationImage(
-                          image: imageUrl != null 
-                              ? NetworkImage(imageUrl) 
-                              : const AssetImage('assets/images/placeholder.png') as ImageProvider,
+                      ),
+                      clipBehavior: Clip.hardEdge,
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl ?? 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          color: Colors.grey[200],
+                          child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                        ),
+                        errorWidget: (context, url, error) => CachedNetworkImage(
+                          imageUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
                           fit: BoxFit.cover,
                         ),
                       ),

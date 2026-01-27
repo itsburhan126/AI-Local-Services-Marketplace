@@ -36,6 +36,7 @@ Route::get('/tags', [\App\Http\Controllers\Api\TagController::class, 'index']);
 Route::get('/settings', [\App\Http\Controllers\Api\SettingController::class, 'index']);
 Route::get('/gigs', [\App\Http\Controllers\Api\GigController::class, 'index']);
 Route::get('/gigs/{id}', [\App\Http\Controllers\Api\GigController::class, 'show']);
+Route::get('/providers/{id}', [\App\Http\Controllers\Api\ProviderController::class, 'show']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);

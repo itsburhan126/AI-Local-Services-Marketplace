@@ -154,12 +154,12 @@ class _NewGigsPageState extends State<NewGigsPage> {
                         color: Colors.white,
                         shape: BoxShape.circle,
                         boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.04),
-                            blurRadius: 12,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 6,
+                  offset: const Offset(0, 0),
+                ),
+              ],
                       ),
                       child: Icon(Icons.search_off_rounded, size: 48, color: Colors.grey[400]),
                     ),
@@ -304,12 +304,12 @@ class _NewGigsPageState extends State<NewGigsPage> {
           child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
             ),
           ],
           border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
@@ -317,149 +317,85 @@ class _NewGigsPageState extends State<NewGigsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                  child: image.isEmpty 
-                    ? Image.asset(
-                        'assets/images/placeholder.png',
-                        height: 120,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      )
-                    : CachedNetworkImage(
-                        imageUrl: image,
-                        height: 120,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Image.asset(
-                          'assets/images/placeholder.png',
-                          height: 120,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                        errorWidget: (context, url, error) => Image.asset(
-                          'assets/images/placeholder.png',
-                          height: 120,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              child: CachedNetworkImage(
+                imageUrl: image.isEmpty ? 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop' : image,
+                height: 120,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  color: Colors.grey[200],
+                  child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
                 ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: GestureDetector(
-                    onTap: () {
-                      final gigId = int.tryParse(gig['id'].toString()) ?? 0;
-                      if (gigId != 0) {
-                        setState(() {
-                          final currentVal = gig['is_favorite'];
-                          final isFav = currentVal == true || currentVal == 1;
-                          gig['is_favorite'] = !isFav;
-                        });
-                        Provider.of<HomeProvider>(context, listen: false).toggleGigFavorite(gigId);
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        (gig['is_favorite'] == true || gig['is_favorite'] == 1) 
-                            ? Icons.favorite_rounded 
-                            : Icons.favorite_border_rounded,
-                        size: 16, 
-                        color: (gig['is_favorite'] == true || gig['is_favorite'] == 1) 
-                            ? const Color(0xFFEF4444) 
-                            : Colors.grey,
-                      ),
-                    ),
-                  ),
+                errorWidget: (context, url, error) => CachedNetworkImage(
+                   imageUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
+                   fit: BoxFit.cover,
                 ),
-              ],
+              ),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        CustomAvatar(
-                          imageUrl: providerImage,
-                          name: providerName,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            providerName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFF64748B),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF0F172A),
-                        height: 1.3,
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      CustomAvatar(
+                        imageUrl: providerImage,
+                        name: providerName,
+                        size: 20,
                       ),
-                    ),
-                    const Spacer(),
-                    Row(
-                      children: [
-                        const Icon(Icons.star_rounded, size: 14, color: Color(0xFFF59E0B)),
-                        const SizedBox(width: 4),
-                        Text(
-                          ratingStr,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          providerName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             color: const Color(0xFF0F172A),
                           ),
                         ),
-                        Text(
-                          ' ($reviewCount)',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          '\$$price',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                        ),
-                      ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF0F172A),
+                      height: 1.3,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(Icons.star_rounded, size: 14, color: Colors.amber),
+                      const SizedBox(width: 4),
+                      Text('$ratingStr ($reviewCount)', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: Colors.grey[600])),
+                      const Spacer(),
+                      Text(
+                        'From \$$price',
+                         style: GoogleFonts.plusJakartaSans(
+                           fontWeight: FontWeight.bold, 
+                           fontSize: 14, 
+                           color: const Color(0xFF0F172A)
+                         ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
         ),
-      ).animate().fadeIn(delay: (index * 50).ms).scale(),
+      ),
     );
   }
 
@@ -467,7 +403,14 @@ class _NewGigsPageState extends State<NewGigsPage> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
         border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
       ),
       child: Column(
@@ -477,7 +420,7 @@ class _NewGigsPageState extends State<NewGigsPage> {
             height: 120,
             decoration: BoxDecoration(
               color: Colors.grey[200],
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             ),
           ),
           Padding(

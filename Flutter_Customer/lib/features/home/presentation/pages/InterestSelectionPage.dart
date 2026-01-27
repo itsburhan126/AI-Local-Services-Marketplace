@@ -45,7 +45,7 @@ class _InterestSelectionPageState extends State<InterestSelectionPage> {
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
                 blurRadius: 10,
-                offset: const Offset(0, 4),
+                offset: const Offset(0, 0),
               ),
             ],
           ),
@@ -250,7 +250,7 @@ class _InterestSelectionPageState extends State<InterestSelectionPage> {
                   BoxShadow(
                     color: Colors.black.withOpacity(0.02),
                     blurRadius: 4,
-                    offset: const Offset(0, 2),
+                    offset: const Offset(0, 0),
                   )
                 ],
         ),

@@ -19,6 +19,11 @@ class GigController extends Controller
             $query->where('category_id', $request->category_id);
         }
 
+        // Filter by Provider
+        if ($request->has('provider_id')) {
+            $query->where('provider_id', $request->provider_id);
+        }
+
         // Search
         if ($request->has('search')) {
             $search = $request->search;

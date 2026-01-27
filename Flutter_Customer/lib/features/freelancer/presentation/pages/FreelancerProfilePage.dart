@@ -4,6 +4,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_customer/core/widgets/custom_avatar.dart';
+import 'package:flutter_customer/core/constants/api_constants.dart';
+import '../../data/services/gig_service.dart';
+import 'package:intl/intl.dart';
 
 class FreelancerProfilePage extends StatefulWidget {
   final Map<String, dynamic> provider;
@@ -17,33 +20,56 @@ class FreelancerProfilePage extends StatefulWidget {
 class _FreelancerProfilePageState extends State<FreelancerProfilePage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _isBioExpanded = false;
-
-  // Mock Data to match the "Ultra" screenshot requirements
-  final List<String> _skills = [
-    'Java', 'Android Studio', 'Unity', 'Google ads', 
-    'Google AdWords', 'Digital marketing', 'Flutter', 'Dart'
-  ];
-
-  final List<Map<String, String>> _languages = [
-    {'language': 'English', 'level': 'Conversational'},
-    {'language': 'Bengali', 'level': 'Native/Bilingual'},
-    {'language': 'Hindi', 'level': 'Fluent'},
-  ];
-
-  // Mock Portfolio Data
-  final List<String> _portfolioImages = [
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-  ];
+  List<Map<String, dynamic>> _gigs = [];
+  bool _isLoadingGigs = false;
+  Map<String, dynamic> _providerDetails = {};
+  bool _isLoadingProvider = true;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    _providerDetails = widget.provider;
+    _fetchGigs();
+    _fetchProviderDetails();
+  }
+
+  Future<void> _fetchProviderDetails() async {
+    final providerId = int.tryParse(widget.provider['id']?.toString() ?? '0') ?? 0;
+    if (providerId == 0) return;
+
+    setState(() => _isLoadingProvider = true);
+    try {
+      final details = await GigService().getProviderDetails(providerId);
+      if (details != null && mounted) {
+        setState(() {
+          _providerDetails = details;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching provider details: $e');
+    } finally {
+      if (mounted) setState(() => _isLoadingProvider = false);
+    }
+  }
+
+  Future<void> _fetchGigs() async {
+    final providerId = int.tryParse(widget.provider['id']?.toString() ?? '0') ?? 0;
+    if (providerId == 0) return;
+
+    setState(() => _isLoadingGigs = true);
+    try {
+      final gigs = await GigService().getGigsByProvider(providerId);
+      if (mounted) {
+        setState(() {
+          _gigs = gigs;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching provider gigs: $e');
+    } finally {
+      if (mounted) setState(() => _isLoadingGigs = false);
+    }
   }
 
   @override
@@ -54,11 +80,12 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
 
   @override
   Widget build(BuildContext context) {
-    final name = widget.provider['name'] ?? 'Robius Sani';
-    final image = widget.provider['image'] ?? '';
-    final username = widget.provider['username'] ?? '@l33tgaming';
-    final rating = widget.provider['rating']?.toString() ?? '5.0';
-    final reviews = widget.provider['reviews_count']?.toString() ?? '74';
+    final name = _providerDetails['name'] ?? widget.provider['name'] ?? 'Robius Sani';
+    final image = _providerDetails['image'] ?? widget.provider['image'] ?? '';
+    final username = _providerDetails['username'] ?? widget.provider['username'] ?? '@l33tgaming';
+    final rating = double.tryParse(_providerDetails['rating']?.toString() ?? '0')?.toStringAsFixed(1) ?? '5.0';
+    final reviews = _providerDetails['reviews_count']?.toString() ?? '0';
+    final coverImage = _providerDetails['provider_profile']?['cover_image'] ?? '';
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -125,14 +152,18 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
                           child: Stack(
                             children: [
                               Positioned.fill(
-                                child: Opacity(
-                                  opacity: 0.2,
-                                  child: Image.network(
-                                    'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=800&q=80',
-                                    fit: BoxFit.cover,
-                                  ),
+                              child: Opacity(
+                                opacity: 0.2,
+                                child: CachedNetworkImage(
+                                  imageUrl: (coverImage.isNotEmpty && coverImage.startsWith('http')) 
+                                      ? coverImage 
+                                      : 'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=800&q=80',
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => Container(color: const Color(0xFF6366F1)),
+                                  errorWidget: (context, url, error) => Container(color: const Color(0xFF6366F1)),
                                 ),
                               ),
+                            ),
                             ],
                           ),
                         ),
@@ -194,7 +225,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
                             children: [
                               ElevatedButton(
                                 onPressed: () {
-                                  // Hire logic
+                                  _tabController.animateTo(1);
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF0F172A),
@@ -216,12 +247,12 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
                               const SizedBox(width: 12),
                               OutlinedButton(
                                 onPressed: () {
-                                  final providerId = widget.provider['id'];
+                                  final providerId = _providerDetails['id'] ?? widget.provider['id'];
                                   if (providerId != null) {
                                     context.push('/chat-details', extra: {
                                       'id': providerId,
-                                      'name': widget.provider['name'],
-                                      'image': widget.provider['image']
+                                      'name': _providerDetails['name'] ?? widget.provider['name'],
+                                      'image': _providerDetails['image'] ?? widget.provider['image']
                                     });
                                   }
                                 },
@@ -254,7 +285,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
                               _buildVerticalDivider(),
                               _buildQuickStat('Reviews', reviews, Icons.chat_bubble_outline, Colors.blue),
                               _buildVerticalDivider(),
-                              _buildQuickStat('Orders', '120+', Icons.check_circle_outline, Colors.green),
+                              _buildQuickStat('Orders', '${_providerDetails['completed_orders'] ?? '0'}+', Icons.check_circle_outline, Colors.green),
                             ],
                           ),
                         ],
@@ -343,6 +374,53 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
   }
 
   Widget _buildAboutTab() {
+    if (_isLoadingProvider) {
+       return const Center(child: CircularProgressIndicator());
+    }
+
+    final profile = _providerDetails['provider_profile'] ?? {};
+    final bio = profile['about'] ?? profile['bio'] ?? "Hi, I'm ${_providerDetails['name']}. I am a professional freelancer ready to help you with your projects.";
+    
+    String memberSince = 'N/A';
+    if (_providerDetails['created_at'] != null) {
+      try {
+        final date = DateTime.parse(_providerDetails['created_at']);
+        memberSince = DateFormat.yMMMM().format(date);
+      } catch (e) {}
+    }
+
+    final from = _providerDetails['country']?['name'] ?? profile['address'] ?? 'Global';
+
+    List<Map<String, String>> languages = [];
+    if (profile['languages'] is List) {
+       for (var l in profile['languages']) {
+         if (l is Map) {
+            languages.add({
+              'language': l['language']?.toString() ?? 'Unknown',
+              'level': l['level']?.toString() ?? 'Fluent'
+            });
+         } else if (l is String) {
+            languages.add({
+              'language': l,
+              'level': 'Fluent'
+            });
+         }
+       }
+    }
+    if (languages.isEmpty) {
+        languages.add({'language': 'English', 'level': 'Fluent'});
+    }
+
+    List<String> skills = [];
+    if (profile['skills'] is List) {
+      skills = (profile['skills'] as List).map((e) => e.toString()).toList();
+    } else if (profile['skills'] is String) {
+       skills = profile['skills'].toString().split(',').map((e) => e.trim()).toList();
+    }
+    
+    // Fallback if no skills
+    if (skills.isEmpty) skills = ['Freelancer', 'Professional'];
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -358,7 +436,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
           ),
           const SizedBox(height: 16),
           Text(
-            "Hi, I'm ${widget.provider['name'] ?? 'Robius Sani'}, an experienced app developer on Fiverr. If you're looking to start your own startup application business and generate passive income, you're in the right place. I have over 5 years of experience in Flutter and native Android development.",
+            bio,
             maxLines: _isBioExpanded ? null : 4,
             overflow: _isBioExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
             style: GoogleFonts.plusJakartaSans(
@@ -391,11 +469,9 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
             ),
             child: Column(
               children: [
-                _buildInfoRow(Icons.location_on_outlined, 'From', 'Bangladesh (6:58 AM)'),
-                _buildInfoRow(Icons.person_outline, 'Member since', 'May 2019'),
-                _buildInfoRow(Icons.chat_bubble_outline, 'Avg. response time', '1 hour'),
-                _buildInfoRow(Icons.send_outlined, 'Recent delivery', 'About 31 weeks'),
-                _buildInfoRow(Icons.visibility_outlined, 'Last active', '12d ago', isLast: true),
+                _buildInfoRow(Icons.location_on_outlined, 'From', from),
+                _buildInfoRow(Icons.person_outline, 'Member since', memberSince),
+                _buildInfoRow(Icons.visibility_outlined, 'Last active', 'Today', isLast: true),
               ],
             ),
           ),
@@ -414,7 +490,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
           Wrap(
             spacing: 12,
             runSpacing: 12,
-            children: _languages.map((l) => Container(
+            children: languages.map((l) => Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -464,7 +540,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: _skills.map((skill) => Container(
+            children: skills.map((skill) => Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: const Color(0xFFF1F5F9),
@@ -515,73 +591,174 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
   }
 
   Widget _buildGigsTab() {
-    return ListView.separated(
+    if (_isLoadingGigs) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_gigs.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.work_off_outlined, size: 64, color: Colors.grey[300]),
+            const SizedBox(height: 16),
+            Text('No gigs available', style: GoogleFonts.plusJakartaSans(color: Colors.grey[500])),
+          ],
+        ),
+      );
+    }
+
+    final name = widget.provider['name'] ?? 'Seller';
+    final image = widget.provider['image'] ?? '';
+
+    return GridView.builder(
       padding: const EdgeInsets.all(20),
-      itemCount: 4,
-      separatorBuilder: (_, __) => const SizedBox(height: 16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.72,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: _gigs.length,
       itemBuilder: (context, index) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey[100]!),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
-                child: CachedNetworkImage(
-                  imageUrl: _portfolioImages[index % _portfolioImages.length],
-                  width: 120,
-                  height: 120,
-                  fit: BoxFit.cover,
+        final gig = _gigs[index];
+        final gigImage = gig['thumbnail_image'] ?? gig['image'] ?? '';
+        final title = gig['title'] ?? gig['name'] ?? 'Untitled';
+        final rating = double.tryParse(gig['rating']?.toString() ?? '0') ?? 0.0;
+        final reviews = (gig['reviews'] as List?)?.length ?? 0;
+        
+        // Price logic
+        String price = '0';
+        if (gig['packages'] != null && (gig['packages'] as List).isNotEmpty) {
+           final packages = gig['packages'] as List;
+           final basic = packages.firstWhere((p) => p['tier'] == 'Basic', orElse: () => packages.first);
+           price = basic['price']?.toString() ?? '0';
+        } else {
+           price = gig['price']?.toString() ?? '0';
+        }
+
+        return GestureDetector(
+          onTap: () {
+             // Navigate to gig details
+             context.push('/freelancer-gig-details', extra: gig);
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
                 ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'I will develop a professional flutter application for you',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                          color: const Color(0xFF0F172A),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(Icons.star_rounded, size: 14, color: Colors.amber),
-                          const SizedBox(width: 4),
-                          Text('5.0 (42)', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: Colors.grey[600])),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'From \$100',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: const Color(0xFF0F172A),
-                        ),
-                      ),
-                    ],
+              ],
+              border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  child: CachedNetworkImage(
+                    imageUrl: (gigImage.isNotEmpty && gigImage.startsWith('http')) 
+                        ? gigImage 
+                        : 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
+                    height: 140,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      color: Colors.grey[200],
+                      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.error),
+                    ),
                   ),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CustomAvatar(
+                              imageUrl: (image.isNotEmpty && !image.contains('default.png') && !image.contains('via.placeholder.com')) ? image : null,
+                              name: name,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12, 
+                                  fontWeight: FontWeight.bold, 
+                                  color: const Color(0xFF0F172A)
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF0F172A),
+                            height: 1.3,
+                          ),
+                        ),
+                        const Spacer(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.star_rounded, size: 16, color: Colors.amber),
+                                const SizedBox(width: 4),
+                                Text(
+                                  rating.toStringAsFixed(1), 
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13, 
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF0F172A)
+                                  )
+                                ),
+                                const SizedBox(width: 2),
+                                Text(
+                                  '($reviews)', 
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12, 
+                                    color: Colors.grey[500]
+                                  )
+                                ),
+                              ],
+                            ),
+                            Text(
+                              '\$$price',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontWeight: FontWeight.bold, 
+                                fontSize: 16, 
+                                color: const Color(0xFF0F172A)
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -589,11 +766,38 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
   }
 
   Widget _buildReviewsTab() {
+    if (_isLoadingProvider) return const Center(child: CircularProgressIndicator());
+
+    final List reviews = _providerDetails['reviews'] ?? [];
+    
+    if (reviews.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[300]),
+            const SizedBox(height: 16),
+            Text('No reviews yet', style: GoogleFonts.plusJakartaSans(color: Colors.grey[500])),
+          ],
+        ),
+      );
+    }
+
     return ListView.separated(
       padding: const EdgeInsets.all(20),
-      itemCount: 5,
+      itemCount: reviews.length,
       separatorBuilder: (_, __) => const SizedBox(height: 24),
       itemBuilder: (context, index) {
+        final review = reviews[index];
+        final user = review['user'] ?? {};
+        final userName = user['name'] ?? 'Anonymous';
+        final userImage = user['profile_image'] ?? user['image'];
+        final rating = review['rating']?.toString() ?? '5.0';
+        final comment = review['review'] ?? review['comment'] ?? '';
+        final date = review['created_at'] != null 
+            ? DateFormat.yMMMd().format(DateTime.parse(review['created_at']))
+            : '';
+
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -607,8 +811,8 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
               Row(
                 children: [
                   CustomAvatar(
-                    imageUrl: 'https://i.pravatar.cc/150?img=${index + 10}',
-                    name: 'Client Name ${index + 1}',
+                    imageUrl: (userImage != null && !userImage.contains('default')) ? userImage : null,
+                    name: userName,
                     size: 40,
                   ),
                   const SizedBox(width: 12),
@@ -616,7 +820,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Client Name ${index + 1}',
+                        userName,
                         style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
@@ -628,7 +832,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
                           const Icon(Icons.star_rounded, size: 14, color: Colors.amber),
                           const SizedBox(width: 4),
                           Text(
-                            '5.0',
+                            rating,
                             style: GoogleFonts.plusJakartaSans(
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
@@ -637,7 +841,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            '2 weeks ago',
+                            date,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
                               color: Colors.grey[500],
@@ -651,7 +855,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
               ),
               const SizedBox(height: 12),
               Text(
-                'Great experience working with this seller. The delivery was on time and the quality of work was exceptional. Highly recommended!',
+                comment,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 14,
                   color: const Color(0xFF334155),
@@ -666,6 +870,23 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
   }
 
   Widget _buildPortfolioTab() {
+    if (_isLoadingProvider) return const Center(child: CircularProgressIndicator());
+
+    final portfolios = _providerDetails['freelancer_portfolios'] ?? [];
+    
+    if (portfolios.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+             Icon(Icons.image_not_supported_outlined, size: 64, color: Colors.grey[300]),
+             const SizedBox(height: 16),
+             Text('No portfolio items', style: GoogleFonts.plusJakartaSans(color: Colors.grey[500])),
+          ],
+        ),
+      );
+    }
+
     return GridView.builder(
       padding: const EdgeInsets.all(20),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -674,13 +895,56 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
         mainAxisSpacing: 12,
         childAspectRatio: 1,
       ),
-      itemCount: _portfolioImages.length,
+      itemCount: portfolios.length,
       itemBuilder: (context, index) {
+        final item = portfolios[index];
+        final image = item['image_url'] ?? item['image'] ?? '';
+        final title = item['title'] ?? '';
+
         return ClipRRect(
           borderRadius: BorderRadius.circular(16),
-          child: CachedNetworkImage(
-            imageUrl: _portfolioImages[index],
-            fit: BoxFit.cover,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              CachedNetworkImage(
+                imageUrl: image.startsWith('http') ? image : '${ApiConstants.baseUrl}/storage/$image',
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  color: Colors.grey[200],
+                  child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  color: Colors.grey[200],
+                  child: const Icon(Icons.error),
+                ),
+              ),
+              if (title.isNotEmpty)
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [Colors.black.withValues(alpha: 0.8), Colors.transparent],
+                      ),
+                    ),
+                    child: Text(
+                      title,
+                      style: GoogleFonts.plusJakartaSans(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+            ],
           ),
         );
       },

@@ -245,10 +245,10 @@ class _HomeViewState extends State<HomeView> {
           border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-              spreadRadius: -5,
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+              spreadRadius: -1,
             ),
           ],
         ),
@@ -365,12 +365,12 @@ class _HomeViewState extends State<HomeView> {
                     child: CachedNetworkImage(
                       imageUrl: banner['image'] ?? '',
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => Image.asset(
-                        'assets/images/placeholder.png',
-                        fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: Colors.grey[200],
+                        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
                       ),
-                      errorWidget: (context, url, error) => Image.asset(
-                        'assets/images/placeholder.png',
+                      errorWidget: (context, url, error) => CachedNetworkImage(
+                        imageUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -478,9 +478,9 @@ class _HomeViewState extends State<HomeView> {
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 6,
+                  offset: const Offset(0, 0),
                 ),
               ],
               border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
@@ -661,10 +661,9 @@ class _HomeViewState extends State<HomeView> {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-              spreadRadius: -2,
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
@@ -930,9 +929,9 @@ class _HomeViewState extends State<HomeView> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
         ],
       ),

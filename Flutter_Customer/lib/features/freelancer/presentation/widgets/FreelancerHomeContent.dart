@@ -12,6 +12,7 @@ import '../../../home/presentation/widgets/testimonials_section.dart';
 import '../../../home/presentation/widgets/flash_sale_section.dart';
 import '../../../home/presentation/widgets/trust_safety_section.dart';
 import 'package:flutter_customer/core/constants/api_constants.dart';
+import 'package:flutter_customer/core/widgets/custom_avatar.dart';
 
 class FreelancerHomeContent extends StatefulWidget {
   const FreelancerHomeContent({super.key});
@@ -220,10 +221,12 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
                           : 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
-                        color: Colors.grey[200],
-                        child: const Center(child: CircularProgressIndicator()),
-                      ),
-                      errorWidget: (context, url, error) => const Icon(Icons.error),
+                          color: Colors.grey[200],
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.error),
+                        ),
                     ),
                   ),
                 );
@@ -387,12 +390,12 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
               width: 280,
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
@@ -401,11 +404,11 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
                 children: [
                   Expanded(
                     child: ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                       child: _ShimmerBox(
                         width: 280,
                         height: double.infinity,
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                       ),
                     ),
                   ),
@@ -458,6 +461,21 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
     }
     final hasImage = imageUrl.toString().isNotEmpty;
 
+    // Extract seller info
+    final provider = gig['provider'];
+    final sellerName = provider is Map ? (provider['name'] ?? 'Seller') : 'Seller';
+    var sellerImage = provider is Map && provider['image'] != null ? provider['image'] : '';
+    if (sellerImage.toString().isNotEmpty && !sellerImage.toString().startsWith('http') && !sellerImage.toString().startsWith('assets')) {
+         sellerImage = '${ApiConstants.baseUrl}/storage/$sellerImage';
+    }
+
+    final reviewsData = gig['reviews'];
+    final reviewsCount = (reviewsData is List) ? reviewsData.length : (gig['reviews_count'] ?? 0);
+    final ratingVal = gig['rating'] ?? 0.0;
+    final rating = ratingVal.toString();
+
+    final price = gig['price'] ?? '0';
+
     return GestureDetector(
           onTap: () {
             context.push('/freelancer-gig-details', extra: gig);
@@ -466,12 +484,12 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
         width: 220,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
             ),
           ],
           border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
@@ -480,75 +498,48 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Image
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                  child: hasImage 
-                    ? CachedNetworkImage(
-                        imageUrl: imageUrl,
-                        height: 140,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Image.asset(
-                          'assets/images/placeholder.png',
-                          fit: BoxFit.cover,
-                        ),
-                        errorWidget: (context, url, error) => Image.asset(
-                          'assets/images/placeholder.png',
-                          fit: BoxFit.cover,
-                        ),
-                      )
-                    : Image.asset(
-                        'assets/images/placeholder.png',
-                        height: 140,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              child: CachedNetworkImage(
+                imageUrl: hasImage ? imageUrl : 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
+                height: 140,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  color: Colors.grey[200],
+                  child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
                 ),
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: GestureDetector(
-                    onTap: () {
-                      final gigId = int.tryParse(gig['id'].toString()) ?? 0;
-                      if (gigId != 0) {
-                        Provider.of<HomeProvider>(context, listen: false).toggleGigFavorite(gigId);
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        (gig['is_favorite'] == true || gig['is_favorite'] == 1) ? Icons.favorite : Icons.favorite_border,
-                        size: 18,
-                        color: const Color(0xFFEF4444),
-                      ),
-                    ),
-                  ),
+                errorWidget: (context, url, error) => CachedNetworkImage(
+                   imageUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
+                   fit: BoxFit.cover,
                 ),
-              ],
+              ),
             ),
             
             // Content
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.star_rounded, size: 16, color: Color(0xFFF59E0B)),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${gig['rating'] ?? 4.8} (${gig['reviews_count'] ?? 0})',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF64748B),
+                      CustomAvatar(
+                        imageUrl: sellerImage.toString(),
+                        name: sellerName.toString(),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          sellerName.toString(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12, 
+                            fontWeight: FontWeight.bold, 
+                            color: const Color(0xFF0F172A)
+                          ),
                         ),
                       ),
                     ],
@@ -559,8 +550,8 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
                       color: const Color(0xFF0F172A),
                       height: 1.3,
                     ),
@@ -568,19 +559,19 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
                   const SizedBox(height: 12),
                   Row(
                     children: [
+                      const Icon(Icons.star_rounded, size: 14, color: Colors.amber),
+                      const SizedBox(width: 4),
                       Text(
-                        '\$${gig['price'] ?? 0}',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFF6366F1),
-                        ),
+                        '$rating ($reviewsCount)', 
+                        style: GoogleFonts.plusJakartaSans(fontSize: 12, color: Colors.grey[600])
                       ),
+                      const Spacer(),
                       Text(
-                        '/hr',
+                        'From \$$price',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
-                          color: const Color(0xFF94A3B8),
+                          fontWeight: FontWeight.bold, 
+                          fontSize: 14, 
+                          color: const Color(0xFF0F172A)
                         ),
                       ),
                     ],

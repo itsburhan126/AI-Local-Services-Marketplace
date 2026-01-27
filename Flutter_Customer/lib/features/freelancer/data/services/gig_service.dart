@@ -22,6 +22,34 @@ class GigService {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getGigsByProvider(int providerId) async {
+    try {
+      final response = await _dio.get('${ApiConstants.baseUrl}/api/gigs?provider_id=$providerId');
+      if (response.statusCode == 200) {
+        final List data = response.data['data']['data'];
+        return data.map((e) => _fixDataUrls(e) as Map<String, dynamic>).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('[GigService] getGigsByProvider error: $e');
+      return [];
+    }
+  }
+
+  Future<Map<String, dynamic>?> getProviderDetails(int id) async {
+    try {
+      final response = await _dio.get('${ApiConstants.baseUrl}/api/providers/$id');
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        return _fixDataUrls(data);
+      }
+      return null;
+    } catch (e) {
+      debugPrint('[GigService] getProviderDetails error: $e');
+      return null;
+    }
+  }
+
   Future<bool> incrementGigView(int id) async {
     try {
       final prefs = await SharedPreferences.getInstance();
