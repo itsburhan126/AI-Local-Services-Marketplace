@@ -56,7 +56,13 @@
                     <h3 class="text-sm font-bold text-slate-600 mb-2">Thumbnail</h3>
                     <div class="relative group aspect-video w-full md:w-1/2 rounded-xl overflow-hidden shadow-sm border border-slate-100">
                         @php
-                            $thumbnail = str_replace('http://localhost', url('/'), $gig->thumbnail_image);
+                            $thumbnail = $gig->thumbnail_image;
+                            if (strpos($thumbnail, '/storage/') !== false) {
+                                $parts = explode('/storage/', $thumbnail);
+                                if (count($parts) > 1) {
+                                    $thumbnail = asset('storage/' . $parts[1]);
+                                }
+                            }
                         @endphp
                         <img src="{{ $thumbnail }}" class="w-full h-full object-cover" alt="Gig Thumbnail">
                     </div>
@@ -68,7 +74,13 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     @foreach($gig->images as $image)
                     @php
-                        $imageUrl = str_replace('http://localhost', url('/'), $image);
+                        $imageUrl = $image;
+                        if (strpos($imageUrl, '/storage/') !== false) {
+                            $parts = explode('/storage/', $imageUrl);
+                            if (count($parts) > 1) {
+                                $imageUrl = asset('storage/' . $parts[1]);
+                            }
+                        }
                     @endphp
                     <div class="relative group aspect-square rounded-xl overflow-hidden shadow-sm border border-slate-100">
                         <img src="{{ $imageUrl }}" class="w-full h-full object-cover transition-transform group-hover:scale-105" alt="Gig Image">

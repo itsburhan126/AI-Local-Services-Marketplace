@@ -13,7 +13,13 @@ import 'package:dio/dio.dart';
 import '../../../../core/constants/api_constants.dart';
 
 class ChatProvider extends ChangeNotifier {
-  final ChatService _chatService = ChatService();
+  final ChatService _chatService = ChatService(Dio());
+  
+  Future<String?> _getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('auth_token');
+  }
+  
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   
   List<ChatConversationModel> _conversations = [];
@@ -57,7 +63,8 @@ class ChatProvider extends ChangeNotifier {
 
   Future<void> sendTypingEvent(int receiverId) async {
     if (_isConnected) {
-       await _chatService.sendTyping(receiverId);
+       final token = await _getToken();
+       await _chatService.sendTyping(token, receiverId);
     }
   }
 
@@ -66,7 +73,8 @@ class ChatProvider extends ChangeNotifier {
     if (_isConnected && _subscribedUserId == userId) return;
 
     try {
-      final config = await _chatService.getChatConfig();
+      final token = await _getToken();
+      final config = await _chatService.getChatConfig(token);
       final key = config['key'] as String?;
       final cluster = config['cluster'] as String?;
       _maxFileSize = config['max_file_size'] as int? ?? 10485760;
@@ -151,7 +159,7 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  void _handlePusherEvent(String eventName, dynamic data) {
+  Future<void> _handlePusherEvent(String eventName, dynamic data) async {
     debugPrint("Pusher Event: $eventName data: $data");
     
     try {
@@ -191,7 +199,8 @@ class ChatProvider extends ChangeNotifier {
                 // If I am the receiver
                  if (newMessage.receiverId == _subscribedUserId) {
                     // Mark as delivered immediately since we received it via Pusher
-                    _chatService.markMessageAsDelivered(newMessage.id);
+                    final token = await _getToken();
+                    _chatService.markMessageAsDelivered(token, newMessage.id);
                     
                     // If I am also looking at this specific chat, mark as read
                     if (newMessage.senderId == _currentChatUserId) {
@@ -250,7 +259,8 @@ class ChatProvider extends ChangeNotifier {
     _error = null;
 
     try {
-      _conversations = await _chatService.getConversations();
+      final token = await _getToken();
+      _conversations = await _chatService.getConversations(token);
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -266,7 +276,8 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final data = await _chatService.getMessages(userId);
+      final token = await _getToken();
+      final data = await _chatService.getMessages(token, userId);
       _currentMessages = data['messages'] as List<ChatMessageModel>;
     } catch (e) {
       _error = e.toString();
@@ -309,7 +320,9 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final token = await _getToken();
       final message = await _chatService.sendMessage(
+        token: token,
         receiverId: receiverId,
         message: content,
         attachmentPath: attachmentPath,
@@ -356,7 +369,8 @@ class ChatProvider extends ChangeNotifier {
       _currentMessages[index] = updatedMessage;
       notifyListeners();
       
-      await _chatService.markMessageAsRead(messageId);
+      final token = await _getToken();
+      await _chatService.markMessageAsRead(token, messageId);
     }
   }
 
@@ -379,7 +393,8 @@ class ChatProvider extends ChangeNotifier {
       _currentMessages[index] = updatedMessage;
       notifyListeners();
       
-      await _chatService.reactToMessage(messageId, reaction);
+      final token = await _getToken();
+      await _chatService.reactToMessage(token, messageId, reaction);
     }
   }
   
@@ -418,7 +433,8 @@ class ChatProvider extends ChangeNotifier {
 
   Future<void> blockUser(int userId) async {
     try {
-      await _chatService.blockUser(userId);
+      final token = await _getToken();
+      await _chatService.blockUser(token, userId);
       notifyListeners();
     } catch (e) {
       debugPrint("Error blocking user: $e");
@@ -428,7 +444,8 @@ class ChatProvider extends ChangeNotifier {
 
   Future<void> reportUser(int userId, String reason) async {
     try {
-      await _chatService.reportUser(userId, reason);
+      final token = await _getToken();
+      await _chatService.reportUser(token, userId, reason);
     } catch (e) {
       debugPrint("Error reporting user: $e");
       rethrow;
@@ -437,7 +454,8 @@ class ChatProvider extends ChangeNotifier {
 
   Future<void> clearChat(int userId) async {
     try {
-      await _chatService.clearChat(userId);
+      final token = await _getToken();
+      await _chatService.clearChat(token, userId);
       _currentMessages.clear();
       notifyListeners();
     } catch (e) {

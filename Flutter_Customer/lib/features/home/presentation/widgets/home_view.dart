@@ -356,13 +356,16 @@ class _HomeViewState extends State<HomeView> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(24),
                     child: CachedNetworkImage(
-                      imageUrl: banner['image'] ?? 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+                      imageUrl: banner['image'] ?? '',
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: Colors.grey[200],
-                        child: const Center(child: CircularProgressIndicator()),
+                      placeholder: (context, url) => Image.asset(
+                        'assets/images/placeholder.png',
+                        fit: BoxFit.cover,
                       ),
-                      errorWidget: (context, url, error) => const Icon(Icons.error),
+                      errorWidget: (context, url, error) => Image.asset(
+                        'assets/images/placeholder.png',
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 );

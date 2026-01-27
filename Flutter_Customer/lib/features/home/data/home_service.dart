@@ -166,11 +166,12 @@ class HomeService {
     if (url.isEmpty || 
         url == 'default' || 
         url.contains('via.placeholder.com') ||
+        url.contains('default.png') ||
         url.contains('photo-1527515637-62da7a808806') || // Broken Unsplash 1
         url.contains('photo-1581578731117-104f2a41272c') || // Broken Unsplash 2
         url.contains('photo-1581094794329-cd1361ddee2e')) {
-      // Use a reliable Unsplash image for fallback
-      return 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'; 
+      // Return empty string to trigger errorWidget in CachedNetworkImage which shows local placeholder
+      return ''; 
     }
     if (url.startsWith('http')) return url;
     if (url.startsWith('/')) return '${ApiConstants.baseUrl}$url';

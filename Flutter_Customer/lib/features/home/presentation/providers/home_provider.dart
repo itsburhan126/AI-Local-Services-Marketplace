@@ -12,6 +12,7 @@ class HomeProvider with ChangeNotifier {
   List<dynamic> get categories => _data['categories'] ?? [];
   List<dynamic> get popularServices => _data['popular_services'] ?? [];
   List<dynamic> get recommendedServices => _data['recommended_services'] ?? [];
+  List<dynamic> get newServices => _data['new_services'] ?? [];
   List<dynamic> get banners => _data['banners'] ?? [];
   Map<String, dynamic>? get singleBanner => _data['single_banner'];
   List<dynamic> get promotionalBanners => _data['promotional_banners'] ?? [];

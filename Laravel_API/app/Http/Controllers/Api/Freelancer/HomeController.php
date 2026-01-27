@@ -167,6 +167,17 @@ class HomeController extends Controller
             ]
         ];
 
+        // 13. New Gigs (Recently Created)
+        $newServices = Gig::where('is_active', true)
+            ->where('status', 'approved')
+            ->orderBy('created_at', 'desc')
+            ->with(['provider.providerProfile', 'category', 'packages', 'faqs', 'extras'])
+            ->take(6)
+            ->get()
+            ->map(function ($gig) {
+                return $this->mapGigToService($gig);
+            });
+
         return response()->json([
             'status' => 'success',
             'data' => [
@@ -174,6 +185,7 @@ class HomeController extends Controller
                 'categories' => $categories,
                 'popular_services' => $popularServices,
                 'recommended_services' => $recommendedServices,
+                'new_services' => $newServices,
                 'single_banner' => $singleBanner,
                 'promotional_banners' => $promotionalBanners,
                 'recently_viewed' => $recentlyViewed,

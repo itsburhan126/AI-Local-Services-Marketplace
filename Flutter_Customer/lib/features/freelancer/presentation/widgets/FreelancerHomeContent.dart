@@ -120,6 +120,16 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
             const SizedBox(height: 16),
             _buildHorizontalServiceList(context, provider.recommendedServices, provider.isLoading)
                 .animate().fadeIn(delay: 950.ms),
+
+            // New Gigs (New)
+            if (provider.newServices.isNotEmpty) ...[
+              const SizedBox(height: 32),
+              _buildSectionHeader(context, 'New Gigs', 'View All', () => {})
+                  .animate().fadeIn(delay: 1000.ms),
+              const SizedBox(height: 16),
+              _buildHorizontalServiceList(context, provider.newServices, provider.isLoading)
+                  .animate().fadeIn(delay: 1050.ms),
+            ],
           ],
         );
       },
@@ -434,6 +444,9 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
   }
 
   Widget _buildGigCard(BuildContext context, dynamic gig) {
+    final imageUrl = gig['thumbnail'] ?? gig['image'] ?? '';
+    final hasImage = imageUrl.toString().isNotEmpty;
+
     return GestureDetector(
           onTap: () {
             context.push('/freelancer-gig-details', extra: gig);
@@ -459,12 +472,27 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                  child: CachedNetworkImage(
-                    imageUrl: gig['thumbnail'] ?? gig['image'] ?? 'https://via.placeholder.com/200',
-                    height: 140,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
+                  child: hasImage 
+                    ? CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        height: 140,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Image.asset(
+                          'assets/images/placeholder.png',
+                          fit: BoxFit.cover,
+                        ),
+                        errorWidget: (context, url, error) => Image.asset(
+                          'assets/images/placeholder.png',
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Image.asset(
+                        'assets/images/placeholder.png',
+                        height: 140,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
                 ),
                 Positioned(
                   top: 12,

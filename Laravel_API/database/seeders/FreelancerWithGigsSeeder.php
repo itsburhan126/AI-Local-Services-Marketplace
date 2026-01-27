@@ -69,7 +69,7 @@ class FreelancerWithGigsSeeder extends Seeder
                     'title' => $faker->catchPhrase,
                     'slug' => $faker->slug . '-' . uniqid(),
                     'description' => $faker->paragraph,
-                    'images' => ['https://via.placeholder.com/300'],
+                    'images' => ['assets/img/category/default.png'],
                     'is_active' => true,
                     'status' => 'approved',
                     'is_featured' => $faker->boolean(20),

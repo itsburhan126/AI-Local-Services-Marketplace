@@ -31,12 +31,12 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
 
   // Mock Portfolio Data
   final List<String> _portfolioImages = [
-    'https://images.unsplash.com/photo-1626785774573-4b79931434f3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1558655146-d09347e92766?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1579353977828-2a4eab540b9a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1599658880436-c61792e70672?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1626785774625-ddcddc3445e9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
   ];
 
   @override
@@ -54,7 +54,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
   @override
   Widget build(BuildContext context) {
     final name = widget.provider['name'] ?? 'Robius Sani';
-    final image = widget.provider['image'] ?? 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80';
+    final image = widget.provider['image'] ?? '';
     final username = widget.provider['username'] ?? '@l33tgaming';
     final rating = widget.provider['rating']?.toString() ?? '5.0';
     final reviews = widget.provider['reviews_count']?.toString() ?? '74';
@@ -157,7 +157,9 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
                             ),
                             child: CircleAvatar(
                               radius: 55,
-                              backgroundImage: CachedNetworkImageProvider(image),
+                              backgroundImage: (image.isNotEmpty && !image.contains('default.png') && !image.contains('via.placeholder.com'))
+                                  ? CachedNetworkImageProvider(image)
+                                  : const AssetImage('assets/images/placeholder.png') as ImageProvider,
                             ),
                           ).animate().scale(duration: 400.ms, curve: Curves.easeOutBack),
                           

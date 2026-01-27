@@ -117,7 +117,7 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
 
     // Fallback if empty
     if (images.isEmpty) {
-      images.add('https://images.unsplash.com/photo-1572044162444-ad6021194bed?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
+      images.add(''); // Use empty string to trigger local placeholder
     }
 
     return images;
@@ -139,6 +139,13 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
     }
     
     if (url != null) {
+      if (url == 'default' || 
+          url.contains('via.placeholder.com') || 
+          url.contains('default.png') ||
+          url.contains('unsplash.com')) {
+        return null;
+      }
+
       if (url.startsWith('http') || url.startsWith('assets')) return url;
       
       String cleanPath = url.startsWith('/') ? url.substring(1) : url;
@@ -273,11 +280,14 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
                       imageUrl: img,
                       fit: BoxFit.cover,
                       width: double.infinity,
-                      placeholder: (context, url) => Container(
-                        color: Colors.grey[200],
-                        child: const Center(child: CircularProgressIndicator()),
+                      placeholder: (context, url) => Image.asset(
+                        'assets/images/placeholder.png',
+                        fit: BoxFit.cover,
                       ),
-                      errorWidget: (context, url, error) => const Icon(Icons.error),
+                      errorWidget: (context, url, error) => Image.asset(
+                        'assets/images/placeholder.png',
+                        fit: BoxFit.cover,
+                      ),
                     );
                   },
                 );

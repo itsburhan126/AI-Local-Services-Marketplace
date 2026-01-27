@@ -110,7 +110,7 @@ class _FreelancerHomeViewState extends State<FreelancerHomeView> {
             backgroundColor: Colors.white,
             child: CircleAvatar(
               radius: 22,
-              backgroundImage: const NetworkImage('https://i.pravatar.cc/150?img=12'),
+              backgroundImage: const AssetImage('assets/images/placeholder.png'),
               onBackgroundImageError: (_, __) => const Icon(Icons.person),
             ),
           ),

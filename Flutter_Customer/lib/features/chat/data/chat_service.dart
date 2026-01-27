@@ -195,4 +195,37 @@ class ChatService {
       throw Exception('Failed to block user: $e');
     }
   }
+
+  Future<void> reportUser(String? token, int userId, String reason) async {
+    try {
+      await _dio.post(
+        '${ApiConstants.baseUrl}${ApiConstants.reportUserEndpoint}',
+        data: {
+          'user_id': userId,
+          'reason': reason,
+        },
+        options: Options(headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        }),
+      );
+    } catch (e) {
+      throw Exception('Failed to report user: $e');
+    }
+  }
+
+  Future<void> clearChat(String? token, int userId) async {
+    try {
+      await _dio.post(
+        '${ApiConstants.baseUrl}${ApiConstants.clearChatEndpoint}',
+        data: {'user_id': userId},
+        options: Options(headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        }),
+      );
+    } catch (e) {
+      throw Exception('Failed to clear chat: $e');
+    }
+  }
 }

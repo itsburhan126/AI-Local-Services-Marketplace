@@ -307,14 +307,31 @@ class _FreelancerCategoryPageState extends State<FreelancerCategoryPage> {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                  child: CachedNetworkImage(
-                    imageUrl: image,
-                    height: 120,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(color: Colors.grey[100]),
-                    errorWidget: (context, url, error) => Container(color: Colors.grey[100], child: const Icon(Icons.error_outline, color: Colors.grey)),
-                  ),
+                  child: image.isEmpty 
+                    ? Image.asset(
+                        'assets/images/placeholder.png',
+                        height: 120,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      )
+                    : CachedNetworkImage(
+                        imageUrl: image,
+                        height: 120,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Image.asset(
+                          'assets/images/placeholder.png',
+                          height: 120,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                        errorWidget: (context, url, error) => Image.asset(
+                          'assets/images/placeholder.png',
+                          height: 120,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                 ),
                 Positioned(
                   top: 8,
@@ -344,7 +361,9 @@ class _FreelancerCategoryPageState extends State<FreelancerCategoryPage> {
                         CircleAvatar(
                           radius: 10,
                           backgroundColor: Colors.grey[200],
-                          backgroundImage: NetworkImage(providerImage),
+                          backgroundImage: providerImage.isNotEmpty 
+                              ? NetworkImage(providerImage) 
+                              : const AssetImage('assets/images/placeholder.png') as ImageProvider,
                           onBackgroundImageError: (_, __) {},
                           child: null,
                         ),

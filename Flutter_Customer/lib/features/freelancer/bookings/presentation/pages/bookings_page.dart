@@ -213,7 +213,7 @@ class _BookingsPageState extends State<BookingsPage> with SingleTickerProviderSt
                         image: DecorationImage(
                           image: imageUrl != null 
                               ? NetworkImage(imageUrl) 
-                              : const NetworkImage('https://via.placeholder.com/200'),
+                              : const AssetImage('assets/images/placeholder.png') as ImageProvider,
                           fit: BoxFit.cover,
                         ),
                       ),

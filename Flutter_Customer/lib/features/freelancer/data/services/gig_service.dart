@@ -92,7 +92,13 @@ class GigService {
   }
 
   String _getValidUrl(String url) {
-    if (url.isEmpty || url == 'default') return 'https://images.unsplash.com/photo-1558655146-d09347e92766?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+    if (url.isEmpty || 
+        url == 'default' || 
+        url.contains('via.placeholder.com') ||
+        url.contains('default.png') ||
+        url.contains('unsplash.com')) {
+      return '';
+    }
     if (url.startsWith('http')) return url;
     if (url.startsWith('/')) return '${ApiConstants.baseUrl}$url';
     return '${ApiConstants.baseUrl}/$url';

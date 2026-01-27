@@ -102,7 +102,7 @@ class FreelancerController extends Controller
     public function storeBanner(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
             'title' => 'nullable|string|max:255',
             'order' => 'nullable|integer',
             'is_active' => 'boolean'

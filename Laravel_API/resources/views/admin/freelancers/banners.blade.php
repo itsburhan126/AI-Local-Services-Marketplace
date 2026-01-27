@@ -64,7 +64,7 @@
                     @forelse($banners as $banner)
                     <div class="group relative rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-slate-100">
                         <div class="aspect-video bg-slate-100 relative">
-                            <img src="{{ asset('storage/' . $banner->image_path) }}" class="w-full h-full object-cover">
+                            <img src="/storage/{{ $banner->image_path }}" class="w-full h-full object-cover">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-4">
                                 <h4 class="text-white font-bold text-lg">{{ $banner->title ?? 'No Title' }}</h4>
                                 <div class="flex justify-between items-center mt-1">
