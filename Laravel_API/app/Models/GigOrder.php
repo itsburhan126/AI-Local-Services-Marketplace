@@ -54,4 +54,9 @@ class GigOrder extends Model
     {
         return $this->belongsTo(GigPackage::class, 'gig_package_id');
     }
+
+    public function review()
+    {
+        return $this->hasOne(Review::class, 'gig_order_id');
+    }
 }

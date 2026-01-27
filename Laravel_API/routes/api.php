@@ -53,6 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('provider/gigs', \App\Http\Controllers\Api\Freelancer\GigController::class);
     Route::patch('/provider/gigs/{id}/status', [\App\Http\Controllers\Api\Freelancer\GigController::class, 'updateStatus']);
     Route::get('/provider/gigs/{id}/analytics', [\App\Http\Controllers\Api\Freelancer\GigController::class, 'analytics']);
+    Route::get('/provider/gigs/{id}/reviews', [\App\Http\Controllers\Api\Freelancer\GigController::class, 'reviews']);
     
     // Freelancer Orders (Provider Side)
     Route::get('/freelancer/orders', [\App\Http\Controllers\Api\Freelancer\GigOrderController::class, 'index']);

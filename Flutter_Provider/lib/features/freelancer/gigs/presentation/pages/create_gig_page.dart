@@ -882,6 +882,7 @@ class _CreateGigPageState extends ConsumerState<CreateGigPage> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: DropdownButtonFormField<int>(
+                        isExpanded: true,
                         value: package.revisions,
                         decoration: _inputDecoration('Revisions', Icons.repeat),
                         items: List.generate(11, (i) => i)

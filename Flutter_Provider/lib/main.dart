@@ -19,6 +19,7 @@ import 'features/services/presentation/providers/service_provider.dart';
 import 'features/freelancer/gigs/presentation/providers/gig_provider.dart';
 import 'features/chat/presentation/providers/chat_provider.dart';
 import 'features/freelancer/orders/presentation/providers/requests_provider.dart';
+import 'features/freelancer/wallet/presentation/providers/wallet_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -311,6 +312,10 @@ void main() async {
             create: (_) => RequestsProvider(dio),
             update: (_, auth, prev) => (prev ?? RequestsProvider(dio))..update(auth),
           ),
+          ChangeNotifierProxyProvider<AuthProvider, WalletProvider>(
+            create: (_) => WalletProvider(dio),
+            update: (_, auth, prev) => (prev ?? WalletProvider(dio))..update(auth),
+          ),
         ],
         child: const ProviderApp(),
       ),
@@ -402,5 +407,4 @@ class _ProviderAppState extends State<ProviderApp> {
     );
   }
 }
-
 

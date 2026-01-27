@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import '../../../../../core/constants/api_constants.dart';
 import '../models/gig_model.dart';
 import '../models/tag_model.dart';
+import '../models/paginated_reviews_model.dart';
 import 'package:flutter_provider/features/freelancer/gigs/data/models/gig_analytics_model.dart';
 import '../../../../services/data/models/category_model.dart';
 
@@ -32,6 +33,7 @@ abstract class GigRemoteDataSource {
   Future<List<CategoryModel>> getCategories();
   Future<List<TagModel>> getTags({String? query});
   Future<GigAnalyticsModel> getGigAnalytics(String token, int id);
+  Future<PaginatedReviewsModel> getGigReviews(String token, int id, int page);
   Future<GigModel> getGigDetails(String token, int id);
   Future<GigModel> updateGigStatus(String token, int id, String status);
 }
@@ -360,6 +362,30 @@ class GigRemoteDataSourceImpl implements GigRemoteDataSource {
       }
     } catch (e) {
       throw Exception('Failed to fetch gig analytics: $e');
+    }
+  }
+
+  @override
+  Future<PaginatedReviewsModel> getGigReviews(String token, int id, int page) async {
+    try {
+      final response = await dio.get(
+        '/api/provider/gigs/$id/reviews',
+        queryParameters: {'page': page},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return PaginatedReviewsModel.fromJson(response.data['data']);
+      } else {
+        throw Exception('Failed to fetch gig reviews');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch gig reviews: $e');
     }
   }
 

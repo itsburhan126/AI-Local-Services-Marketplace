@@ -55,9 +55,9 @@ class BookingProvider with ChangeNotifier {
         _bookingService.getBookings(token, status: 'cancelled'),
       ]);
 
-      _activeBookings = results[0];
-      _completedBookings = results[1];
-      _cancelledBookings = results[2];
+      _activeBookings = results[0].where((b) => b['status'] != 'completed' && b['status'] != 'cancelled' && b['status'] != 'rejected').toList();
+      _completedBookings = results[1].where((b) => b['status'] == 'completed').toList();
+      _cancelledBookings = results[2].where((b) => b['status'] == 'cancelled' || b['status'] == 'rejected').toList();
     } catch (e) {
       _error = e.toString();
     } finally {

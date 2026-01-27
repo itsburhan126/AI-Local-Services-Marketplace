@@ -4,6 +4,7 @@ import '../../data/datasources/gig_remote_data_source.dart';
 import 'package:flutter_provider/features/freelancer/gigs/data/models/gig_analytics_model.dart';
 import '../../data/models/gig_model.dart';
 import '../../data/models/tag_model.dart';
+import '../../data/models/paginated_reviews_model.dart';
 import '../../../../services/data/models/category_model.dart';
 import '../../../../services/data/models/service_type_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -52,6 +53,12 @@ class GigRepositoryImpl implements GigRepository {
   Future<GigAnalyticsModel> getGigAnalytics(int id) async {
     final token = await _getToken();
     return await remoteDataSource.getGigAnalytics(token, id);
+  }
+
+  @override
+  Future<PaginatedReviewsModel> getGigReviews(int id, int page) async {
+    final token = await _getToken();
+    return await remoteDataSource.getGigReviews(token, id, page);
   }
 
   @override

@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:shimmer/shimmer.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import '../../data/models/gig_model.dart';
 import '../../data/models/gig_analytics_model.dart';
 import '../providers/gig_provider.dart';
@@ -14,6 +16,7 @@ import '../../../../auth/presentation/providers/auth_provider.dart';
 import '../../../../auth/data/models/user_model.dart';
 import '../../../../../core/utils/image_helper.dart';
 import 'create_gig_page.dart';
+import '../widgets/all_reviews_bottom_sheet.dart';
 
 class GigDetailsPage extends ConsumerStatefulWidget {
   final GigModel gig;
@@ -334,7 +337,7 @@ class _GigDetailsPageState extends ConsumerState<GigDetailsPage> {
                     const SizedBox(height: 32),
                     _buildSellerProfilePreviewSection(context, gig),
                     const SizedBox(height: 32),
-                    _buildReviewsSection(),
+                    _buildReviewsSection(analyticsAsync),
                     const SizedBox(height: 32),
                     _buildFAQSection(gig),
                     const SizedBox(height: 100),
@@ -539,6 +542,7 @@ class _GigDetailsPageState extends ConsumerState<GigDetailsPage> {
             },
           ),
         ),
+        const SizedBox(width: 12),
         Expanded(
           child: _buildActionButton(
             icon: Icons.link_rounded,
@@ -681,10 +685,38 @@ class _GigDetailsPageState extends ConsumerState<GigDetailsPage> {
 
   Widget _buildPerformanceGrid(AsyncValue<GigAnalyticsModel> analyticsAsync) {
     if (analyticsAsync.isLoading) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: CircularProgressIndicator(),
+      return Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(width: 150, height: 24, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)))),
+                const SizedBox(width: 16),
+                Expanded(child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)))),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)))),
+                const SizedBox(width: 16),
+                Expanded(child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)))),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)))),
+                const SizedBox(width: 16),
+                Expanded(child: Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)))),
+              ],
+            ),
+          ],
         ),
       );
     }
@@ -708,7 +740,16 @@ class _GigDetailsPageState extends ConsumerState<GigDetailsPage> {
 
     final analytics = analyticsAsync.asData?.value;
     final totalEarnings = analytics?.totalEarnings ?? 0.0;
-    final todayEarnings = analytics?.todayEarnings ?? 0.0;
+    final pendingAmount = analytics?.pendingAmount ?? 0.0; // Expected Earnings (Active/Pending Orders)
+    final clearanceAmount = analytics?.clearanceAmount ?? 0.0; // Completed but Pending Clearance
+    final clearedAmount = analytics?.clearedAmount ?? 0.0; // Completed and Cleared
+    final activeOrders = analytics?.activeOrders ?? 0;
+    final completedOrders = analytics?.completedOrders ?? 0;
+    final pendingOrders = analytics?.pendingOrders ?? 0;
+    final viewCount = analytics?.viewCount ?? 0;
+    final averageRating = analytics?.averageRating ?? 0.0;
+    final totalReviews = analytics?.totalReviews ?? 0;
+    
     final earningsChange = analytics?.earningsChange ?? 0.0;
     
     final changeText = earningsChange >= 0 ? '+${earningsChange.toStringAsFixed(1)}%' : '${earningsChange.toStringAsFixed(1)}%';
@@ -718,7 +759,7 @@ class _GigDetailsPageState extends ConsumerState<GigDetailsPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Performance',
+          'Performance Overview',
           style: GoogleFonts.plusJakartaSans(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -726,6 +767,7 @@ class _GigDetailsPageState extends ConsumerState<GigDetailsPage> {
           ),
         ),
         const SizedBox(height: 16),
+        // Row 1: Financials
         Row(
           children: [
             Expanded(
@@ -734,22 +776,104 @@ class _GigDetailsPageState extends ConsumerState<GigDetailsPage> {
                 '\$${totalEarnings.toStringAsFixed(2)}',
                 changeText,
                 const Color(0xFF10B981),
-                Icons.trending_up,
+                Icons.attach_money,
                 changeColor: changeColor,
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: _buildInfoCard(
-                'Today Sell',
-                '\$${todayEarnings.toStringAsFixed(2)}',
-                'Today',
-                const Color(0xFF6366F1),
-                Icons.today,
+                'Cleared Amount',
+                '\$${clearedAmount.toStringAsFixed(2)}',
+                'Available',
+                const Color(0xFF3B82F6),
+                Icons.account_balance_wallet,
+                changeColor: const Color(0xFF3B82F6),
               ),
             ),
           ],
         ),
+        const SizedBox(height: 16),
+        // Row 2: Clearance & Active
+        Row(
+          children: [
+            Expanded(
+              child: _buildInfoCard(
+                'Clearance Amount',
+                '\$${clearanceAmount.toStringAsFixed(2)}',
+                'Pending',
+                const Color(0xFFF59E0B),
+                Icons.pending_actions,
+                changeColor: const Color(0xFFF59E0B),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildInfoCard(
+                'Active Orders',
+                '$activeOrders',
+                'In Progress',
+                const Color(0xFF8B5CF6),
+                Icons.run_circle_outlined,
+                changeColor: const Color(0xFF8B5CF6),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // Row 3: Rating & Completed
+        Row(
+          children: [
+             Expanded(
+              child: _buildInfoCard(
+                'Rating',
+                '$averageRating ($totalReviews)',
+                'Reviews',
+                const Color(0xFFEAB308),
+                Icons.star_rounded,
+                changeColor: const Color(0xFFEAB308),
+              ),
+            ),
+            const SizedBox(width: 16),
+             Expanded(
+              child: _buildInfoCard(
+                'Completed',
+                '$completedOrders',
+                'Orders',
+                const Color(0xFF059669),
+                Icons.check_circle_outline,
+                changeColor: const Color(0xFF059669),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // Row 4: Pending & More
+        Row(
+          children: [
+            Expanded(
+              child: _buildInfoCard(
+                'Pending',
+                '$pendingOrders',
+                'Requests',
+                const Color(0xFF6366F1),
+                Icons.hourglass_empty_rounded,
+                changeColor: const Color(0xFF6366F1),
+              ),
+            ),
+             const SizedBox(width: 16),
+             Expanded(
+               child: _buildInfoCard(
+                 'Views',
+                 '$viewCount',
+                 'Total',
+                 const Color(0xFF64748B),
+                 Icons.visibility_outlined,
+                 changeColor: const Color(0xFF64748B),
+               ),
+             ),
+           ],
+         ),
       ],
     );
   }
@@ -829,7 +953,38 @@ class _GigDetailsPageState extends ConsumerState<GigDetailsPage> {
 
   Widget _buildDaySellAnalytics(AsyncValue<GigAnalyticsModel> analyticsAsync) {
     if (analyticsAsync.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(width: 150, height: 24, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                  Container(width: 80, height: 24, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20))),
+                ],
+              ),
+              const SizedBox(height: 32),
+              Container(height: 200, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
+            ],
+          ),
+        ),
+      );
     }
     final salesChart = analyticsAsync.asData?.value.salesChart ?? [];
     List<FlSpot> spots = [];
@@ -921,6 +1076,40 @@ class _GigDetailsPageState extends ConsumerState<GigDetailsPage> {
   }
 
   Widget _buildViewAnalytics(AsyncValue<GigAnalyticsModel> analyticsAsync) {
+    if (analyticsAsync.isLoading) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(width: 150, height: 24, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                  Container(width: 24, height: 24, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
+                ],
+              ),
+              const SizedBox(height: 32),
+              Container(height: 200, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
+            ],
+          ),
+        ),
+      );
+    }
     final ordersChart = analyticsAsync.asData?.value.ordersChart ?? [];
     List<FlSpot> spots = [];
     if (ordersChart.isNotEmpty) {
@@ -994,6 +1183,40 @@ class _GigDetailsPageState extends ConsumerState<GigDetailsPage> {
   }
 
   Widget _buildEarnAnalytics(AsyncValue<GigAnalyticsModel> analyticsAsync) {
+    if (analyticsAsync.isLoading) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(width: 150, height: 24, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                  Container(width: 80, height: 24, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20))),
+                ],
+              ),
+              const SizedBox(height: 32),
+              Container(height: 200, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
+            ],
+          ),
+        ),
+      );
+    }
     final salesChart = analyticsAsync.asData?.value.salesChart ?? [];
     List<BarChartGroupData> barGroups = [];
 
@@ -1056,7 +1279,55 @@ class _GigDetailsPageState extends ConsumerState<GigDetailsPage> {
 
   Widget _buildRecentOrdersSection(AsyncValue<GigAnalyticsModel> analyticsAsync) {
     if (analyticsAsync.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(width: 150, height: 24, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Column(
+                children: List.generate(3, (index) => Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Container(width: 40, height: 40, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(width: 120, height: 16, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                            const SizedBox(height: 8),
+                            Container(width: 60, height: 12, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+              ),
+            ),
+          ),
+        ],
+      );
     }
     final recentOrders = analyticsAsync.asData?.value.recentOrders ?? [];
 
@@ -1544,25 +1815,259 @@ class _GigDetailsPageState extends ConsumerState<GigDetailsPage> {
     );
   }
 
-  Widget _buildReviewsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Overall Rating',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFF1F2937),
+  Widget _buildReviewsSection(AsyncValue<GigAnalyticsModel> analyticsAsync) {
+    if (analyticsAsync.isLoading) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(width: 100, height: 24, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                      const SizedBox(height: 8),
+                      Container(width: 150, height: 16, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                    ],
+                  ),
+                  Container(width: 60, height: 20, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Column(
+                children: List.generate(3, (index) => Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(width: 40, height: 40, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(width: 120, height: 16, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                            const SizedBox(height: 8),
+                            Container(width: 100, height: 12, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                            const SizedBox(height: 12),
+                            Container(width: double.infinity, height: 14, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                            const SizedBox(height: 8),
+                            Container(width: 200, height: 14, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 20),
-        _buildRatingRow('Seller communication level', 0.0),
-        const SizedBox(height: 12),
-        _buildRatingRow('Recommend to a friend', 0.0),
-        const SizedBox(height: 12),
-        _buildRatingRow('Service as described', 0.0),
-      ],
+      );
+    }
+    final analytics = analyticsAsync.asData?.value;
+    final reviews = analytics?.recentReviews ?? [];
+    final totalReviews = analytics?.totalReviews ?? 0;
+    final averageRating = analytics?.averageRating ?? 0.0;
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Reviews',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1F2937),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.star_rounded, color: Color(0xFFEAB308), size: 20),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$averageRating',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF1F2937),
+                        ),
+                      ),
+                      Text(
+                        ' ($totalReviews reviews)',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          color: const Color(0xFF6B7280),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              if (reviews.isNotEmpty)
+                TextButton(
+                  onPressed: () {
+                    if (widget.gig.id != null) {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => AllReviewsBottomSheet(
+                          gigId: widget.gig.id!,
+                          averageRating: averageRating,
+                          totalReviews: totalReviews,
+                        ),
+                      );
+                    }
+                  },
+                  child: Text(
+                    'See All',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF3B82F6),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          if (reviews.isEmpty)
+             Center(
+               child: Padding(
+                 padding: const EdgeInsets.symmetric(vertical: 20),
+                 child: Text(
+                   'No reviews yet',
+                   style: GoogleFonts.plusJakartaSans(
+                     color: const Color(0xFF9CA3AF),
+                     fontSize: 14,
+                   ),
+                 ),
+               ),
+             )
+          else
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: reviews.length,
+              separatorBuilder: (context, index) => const Divider(height: 32),
+              itemBuilder: (context, index) {
+                final review = reviews[index];
+                final user = review['user'];
+                final userName = user != null ? '${user['first_name']} ${user['last_name']}' : 'Unknown User';
+                final userImage = user != null ? user['profile_image'] : null;
+                final rating = double.tryParse(review['rating'].toString()) ?? 0.0;
+                final comment = review['review'] ?? '';
+                final timeAgo = review['created_at'] != null 
+                    ? timeago.format(DateTime.parse(review['created_at'])) 
+                    : '';
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor: Colors.grey[200],
+                          backgroundImage: userImage != null ? NetworkImage(resolveImageUrl(userImage)) : null,
+                          child: userImage == null 
+                              ? Text(userName[0].toUpperCase(), style: const TextStyle(color: Colors.grey)) 
+                              : null,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                userName,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF1F2937),
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Row(
+                                children: [
+                                  ...List.generate(5, (starIndex) {
+                                    return Icon(
+                                      Icons.star_rounded,
+                                      size: 14,
+                                      color: starIndex < rating 
+                                          ? const Color(0xFFEAB308) 
+                                          : Colors.grey[300],
+                                    );
+                                  }),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    timeAgo,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 12,
+                                      color: const Color(0xFF9CA3AF),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (comment.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        comment,
+                        style: GoogleFonts.plusJakartaSans(
+                          color: const Color(0xFF4B5563),
+                          fontSize: 14,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              },
+            ),
+        ],
+      ),
     );
   }
 

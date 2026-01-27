@@ -16,6 +16,37 @@ class WalletController extends Controller
     {
         $user = Auth::user();
 
+        // Professional Fix: Process pending balances for this user dynamically on access
+        // This ensures funds are available immediately when the date is reached
+        $pendingTransactions = WalletTransaction::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->where('available_at', '<=', now())
+            ->get();
+
+        if ($pendingTransactions->isNotEmpty()) {
+            DB::transaction(function () use ($user, $pendingTransactions) {
+                // Refresh user instance to get latest balances
+                $user->refresh(); 
+                
+                foreach ($pendingTransactions as $transaction) {
+                    // Move funds
+                    if ($user->pending_balance >= $transaction->amount) {
+                        $user->pending_balance -= $transaction->amount;
+                    } else {
+                        $user->pending_balance = 0;
+                    }
+                    
+                    $user->wallet_balance += $transaction->amount;
+                    
+                    // Update transaction
+                    $transaction->status = 'completed';
+                    $transaction->save();
+                }
+                
+                $user->save();
+            });
+        }
+
         $transactions = WalletTransaction::where('user_id', $user->id)
             ->latest()
             ->paginate(20);

@@ -193,7 +193,7 @@ class GigOrderController extends Controller
         $user = Auth::user();
 
         $query = GigOrder::where('user_id', $user->id)
-            ->with(['provider', 'gig', 'package'])
+            ->with(['provider', 'gig', 'package', 'review'])
             ->latest();
 
         if ($status) {
@@ -212,7 +212,6 @@ class GigOrderController extends Controller
 
         $orders = $query->paginate(20);
         
-        // Transform data to include 'image' and 'title' for frontend compatibility if needed
         $orders->getCollection()->transform(function ($order) {
              // Ensure we don't overwrite if model accessors exist, but usually safe here
              // Using gig->thumbnail_image if available, or a default
@@ -227,6 +226,14 @@ class GigOrderController extends Controller
              // Include provider name/image
              $order->provider_name = $order->provider ? $order->provider->name : 'Unknown Provider';
              $order->provider_image = $order->provider ? $order->provider->profile_image : null;
+             
+             if ($order->review) {
+                 $order->customer_rating = $order->review->rating;
+                 $order->customer_review = $order->review->review;
+             } else {
+                 $order->customer_rating = null;
+                 $order->customer_review = null;
+             }
              
              return $order;
         });
@@ -411,7 +418,7 @@ class GigOrderController extends Controller
                 $amount = $gigOrder->provider_amount;
                 
                 // Get delay setting
-                $delayDays = \App\Models\Setting::get('freelancer_payment_delay_days', 0);
+                $delayDays = (int) \App\Models\Setting::get('freelancer_payment_delay_days', 0);
                 $availableAt = now()->addDays($delayDays);
                 
                 // Add to pending balance

@@ -9,6 +9,7 @@ use App\Models\ProviderProfile;
 use App\Models\Tag;
 use App\Models\ServiceType;
 use App\Models\FreelancerBanner;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 

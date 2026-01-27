@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:shimmer/shimmer.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -76,7 +77,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         ],
       ),
       body: _isLoading 
-          ? const Center(child: CircularProgressIndicator())
+          ? _buildShimmerLoading()
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -121,6 +122,27 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         ),
         child: SafeArea(
           child: _buildActionButtons(requestsProvider),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerLoading() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Column(
+          children: [
+            Container(height: 80, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
+            const SizedBox(height: 24),
+            Container(height: 150, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
+            const SizedBox(height: 24),
+            Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
+            const SizedBox(height: 24),
+            Container(height: 200, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
+          ],
         ),
       ),
     );

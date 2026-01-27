@@ -43,6 +43,12 @@ class BookingDetailsPage extends StatelessWidget {
     final status = _asString(booking?['status'], fallback: 'New Request');
     final isNew = status == 'New Request';
 
+    final reviewData = booking?['review'];
+    final dynamic rawRating = booking?['customer_rating'] ?? (reviewData is Map<String, dynamic> ? reviewData['rating'] : null);
+    final int? customerRating = rawRating is int ? rawRating : int.tryParse(rawRating?.toString() ?? '');
+    final String? customerReview = booking?['customer_review'] ?? (reviewData is Map<String, dynamic> ? reviewData['review']?.toString() : null);
+    final bool hasReview = customerRating != null;
+
     String? imageUrl = booking?['image'];
     if (imageUrl != null && !imageUrl.startsWith('http')) {
       imageUrl = '${ApiConstants.baseUrl}/$imageUrl'.replaceAll('//', '/').replaceFirst('http:/', 'http://').replaceFirst('https:/', 'https://');
@@ -264,6 +270,11 @@ class BookingDetailsPage extends StatelessWidget {
             if (!isNew && (status.toLowerCase() == 'delivered' || status.toLowerCase() == 'completed')) ...[
               const SizedBox(height: 24),
               _buildDeliverySection(context, deliveryNote, deliveryFiles),
+            ],
+
+            if (!isNew && hasReview) ...[
+              const SizedBox(height: 24),
+              _buildReviewSection(customerRating!, customerReview),
             ],
 
             const SizedBox(height: 100), // Bottom padding for fixed button
@@ -547,7 +558,16 @@ class BookingDetailsPage extends StatelessWidget {
                          width: double.infinity,
                          child: ElevatedButton(
                            onPressed: () {
-                              Navigator.push(
+                             if (hasReview) {
+                               ScaffoldMessenger.of(context).showSnackBar(
+                                 const SnackBar(
+                                   content: Text('You already submitted a review for this order'),
+                                   backgroundColor: Colors.green,
+                                 ),
+                               );
+                               return;
+                             }
+                             Navigator.push(
                                context,
                                MaterialPageRoute(
                                  builder: (context) => RatingPage(
@@ -558,14 +578,14 @@ class BookingDetailsPage extends StatelessWidget {
                              );
                            },
                            style: ElevatedButton.styleFrom(
-                             backgroundColor: Colors.amber,
+                             backgroundColor: hasReview ? Colors.grey[300] : Colors.amber,
                              padding: const EdgeInsets.symmetric(vertical: 16),
                              elevation: 0,
                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                            ),
-                           child: const Text(
-                             'Rate Freelancer',
-                             style: TextStyle(
+                           child: Text(
+                             hasReview ? 'You already rated this order' : 'Rate Freelancer',
+                             style: const TextStyle(
                                color: Colors.white,
                                fontWeight: FontWeight.bold,
                                fontSize: 16,
@@ -713,6 +733,69 @@ class BookingDetailsPage extends StatelessWidget {
   }
 
 
+
+  Widget _buildReviewSection(int rating, String? review) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Your Review',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: Color(0xFF1E293B),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Row(
+                children: List.generate(5, (index) {
+                  return Icon(
+                    index < rating ? Icons.star_rounded : Icons.star_border_rounded,
+                    color: const Color(0xFFFFB020),
+                    size: 20,
+                  );
+                }),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '$rating.0',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF475569),
+                ),
+              ),
+            ],
+          ),
+          if (review != null && review.trim().isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              review,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color(0xFF64748B),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 
   Widget _buildStatusTimeline(String currentStatus, String? createdAt) {
     final statusOrder = ['pending', 'accepted', 'in_progress', 'delivered', 'completed'];
