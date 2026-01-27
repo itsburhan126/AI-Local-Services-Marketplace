@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import '../../../../../core/utils/image_helper.dart';
 import '../providers/gig_provider.dart';
 
 class AllReviewsBottomSheet extends ConsumerStatefulWidget {
@@ -222,9 +223,17 @@ class _AllReviewsBottomSheetState extends ConsumerState<AllReviewsBottomSheet> {
 
   Widget _buildReviewItem(dynamic review) {
     final user = review['user'];
-    final userName = user != null 
-        ? '${user['first_name'] ?? ''} ${user['last_name'] ?? ''}'.trim() 
-        : 'Unknown User';
+    String userName = 'Unknown User';
+    if (user != null) {
+      final firstName = user['first_name'] ?? '';
+      final lastName = user['last_name'] ?? '';
+      final fullName = '$firstName $lastName'.trim();
+      if (fullName.isNotEmpty) {
+        userName = fullName;
+      } else if (user['name'] != null) {
+        userName = user['name'];
+      }
+    }
     final userImage = user != null ? user['profile_image'] : null;
     final rating = double.tryParse(review['rating'].toString()) ?? 0.0;
     final comment = review['review'] ?? '';
@@ -241,7 +250,7 @@ class _AllReviewsBottomSheetState extends ConsumerState<AllReviewsBottomSheet> {
               radius: 20,
               backgroundColor: Colors.grey[200],
               backgroundImage: userImage != null 
-                  ? NetworkImage('https://al-services.com/storage/$userImage') 
+                  ? NetworkImage(resolveImageUrl(userImage)) 
                   : null,
               child: userImage == null 
                   ? Text(userName.isNotEmpty ? userName[0].toUpperCase() : 'U', 

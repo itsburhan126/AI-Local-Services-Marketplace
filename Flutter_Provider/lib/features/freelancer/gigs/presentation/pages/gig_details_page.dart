@@ -1990,7 +1990,17 @@ class _GigDetailsPageState extends ConsumerState<GigDetailsPage> {
               itemBuilder: (context, index) {
                 final review = reviews[index];
                 final user = review['user'];
-                final userName = user != null ? '${user['first_name']} ${user['last_name']}' : 'Unknown User';
+                String userName = 'Unknown User';
+                if (user != null) {
+                  final firstName = user['first_name'] ?? '';
+                  final lastName = user['last_name'] ?? '';
+                  final fullName = '$firstName $lastName'.trim();
+                  if (fullName.isNotEmpty) {
+                    userName = fullName;
+                  } else if (user['name'] != null) {
+                    userName = user['name'];
+                  }
+                }
                 final userImage = user != null ? user['profile_image'] : null;
                 final rating = double.tryParse(review['rating'].toString()) ?? 0.0;
                 final comment = review['review'] ?? '';
