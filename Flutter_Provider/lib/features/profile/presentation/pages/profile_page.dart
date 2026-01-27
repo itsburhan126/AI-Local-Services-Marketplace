@@ -116,6 +116,20 @@ class ProfilePage extends StatelessWidget {
                   subtitle: 'Privacy, security and preferences',
                 ),
                 const SizedBox(height: 16),
+                _buildSectionTitle('Finance'),
+                const SizedBox(height: 10),
+                _buildOptionTile(
+                  context,
+                  icon: Icons.attach_money_rounded,
+                  title: 'Earnings',
+                  subtitle: 'View earnings and withdrawal history',
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const EarningsPage()),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
                 _buildSectionTitle('Support'),
                 const SizedBox(height: 10),
                 _buildOptionTile(
