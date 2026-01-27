@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\InterestController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ServiceController;
+use App\Http\Controllers\Api\FavoriteController;
 
 
 // Auth Routes
@@ -68,6 +69,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Interests
     Route::post('/interests/toggle', [InterestController::class, 'toggle']);
+
+    // Favorites
+    Route::post('/favorites/toggle', [FavoriteController::class, 'toggle']);
     
     // Chat Routes
     Route::get('/chat/config', [ChatController::class, 'config']);

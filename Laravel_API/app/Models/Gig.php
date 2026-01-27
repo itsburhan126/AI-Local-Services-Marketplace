@@ -39,6 +39,8 @@ class Gig extends Model
         'is_featured' => 'boolean',
     ];
 
+    protected $appends = ['is_favorite'];
+
     public function provider()
     {
         return $this->belongsTo(User::class, 'provider_id');
@@ -82,5 +84,18 @@ class Gig extends Model
     public function bookings()
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function favorites()
+    {
+        return $this->morphMany(Favorite::class, 'favorable');
+    }
+
+    public function getIsFavoriteAttribute()
+    {
+        if (auth('sanctum')->check()) {
+            return $this->favorites()->where('user_id', auth('sanctum')->id())->exists();
+        }
+        return false;
     }
 }

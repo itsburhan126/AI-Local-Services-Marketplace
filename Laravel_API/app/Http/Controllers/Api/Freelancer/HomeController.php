@@ -223,6 +223,7 @@ class HomeController extends Controller
             'extras' => $gig->extras,
             'faqs' => $gig->faqs,
             'tags' => $gig->tags,
+            'is_favorite' => $gig->is_favorite,
         ];
     }
 }
