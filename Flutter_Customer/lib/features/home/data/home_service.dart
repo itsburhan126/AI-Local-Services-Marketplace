@@ -103,6 +103,34 @@ class HomeService {
     }
   }
 
+  // Fetch New Gigs (Paginated)
+  Future<Map<String, dynamic>> getNewGigs({int page = 1}) async {
+    try {
+      debugPrint('[HomeService] GET new gigs: ${ApiConstants.baseUrl}/api/freelancer/gigs/new?page=$page');
+      final response = await _dio.get(
+        '${ApiConstants.baseUrl}/api/freelancer/gigs/new',
+        queryParameters: {'page': page},
+      );
+
+      if (response.statusCode == 200) {
+        // Response format: { status: 'success', data: { current_page: 1, data: [...], ... } }
+        final responseData = response.data['data'];
+        final gigs = _fixDataUrls(responseData['data'] ?? []);
+        
+        return {
+          'data': gigs,
+          'current_page': responseData['current_page'],
+          'last_page': responseData['last_page'],
+          'total': responseData['total'],
+        };
+      }
+      return {'data': [], 'current_page': 1, 'last_page': 1};
+    } catch (e) {
+      debugPrint('[HomeService] getNewGigs error: $e');
+      return {'data': [], 'current_page': 1, 'last_page': 1};
+    }
+  }
+
   // Toggle Interest
   Future<bool> toggleInterest(int interestId, {String type = 'local_service'}) async {
     try {
@@ -204,8 +232,8 @@ class HomeService {
         url.contains('photo-1527515637-62da7a808806') || // Broken Unsplash 1
         url.contains('photo-1581578731117-104f2a41272c') || // Broken Unsplash 2
         url.contains('photo-1581094794329-cd1361ddee2e')) {
-      // Return empty string to trigger errorWidget in CachedNetworkImage which shows local placeholder
-      return ''; 
+      // Return professional default image URL
+      return 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80';
     }
     if (url.startsWith('http')) return url;
     if (url.startsWith('/')) return '${ApiConstants.baseUrl}$url';

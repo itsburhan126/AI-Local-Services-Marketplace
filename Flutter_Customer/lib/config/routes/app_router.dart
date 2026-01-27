@@ -21,6 +21,7 @@ import '../../features/freelancer/presentation/pages/OrderUpgradePage.dart';
 import '../../features/freelancer/presentation/pages/OrderReviewPage.dart';
 import '../../features/freelancer/presentation/pages/OrderSuccessPage.dart';
 import '../../features/freelancer/presentation/pages/FreelancerCategoryPage.dart';
+import '../../features/freelancer/presentation/pages/NewGigsPage.dart';
 import '../../features/chat/presentation/pages/chat_details_page.dart';
 import '../../features/auth/data/models/user_model.dart';
 
@@ -89,6 +90,13 @@ class AppRouter {
         },
       ),
       GoRoute(
+        path: '/gigs/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id'];
+          return FreelancerGigDetailsPage(service: {'id': id});
+        },
+      ),
+      GoRoute(
         path: '/freelancer-profile',
         builder: (context, state) {
           final provider = state.extra as Map<String, dynamic>;
@@ -101,6 +109,10 @@ class AppRouter {
           final category = state.extra as Map<String, dynamic>;
           return FreelancerCategoryPage(category: category);
         },
+      ),
+      GoRoute(
+        path: '/new-gigs',
+        builder: (context, state) => const NewGigsPage(),
       ),
       GoRoute(
         path: '/order-upgrade',
@@ -148,7 +160,7 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: '/search-page',
+        path: '/search',
         builder: (context, state) => const SearchPage(),
       ),
       GoRoute(

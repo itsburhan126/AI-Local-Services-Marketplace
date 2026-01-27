@@ -5,12 +5,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:provider/provider.dart';
 import '../../../chat/presentation/pages/chat_page.dart';
 import '../../../chat/presentation/pages/chat_details_page.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../data/services/recently_viewed_service.dart';
 import '../../data/services/gig_service.dart';
 import 'package:flutter_customer/core/constants/api_constants.dart';
+import '../../../home/presentation/providers/home_provider.dart';
 
 class FreelancerGigDetailsPage extends StatefulWidget {
   final Map<String, dynamic>? service;
@@ -31,11 +34,15 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
   List<Map<String, dynamic>> _recentlyViewed = [];
   Map<String, dynamic>? _service;
   bool _isLoading = false;
+  bool _isFavorite = false;
 
   @override
   void initState() {
     super.initState();
     _service = widget.service;
+    if (_service != null) {
+      _isFavorite = _service!['is_favorite'] == true || _service!['is_favorite'] == 1;
+    }
     _fetchGigDetails();
     _initRecentlyViewed();
   }
@@ -49,6 +56,7 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
         if (mounted && gigData != null) {
           setState(() {
             _service = gigData;
+            _isFavorite = gigData['is_favorite'] == true || gigData['is_favorite'] == 1;
           });
         }
       } catch (e) {
@@ -56,6 +64,36 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
       } finally {
         if (mounted) setState(() => _isLoading = false);
       }
+    }
+  }
+
+  void _toggleFavorite() {
+    if (_service == null || _service!['id'] == null) return;
+    
+    final gigId = int.tryParse(_service!['id'].toString()) ?? 0;
+    if (gigId == 0) return;
+
+    setState(() {
+      _isFavorite = !_isFavorite;
+    });
+
+    // Call Provider
+    Provider.of<HomeProvider>(context, listen: false).toggleGigFavorite(gigId);
+  }
+
+  Future<void> _shareGig() async {
+    if (_service == null || _service!['id'] == null) return;
+    
+    final gigId = _service!['id'];
+    // Construct shareable URL
+    // Format: BASE_URL/gigs/{id}
+    final String url = '${ApiConstants.baseUrl}/gigs/$gigId';
+    final String title = _asString(_service?['name'], fallback: 'Check out this gig!');
+    
+    try {
+      await Share.share('$title\n$url');
+    } catch (e) {
+      debugPrint('Error sharing gig: $e');
     }
   }
 
@@ -117,7 +155,7 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
 
     // Fallback if empty
     if (images.isEmpty) {
-      images.add(''); // Use empty string to trigger local placeholder
+      images.add('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
     }
 
     return images;
@@ -240,7 +278,7 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
           ),
           child: IconButton(
             icon: const Icon(Icons.share_outlined, color: Colors.black, size: 20),
-            onPressed: () {},
+            onPressed: _shareGig,
           ),
         ),
         Container(
@@ -253,8 +291,12 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
             ],
           ),
           child: IconButton(
-            icon: const Icon(Icons.favorite_border, color: Colors.black, size: 20),
-            onPressed: () {},
+            icon: Icon(
+              _isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded, 
+              color: _isFavorite ? Colors.red : Colors.black, 
+              size: 20
+            ),
+            onPressed: _toggleFavorite,
           ),
         ),
       ],
@@ -276,6 +318,14 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
               items: images.map((img) {
                 return Builder(
                   builder: (BuildContext context) {
+                    // Check for empty string or local asset path
+                    if (img.isEmpty || !img.startsWith('http')) {
+                      return Image.asset(
+                        'assets/images/placeholder.png',
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      );
+                    }
                     return CachedNetworkImage(
                       imageUrl: img,
                       fit: BoxFit.cover,

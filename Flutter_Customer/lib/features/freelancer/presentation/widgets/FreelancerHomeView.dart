@@ -123,7 +123,7 @@ class _FreelancerHomeViewState extends State<FreelancerHomeView> {
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
-        context.push('/search-page');
+        context.push('/search');
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),

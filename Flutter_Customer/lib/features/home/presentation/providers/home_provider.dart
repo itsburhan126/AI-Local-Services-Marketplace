@@ -134,9 +134,18 @@ class HomeProvider with ChangeNotifier {
   Future<void> toggleGigFavorite(int gigId) async {
     // Optimistic Update helper
     void updateList(List<dynamic> list) {
-      final index = list.indexWhere((item) => item['id'] == gigId);
+      final index = list.indexWhere((item) {
+        final itemId = item['id'];
+        if (itemId is String) {
+          return int.tryParse(itemId) == gigId;
+        }
+        return itemId == gigId;
+      });
+
       if (index != -1) {
-        list[index]['is_favorite'] = !(list[index]['is_favorite'] ?? false);
+        final currentVal = list[index]['is_favorite'];
+        final isFav = currentVal == true || currentVal == 1;
+        list[index]['is_favorite'] = !isFav;
       }
     }
 
@@ -145,17 +154,30 @@ class HomeProvider with ChangeNotifier {
     updateList(popularServices);
     updateList(recommendedServices);
     updateList(recentlyViewed);
+    updateList(recentlySaved); // Also update saved list
     
     notifyListeners();
 
-    final result = await _homeService.toggleFavorite(gigId);
-    
-    if (!result['success']) {
-      // Revert if failed
+    try {
+      final result = await _homeService.toggleFavorite(gigId);
+      
+      if (!result['success']) {
+        // Revert if failed
+        updateList(newServices);
+        updateList(popularServices);
+        updateList(recommendedServices);
+        updateList(recentlyViewed);
+        updateList(recentlySaved);
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('Error toggling favorite in provider: $e');
+      // Revert on error
       updateList(newServices);
       updateList(popularServices);
       updateList(recommendedServices);
       updateList(recentlyViewed);
+      updateList(recentlySaved);
       notifyListeners();
     }
   }

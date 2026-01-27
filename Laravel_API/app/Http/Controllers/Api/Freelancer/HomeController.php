@@ -198,6 +198,24 @@ class HomeController extends Controller
         ]);
     }
 
+    public function newGigs(Request $request)
+    {
+        $newServices = Gig::where('is_active', true)
+            ->where('status', 'approved')
+            ->orderBy('created_at', 'desc')
+            ->with(['provider.providerProfile', 'category', 'packages', 'faqs', 'extras'])
+            ->paginate(20);
+
+        $newServices->getCollection()->transform(function ($gig) {
+            return $this->mapGigToService($gig);
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $newServices
+        ]);
+    }
+
     private function mapGigToService($gig)
     {
         // Calculate min price from packages

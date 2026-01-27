@@ -122,14 +122,14 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
                 .animate().fadeIn(delay: 950.ms),
 
             // New Gigs (New)
-            if (provider.newServices.isNotEmpty) ...[
-              const SizedBox(height: 32),
-              _buildSectionHeader(context, 'New Gigs', 'View All', () => {})
-                  .animate().fadeIn(delay: 1000.ms),
-              const SizedBox(height: 16),
-              _buildHorizontalServiceList(context, provider.newServices, provider.isLoading)
-                  .animate().fadeIn(delay: 1050.ms),
-            ],
+          if (provider.newServices.isNotEmpty) ...[
+            const SizedBox(height: 32),
+            _buildSectionHeader(context, 'New Gigs', 'View All', () => context.push('/new-gigs'))
+                .animate().fadeIn(delay: 1000.ms),
+            const SizedBox(height: 16),
+            _buildHorizontalServiceList(context, provider.newServices, provider.isLoading)
+                .animate().fadeIn(delay: 1050.ms),
+          ],
           ],
         );
       },
@@ -214,7 +214,9 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(24),
                     child: CachedNetworkImage(
-                      imageUrl: banner['image'] ?? 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+                      imageUrl: (banner['image'] != null && banner['image'].toString().isNotEmpty) 
+                          ? banner['image'] 
+                          : 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
                         color: Colors.grey[200],
@@ -499,7 +501,10 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
                   right: 12,
                   child: GestureDetector(
                     onTap: () {
-                      Provider.of<HomeProvider>(context, listen: false).toggleGigFavorite(gig['id']);
+                      final gigId = int.tryParse(gig['id'].toString()) ?? 0;
+                      if (gigId != 0) {
+                        Provider.of<HomeProvider>(context, listen: false).toggleGigFavorite(gigId);
+                      }
                     },
                     child: Container(
                       padding: const EdgeInsets.all(8),
@@ -508,7 +513,7 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        (gig['is_favorite'] ?? false) ? Icons.favorite : Icons.favorite_border,
+                        (gig['is_favorite'] == true || gig['is_favorite'] == 1) ? Icons.favorite : Icons.favorite_border,
                         size: 18,
                         color: const Color(0xFFEF4444),
                       ),

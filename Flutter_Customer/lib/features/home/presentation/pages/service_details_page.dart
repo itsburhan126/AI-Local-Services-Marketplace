@@ -3,10 +3,12 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../../chat/presentation/pages/chat_page.dart';
 import '../../../chat/presentation/pages/chat_details_page.dart';
 import '../../../auth/data/models/user_model.dart';
 import 'package:flutter_customer/features/freelancer/data/services/gig_service.dart';
+import '../providers/home_provider.dart';
 
 class ServiceDetailsPage extends StatefulWidget {
   final Map<String, dynamic>? service;
@@ -20,11 +22,29 @@ class ServiceDetailsPage extends StatefulWidget {
 class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   int _selectedPackageIndex = 0;
   final GigService _gigService = GigService();
+  bool _isFavorite = false;
 
   @override
   void initState() {
     super.initState();
     _checkAndIncrementView();
+    if (widget.service != null) {
+      final isFav = widget.service!['is_favorite'];
+      _isFavorite = isFav == true || isFav == 1;
+    }
+  }
+
+  void _toggleFavorite() {
+    if (widget.service == null || widget.service!['id'] == null) return;
+    
+    final serviceId = int.tryParse(widget.service!['id'].toString()) ?? 0;
+    if (serviceId == 0) return;
+
+    setState(() {
+      _isFavorite = !_isFavorite;
+    });
+
+    Provider.of<HomeProvider>(context, listen: false).toggleGigFavorite(serviceId);
   }
 
   Future<void> _checkAndIncrementView() async {
@@ -156,8 +176,11 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                       ],
                     ),
                     child: IconButton(
-                      icon: Icon(Icons.favorite_border, color: Theme.of(context).iconTheme.color),
-                      onPressed: () {},
+                      icon: Icon(
+                        _isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                        color: _isFavorite ? const Color(0xFFEF4444) : Theme.of(context).iconTheme.color,
+                      ),
+                      onPressed: _toggleFavorite,
                     ),
                   ),
                 ],

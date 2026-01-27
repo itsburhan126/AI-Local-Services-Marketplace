@@ -686,20 +686,36 @@ class _HomeViewState extends State<HomeView> {
                 Positioned(
                   top: 12,
                   right: 12,
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                  child: GestureDetector(
+                    onTap: () {
+                      final gigId = int.tryParse(service['id'].toString()) ?? 0;
+                      if (gigId != 0) {
+                        context.read<HomeProvider>().toggleGigFavorite(gigId);
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        (service['is_favorite'] == true || service['is_favorite'] == 1) 
+                            ? Icons.favorite_rounded 
+                            : Icons.favorite_border_rounded, 
+                        size: 20, 
+                        color: (service['is_favorite'] == true || service['is_favorite'] == 1)
+                            ? const Color(0xFFEF4444)
+                            : Colors.grey,
+                      ),
                     ),
-                    child: const Icon(Icons.favorite_border_rounded, size: 20, color: Color(0xFFEF4444)),
                   ),
                 ),
                 Positioned(

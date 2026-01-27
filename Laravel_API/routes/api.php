@@ -23,6 +23,7 @@ Route::post('/check-user', [AuthController::class, 'checkUser']);
 // Public Home Data
 Route::get('/home', [HomeController::class, 'index']);
 Route::get('/freelancer/home', [\App\Http\Controllers\Api\Freelancer\HomeController::class, 'index']); // New Freelancer Home Route
+Route::get('/freelancer/gigs/new', [\App\Http\Controllers\Api\Freelancer\HomeController::class, 'newGigs']); // New Gigs View All Route
 Route::get('/interests', [InterestController::class, 'index']);
 Route::get('/flash-sale', [\App\Http\Controllers\Api\FlashSaleController::class, 'index']);
 Route::get('/categories', [CategoryController::class, 'index']);

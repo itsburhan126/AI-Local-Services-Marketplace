@@ -6,43 +6,63 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../../../home/presentation/providers/home_provider.dart';
 import 'package:flutter_customer/core/constants/api_constants.dart';
 import '../../../home/data/home_service.dart';
-import '../../../home/presentation/providers/home_provider.dart';
 
-class FreelancerCategoryPage extends StatefulWidget {
-  final Map<String, dynamic> category;
-
-  const FreelancerCategoryPage({super.key, required this.category});
+class NewGigsPage extends StatefulWidget {
+  const NewGigsPage({super.key});
 
   @override
-  State<FreelancerCategoryPage> createState() => _FreelancerCategoryPageState();
+  State<NewGigsPage> createState() => _NewGigsPageState();
 }
 
-class _FreelancerCategoryPageState extends State<FreelancerCategoryPage> {
+class _NewGigsPageState extends State<NewGigsPage> {
   final HomeService _homeService = HomeService();
-  List<dynamic> _gigs = [];
+  final List<dynamic> _gigs = [];
   bool _isLoading = true;
+  bool _isMoreLoading = false;
   String? _error;
+  int _currentPage = 1;
+  int _lastPage = 1;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _loadGigs();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
+        !_isLoading &&
+        !_isMoreLoading &&
+        _currentPage < _lastPage) {
+      _loadMoreGigs();
+    }
   }
 
   Future<void> _loadGigs() async {
-    try {
-      final categoryId = widget.category['id'] is int 
-          ? widget.category['id'] 
-          : int.tryParse(widget.category['id'].toString());
-      
-      if (categoryId == null) throw Exception('Invalid Category ID');
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
 
-      final gigs = await _homeService.getGigsByCategory(categoryId);
+    try {
+      final response = await _homeService.getNewGigs(page: 1);
       if (mounted) {
         setState(() {
-          _gigs = gigs;
+          _gigs.clear();
+          _gigs.addAll(response['data']);
+          _currentPage = response['current_page'];
+          _lastPage = response['last_page'];
           _isLoading = false;
         });
       }
@@ -56,18 +76,39 @@ class _FreelancerCategoryPageState extends State<FreelancerCategoryPage> {
     }
   }
 
+  Future<void> _loadMoreGigs() async {
+    setState(() {
+      _isMoreLoading = true;
+    });
+
+    try {
+      final response = await _homeService.getNewGigs(page: _currentPage + 1);
+      if (mounted) {
+        setState(() {
+          _gigs.addAll(response['data']);
+          _currentPage = response['current_page'];
+          _lastPage = response['last_page'];
+          _isMoreLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isMoreLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final categoryName = widget.category['name'] ?? 'Category';
-    final categoryImage = widget.category['image'] ?? widget.category['icon'];
-    final isUrl = categoryImage is String && (categoryImage.startsWith('http') || categoryImage.startsWith('assets'));
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: CustomScrollView(
+        controller: _scrollController,
         physics: const BouncingScrollPhysics(),
         slivers: [
-          _buildAppBar(context, categoryName, isUrl ? categoryImage : null),
+          _buildAppBar(context),
           
           if (_isLoading)
             SliverPadding(
@@ -123,7 +164,7 @@ class _FreelancerCategoryPageState extends State<FreelancerCategoryPage> {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'No gigs found',
+                      'No new gigs found',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -132,7 +173,7 @@ class _FreelancerCategoryPageState extends State<FreelancerCategoryPage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Try browsing other categories',
+                      'Check back later for new services',
                       style: GoogleFonts.plusJakartaSans(
                         color: const Color(0xFF64748B),
                       ),
@@ -147,7 +188,7 @@ class _FreelancerCategoryPageState extends State<FreelancerCategoryPage> {
               sliver: SliverGrid(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  childAspectRatio: 0.72, // Taller cards for better layout
+                  childAspectRatio: 0.72,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                 ),
@@ -158,22 +199,30 @@ class _FreelancerCategoryPageState extends State<FreelancerCategoryPage> {
               ),
             ),
             
+          if (_isMoreLoading)
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            ),
+
           const SliverPadding(padding: EdgeInsets.only(bottom: 40)),
         ],
       ),
     );
   }
 
-  Widget _buildAppBar(BuildContext context, String title, String? imageUrl) {
+  Widget _buildAppBar(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 140,
+      expandedHeight: 120,
       pinned: true,
       stretch: true,
       backgroundColor: Colors.white,
       surfaceTintColor: Colors.transparent,
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
-          title,
+          'New Gigs',
           style: GoogleFonts.plusJakartaSans(
             color: const Color(0xFF0F172A),
             fontWeight: FontWeight.bold,
@@ -181,42 +230,14 @@ class _FreelancerCategoryPageState extends State<FreelancerCategoryPage> {
           ),
         ),
         centerTitle: true,
-        background: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Background Pattern/Image
-            if (imageUrl != null)
-              CachedNetworkImage(
-                imageUrl: imageUrl,
-                fit: BoxFit.cover,
-                color: Colors.white.withValues(alpha: 0.9), // Fade it out a bit
-                colorBlendMode: BlendMode.lighten,
-              )
-            else
-              Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFFF8FAFC), Color(0xFFEEF2FF)],
-                  ),
-                ),
-              ),
-              
-            // Decorative blobs
-            Positioned(
-              top: -50,
-              right: -50,
-              child: Container(
-                width: 150,
-                height: 150,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withValues(alpha: 0.05),
-                  shape: BoxShape.circle,
-                ),
-              ),
+        background: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFFF8FAFC), Color(0xFFEEF2FF)],
             ),
-          ],
+          ),
         ),
       ),
       leading: Container(
@@ -236,15 +257,11 @@ class _FreelancerCategoryPageState extends State<FreelancerCategoryPage> {
 
   String _getValidUrl(String? url) {
     if (url == null || url.isEmpty || url == 'default') {
-      return 'https://via.placeholder.com/400';
+      return 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80';
     }
     if (url.startsWith('http') || url.startsWith('assets')) return url;
     
-    // Clean up the URL path
     String cleanPath = url.startsWith('/') ? url.substring(1) : url;
-    
-    // Check if it already has storage prefix if needed, or just append to base
-    // Assuming ApiConstants.baseUrl does NOT end with /
     return '${ApiConstants.baseUrl}/$cleanPath';
   }
 
@@ -252,27 +269,22 @@ class _FreelancerCategoryPageState extends State<FreelancerCategoryPage> {
     final image = _getValidUrl(gig['thumbnail_image'] ?? gig['image'] ?? gig['thumbnail']);
     final title = gig['title'] ?? gig['name'] ?? 'Untitled Gig';
     
-    // Price Logic: Check packages first, fallback to direct price
     String price = '0';
     if (gig['packages'] != null && (gig['packages'] as List).isNotEmpty) {
        final packages = gig['packages'] as List;
-       // Try to find Basic package or min price
        final basic = packages.firstWhere((p) => p['tier'] == 'Basic', orElse: () => packages.first);
        price = basic['price']?.toString() ?? '0';
     } else {
        price = gig['price']?.toString() ?? '0';
     }
 
-    // Provider Logic
     final provider = gig['provider'] ?? {};
     final providerName = provider['name'] ?? 'Freelancer';
     final providerImage = _getValidUrl(provider['provider_profile']?['profile_image'] ?? provider['image']);
     
-    // Rating Logic
     final reviews = (gig['reviews'] as List?) ?? [];
     double rating = double.tryParse(gig['rating']?.toString() ?? '0') ?? 0.0;
     
-    // Calculate if missing
     if (rating == 0 && reviews.isNotEmpty) {
       double total = 0;
       for (var r in reviews) {
@@ -304,7 +316,6 @@ class _FreelancerCategoryPageState extends State<FreelancerCategoryPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image
             Stack(
               children: [
                 ClipRRect(
@@ -357,12 +368,12 @@ class _FreelancerCategoryPageState extends State<FreelancerCategoryPage> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        (gig['is_favorite'] == true || gig['is_favorite'] == 1)
-                            ? Icons.favorite_rounded
+                        (gig['is_favorite'] == true || gig['is_favorite'] == 1) 
+                            ? Icons.favorite_rounded 
                             : Icons.favorite_border_rounded,
-                        size: 16,
-                        color: (gig['is_favorite'] == true || gig['is_favorite'] == 1)
-                            ? const Color(0xFFEF4444)
+                        size: 16, 
+                        color: (gig['is_favorite'] == true || gig['is_favorite'] == 1) 
+                            ? const Color(0xFFEF4444) 
                             : Colors.grey,
                       ),
                     ),
@@ -370,15 +381,12 @@ class _FreelancerCategoryPageState extends State<FreelancerCategoryPage> {
                 ),
               ],
             ),
-            
-            // Content
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Provider Info
                     Row(
                       children: [
                         CircleAvatar(
@@ -406,8 +414,6 @@ class _FreelancerCategoryPageState extends State<FreelancerCategoryPage> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    
-                    // Title
                     Text(
                       title,
                       maxLines: 2,
@@ -419,10 +425,7 @@ class _FreelancerCategoryPageState extends State<FreelancerCategoryPage> {
                         height: 1.3,
                       ),
                     ),
-                    
                     const Spacer(),
-                    
-                    // Footer: Rating & Price
                     Row(
                       children: [
                         const Icon(Icons.star_rounded, size: 14, color: Color(0xFFF59E0B)),
