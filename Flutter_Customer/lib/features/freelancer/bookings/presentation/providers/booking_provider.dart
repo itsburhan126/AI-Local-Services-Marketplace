@@ -29,10 +29,13 @@ class BookingProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  Future<void> loadBookings() async {
-    _isLoading = true;
+  Future<void> loadBookings({bool refresh = false}) async {
+    if (!refresh) {
+      _isLoading = true;
+      notifyListeners();
+    }
     _error = null;
-    notifyListeners();
+    if (refresh) notifyListeners(); // Optional: verify if needed, but usually not if just refreshing data
 
     try {
       final token = _authProvider?.user?.token;

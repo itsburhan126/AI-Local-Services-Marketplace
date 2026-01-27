@@ -13,6 +13,7 @@ import '../../../gigs/presentation/pages/gig_details_page.dart';
 import '../../../../../core/constants/api_constants.dart';
 import '../../../../../core/utils/image_helper.dart';
 import '../../../../chat/presentation/pages/chat_details_page.dart';
+import '../../../../support/presentation/pages/support_page.dart';
 
 class OrderDetailsPage extends StatefulWidget {
   final OrderModel order;
@@ -598,28 +599,28 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           const SizedBox(height: 20),
           _buildDetailRow(
             Icons.calendar_today_rounded,
-            'Scheduled Date',
-            widget.order.scheduledAt != null
-                ? DateFormat('MMM dd, yyyy • h:mm a').format(widget.order.scheduledAt!)
-                : 'Not scheduled',
+            'Ordered On',
+            DateFormat('MMM dd, yyyy • h:mm a').format(widget.order.createdAt),
           ),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
             child: Divider(height: 1, color: Color(0xFFF1F5F9)),
           ),
+          if (widget.order.scheduledAt != null) ...[
+            _buildDetailRow(
+              Icons.event_available_rounded,
+              'Due Date',
+              DateFormat('MMM dd, yyyy • h:mm a').format(widget.order.scheduledAt!),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+            ),
+          ],
           _buildDetailRow(
-            Icons.location_on_rounded,
-            'Location',
-            widget.order.address ?? 'No address provided',
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Divider(height: 1, color: Color(0xFFF1F5F9)),
-          ),
-          _buildDetailRow(
-            Icons.note_alt_rounded,
-            'Additional Notes',
-            widget.order.notes ?? 'No notes provided',
+            Icons.description_outlined,
+            'Requirements',
+            widget.order.notes ?? 'No specific requirements provided',
           ),
         ],
       ),
@@ -899,6 +900,28 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
             ),
           ),
         ],
+        const SizedBox(height: 12),
+        TextButton.icon(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SupportPage(
+                  orderId: widget.order.id,
+                  subject: 'Provider Support',
+                ),
+              ),
+            );
+          },
+          icon: const Icon(Icons.support_agent, color: Color(0xFF0EA5E9)),
+          label: const Text(
+            'Contact Support',
+            style: TextStyle(
+              color: Color(0xFF0EA5E9),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -926,12 +949,13 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
             top: 24,
             bottom: MediaQuery.of(context).viewInsets.bottom + 24,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     'Deliver Work',
@@ -1145,6 +1169,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                 ),
               ),
             ],
+          ),
           ),
         ),
       ),

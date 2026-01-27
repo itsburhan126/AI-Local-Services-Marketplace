@@ -161,7 +161,7 @@ class _BookingsPageState extends State<BookingsPage> with SingleTickerProviderSt
     }
 
     return RefreshIndicator(
-      onRefresh: () => context.read<BookingProvider>().loadBookings(),
+      onRefresh: () => context.read<BookingProvider>().loadBookings(refresh: true),
       child: ListView.separated(
         padding: const EdgeInsets.all(20),
         itemCount: bookings.length,

@@ -44,6 +44,13 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
   String? _audioPath;
   bool _isSearching = false;
   String _searchQuery = '';
+  late ChatProvider _chatProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _chatProvider = context.read<ChatProvider>();
+  }
 
   @override
   void initState() {
@@ -74,7 +81,7 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
     _focusNode.dispose();
     _audioRecorder.dispose();
     _audioPlayer.dispose();
-    context.read<ChatProvider>().clearCurrentChat();
+    _chatProvider.clearCurrentChat();
     super.dispose();
   }
 

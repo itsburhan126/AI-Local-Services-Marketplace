@@ -8,6 +8,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../auth/data/models/user_model.dart';
 import '../../../../chat/presentation/pages/chat_details_page.dart';
 import '../providers/booking_provider.dart';
+import '../../../../support/presentation/pages/support_page.dart';
+import 'rating_page.dart';
 import 'package:flutter_customer/core/constants/api_constants.dart';
 
 class BookingDetailsPage extends StatelessWidget {
@@ -336,6 +338,144 @@ class BookingDetailsPage extends StatelessWidget {
                         width: double.infinity,
                         child: OutlinedButton(
                           onPressed: provider.isLoading ? null : () async {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (context) {
+                                final noteController = TextEditingController();
+                                return StatefulBuilder(
+                                  builder: (context, setState) => Container(
+                                    constraints: BoxConstraints(
+                                      maxHeight: MediaQuery.of(context).size.height * 0.9,
+                                    ),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                                    ),
+                                    padding: EdgeInsets.only(
+                                      left: 24,
+                                      right: 24,
+                                      top: 24,
+                                      bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                                    ),
+                                    child: SingleChildScrollView(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(10),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.amber.withOpacity(0.1),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: const Icon(Icons.edit_note, color: Colors.amber),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              const Expanded(
+                                                child: Text(
+                                                  'Request Changes',
+                                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                                                ),
+                                              ),
+                                              IconButton(
+                                                onPressed: () => Navigator.pop(context),
+                                                icon: const Icon(Icons.close, color: Color(0xFF64748B)),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 16),
+                                          Text(
+                                            'Share notes for the freelancer to fix and re-deliver.',
+                                            style: TextStyle(color: Colors.grey[600]),
+                                          ),
+                                          const SizedBox(height: 16),
+                                          TextField(
+                                            controller: noteController,
+                                            maxLines: 4,
+                                            decoration: const InputDecoration(
+                                              hintText: 'Type your revision notes...',
+                                              border: OutlineInputBorder(),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 16),
+                                          Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0xFFEEF2FF),
+                                                  borderRadius: BorderRadius.circular(20),
+                                                ),
+                                                child: const Text('Missing requirements', style: TextStyle(color: Color(0xFF6366F1), fontWeight: FontWeight.w600)),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0xFFFFF7ED),
+                                                  borderRadius: BorderRadius.circular(20),
+                                                ),
+                                                child: const Text('Quality issues', style: TextStyle(color: Color(0xFFFF9241), fontWeight: FontWeight.w600)),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 24),
+                                          SizedBox(
+                                            width: double.infinity,
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text('Revision request submitted'),
+                                                    backgroundColor: Colors.blue,
+                                                  ),
+                                                );
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: const Color(0xFF0EA5E9),
+                                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                                elevation: 0,
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                              ),
+                                              child: const Text(
+                                                'Submit Revision Request',
+                                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Color(0xFF0EA5E9)),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
+                          child: const Text(
+                            'Request Changes',
+                            style: TextStyle(
+                              color: Color(0xFF0EA5E9),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: provider.isLoading ? null : () async {
                             final success = await provider.rejectWork(booking?['id'].toString() ?? '');
                             if (success && context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -374,39 +514,99 @@ class BookingDetailsPage extends StatelessWidget {
                                   ),
                                 ),
                         ),
+                          ),
+                    const SizedBox(height: 12),
+                    TextButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SupportPage(
+                                orderId: booking?['id']?.toString(),
+                                subject: 'Delivery Issue',
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.headset_mic, color: Color(0xFF0EA5E9)),
+                        label: const Text(
+                          'Contact Support',
+                          style: TextStyle(
+                            color: Color(0xFF0EA5E9),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ],
                   );
                 } else if (!isNew && status.toLowerCase() == 'completed') {
-                   return SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _showRatingDialog(context, provider, booking?['id'].toString() ?? '');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.amber,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                      child: const Text(
-                        'Rate Freelancer',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  );
+                   return Column(
+                     mainAxisSize: MainAxisSize.min,
+                     children: [
+                       SizedBox(
+                         width: double.infinity,
+                         child: ElevatedButton(
+                           onPressed: () {
+                              Navigator.push(
+                               context,
+                               MaterialPageRoute(
+                                 builder: (context) => RatingPage(
+                                   orderId: booking?['id'].toString() ?? '',
+                                   bookingData: booking,
+                                 ),
+                               ),
+                             );
+                           },
+                           style: ElevatedButton.styleFrom(
+                             backgroundColor: Colors.amber,
+                             padding: const EdgeInsets.symmetric(vertical: 16),
+                             elevation: 0,
+                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                           ),
+                           child: const Text(
+                             'Rate Freelancer',
+                             style: TextStyle(
+                               color: Colors.white,
+                               fontWeight: FontWeight.bold,
+                               fontSize: 16,
+                             ),
+                           ),
+                         ),
+                       ),
+                       const SizedBox(height: 12),
+                       TextButton.icon(
+                         onPressed: () {
+                           Navigator.push(
+                             context,
+                             MaterialPageRoute(
+                               builder: (context) => SupportPage(
+                                 orderId: booking?['id']?.toString(),
+                                 subject: 'General Support',
+                               ),
+                             ),
+                           );
+                         },
+                         icon: const Icon(Icons.headset_mic, color: Color(0xFF0EA5E9)),
+                         label: const Text(
+                           'Contact Support',
+                           style: TextStyle(
+                             color: Color(0xFF0EA5E9),
+                             fontWeight: FontWeight.w600,
+                           ),
+                         ),
+                       ),
+                     ],
+                   );
                 }
 
-                return SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: provider.isLoading ? null : () async {
-                      if (isNew) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: provider.isLoading ? null : () async {
+                          if (isNew) {
                         final payload = {
                           'provider_id': booking?['provider_id'],
                           'service_id': booking?['service_id'], // Nullable
@@ -453,34 +653,57 @@ class BookingDetailsPage extends StatelessWidget {
                             );
                           }
                         }
-                      } else {
+                        } else {
                         // Cancel logic
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Cancellation feature coming soon! Please contact support.')),
                         );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isNew ? Theme.of(context).primaryColor : Colors.red.withValues(alpha: 0.1),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    ),
-                    child: provider.isLoading 
-                      ? const SizedBox(
-                          height: 20, 
-                          width: 20, 
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
-                        )
-                      : Text(
-                          isNew ? 'Confirm Order' : 'Cancel Order',
-                          style: TextStyle(
-                            color: isNew ? Colors.white : Colors.red,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isNew ? Theme.of(context).primaryColor : Colors.red.withValues(alpha: 0.1),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      child: provider.isLoading 
+                        ? const SizedBox(
+                            height: 20, 
+                            width: 20, 
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                          )
+                        : Text(
+                            isNew ? 'Confirm Order' : 'Cancel Order',
+                            style: TextStyle(
+                              color: isNew ? Colors.white : Colors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
-                        ),
+                    ),
                   ),
+                    const SizedBox(height: 12),
+                    TextButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SupportPage(
+                              subject: 'General Support',
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.headset_mic, color: Color(0xFF0EA5E9)),
+                      label: const Text(
+                        'Contact Support',
+                        style: TextStyle(
+                          color: Color(0xFF0EA5E9),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 );
               }
             ),
@@ -489,74 +712,7 @@ class BookingDetailsPage extends StatelessWidget {
     );
   }
 
-  void _showRatingDialog(BuildContext context, BookingProvider provider, String orderId) {
-    int rating = 5;
-    final reviewController = TextEditingController();
 
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: const Text('Rate Freelancer'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(5, (index) {
-                    return IconButton(
-                      icon: Icon(
-                        index < rating ? Icons.star : Icons.star,
-                        color: index < rating ? Colors.amber : Colors.grey[300],
-                        size: 32,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          rating = index + 1;
-                        });
-                      },
-                    );
-                  }),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: reviewController,
-                  decoration: const InputDecoration(
-                    hintText: 'Write a review (optional)',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 3,
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  final success = await provider.submitReview(orderId, rating, reviewController.text);
-                  if (success && context.mounted) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Review submitted!'), backgroundColor: Colors.green),
-                    );
-                  } else if (context.mounted) {
-                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(provider.error ?? 'Failed to submit review'), backgroundColor: Colors.red),
-                    );
-                  }
-                },
-                child: const Text('Submit'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
 
   Widget _buildStatusTimeline(String currentStatus, String? createdAt) {
     final statusOrder = ['pending', 'accepted', 'in_progress', 'delivered', 'completed'];
