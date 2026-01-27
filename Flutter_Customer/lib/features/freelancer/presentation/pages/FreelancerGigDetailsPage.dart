@@ -260,7 +260,7 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
           color: Colors.white.withValues(alpha: 0.9),
           shape: BoxShape.circle,
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8),
+            BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8),
           ],
         ),
         child: IconButton(
@@ -275,7 +275,7 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
             color: Colors.white.withValues(alpha: 0.9),
             shape: BoxShape.circle,
             boxShadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8),
+              BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8),
             ],
           ),
           child: IconButton(
@@ -289,7 +289,7 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
             color: Colors.white.withValues(alpha: 0.9),
             shape: BoxShape.circle,
             boxShadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8),
+              BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8),
             ],
           ),
           child: IconButton(
@@ -1136,12 +1136,12 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey[100]!),
+          border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -1273,7 +1273,7 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, -5),
             ),

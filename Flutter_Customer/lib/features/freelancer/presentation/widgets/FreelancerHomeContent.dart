@@ -469,11 +469,12 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
             ),
           ],
+          border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -607,9 +608,9 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -668,9 +669,9 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF6366F1).withValues(alpha: 0.4),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: const Color(0xFF6366F1).withValues(alpha: 0.25),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
