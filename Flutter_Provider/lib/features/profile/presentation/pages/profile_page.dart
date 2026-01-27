@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import 'package:flutter_provider/features/freelancer/presentation/pages/earnings_page.dart';
 import 'my_profile_page.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -125,7 +126,7 @@ class ProfilePage extends StatelessWidget {
                   subtitle: 'View earnings and withdrawal history',
                   onTap: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const EarningsPage()),
+                      MaterialPageRoute(builder: (_) => EarningsPage()),
                     );
                   },
                 ),
