@@ -614,7 +614,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
       padding: const EdgeInsets.all(20),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.72,
+        childAspectRatio: 0.68,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
       ),
