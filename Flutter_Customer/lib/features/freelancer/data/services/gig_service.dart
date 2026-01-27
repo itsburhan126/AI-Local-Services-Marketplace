@@ -101,6 +101,34 @@ class GigService {
     }
   }
 
+  Future<bool> toggleProviderFavorite(int providerId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      
+      final options = Options(
+        headers: token != null ? {'Authorization': 'Bearer $token'} : {},
+      );
+
+      final response = await _dio.post(
+        '${ApiConstants.baseUrl}/api/favorites/toggle',
+        data: {
+            'type': 'provider',
+            'id': providerId
+        },
+        options: options,
+      );
+      
+      if (response.statusCode == 200) {
+          return response.data['is_favorite'] ?? false;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('[GigService] toggleProviderFavorite error: $e');
+      return false;
+    }
+  }
+
   // Helper to fix relative image URLs recursively
   dynamic _fixDataUrls(dynamic data) {
     if (data is Map<String, dynamic>) {

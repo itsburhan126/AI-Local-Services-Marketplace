@@ -39,7 +39,7 @@ class Gig extends Model
         'is_featured' => 'boolean',
     ];
 
-    protected $appends = ['is_favorite'];
+    protected $appends = ['is_favorite', 'rating', 'reviews_count'];
 
     public function provider()
     {
@@ -97,5 +97,36 @@ class Gig extends Model
             return $this->favorites()->where('user_id', auth('sanctum')->id())->exists();
         }
         return false;
+    }
+
+    public function getRatingAttribute()
+    {
+        // Check if the aggregate was loaded via withAvg
+        if (array_key_exists('reviews_avg_rating', $this->attributes)) {
+            return round($this->attributes['reviews_avg_rating'], 1);
+        }
+        
+        // Use loaded relation if available
+        if ($this->relationLoaded('reviews')) {
+            return round($this->reviews->avg('rating') ?? 0, 1);
+        }
+
+        // Fallback: Calculate from relation
+        return round($this->reviews()->avg('rating') ?? 0, 1);
+    }
+
+    public function getReviewsCountAttribute()
+    {
+        // Check if the count was loaded via withCount
+        if (array_key_exists('reviews_count', $this->attributes)) {
+            return $this->attributes['reviews_count'];
+        }
+
+        // Use loaded relation if available
+        if ($this->relationLoaded('reviews')) {
+            return $this->reviews->count();
+        }
+
+        return $this->reviews()->count();
     }
 }

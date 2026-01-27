@@ -12,7 +12,9 @@ class GigController extends Controller
     {
         $query = Gig::where('status', 'approved')
             ->where('is_active', true)
-            ->with(['provider', 'category', 'serviceType', 'packages', 'relatedTags']);
+            ->with(['provider', 'category', 'serviceType', 'packages', 'relatedTags'])
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating');
 
         // Filter by Category
         if ($request->has('category_id')) {
@@ -83,6 +85,8 @@ class GigController extends Controller
                 'relatedTags',
                 'reviews.user'
             ])
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
             ->find($id);
 
         if (!$gig) {

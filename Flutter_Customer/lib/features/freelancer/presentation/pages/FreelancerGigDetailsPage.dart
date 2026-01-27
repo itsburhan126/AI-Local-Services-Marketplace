@@ -447,7 +447,14 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
     final title = _asString(service?['title'] ?? service?['name'], fallback: 'I will do professional freelancer work for you');
     
     final reviewsList = (service?['reviews'] as List?) ?? [];
-    final reviewsCount = reviewsList.length;
+    
+    // Use reviews_count if available, otherwise fall back to list length
+    int reviewsCount = 0;
+    if (service != null && service!.containsKey('reviews_count')) {
+      reviewsCount = int.tryParse(service!['reviews_count'].toString()) ?? 0;
+    } else {
+      reviewsCount = reviewsList.length;
+    }
     
     // Calculate rating if missing or 0
     double avgRating = double.tryParse(service?['rating']?.toString() ?? '0') ?? 0.0;

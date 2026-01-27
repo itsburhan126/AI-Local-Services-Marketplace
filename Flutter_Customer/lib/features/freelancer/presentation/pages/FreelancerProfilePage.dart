@@ -7,6 +7,7 @@ import 'package:flutter_customer/core/widgets/custom_avatar.dart';
 import 'package:flutter_customer/core/constants/api_constants.dart';
 import '../../data/services/gig_service.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
 class FreelancerProfilePage extends StatefulWidget {
   final Map<String, dynamic> provider;
@@ -24,6 +25,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
   bool _isLoadingGigs = false;
   Map<String, dynamic> _providerDetails = {};
   bool _isLoadingProvider = true;
+  bool _isFavorite = false;
 
   @override
   void initState() {
@@ -44,6 +46,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
       if (details != null && mounted) {
         setState(() {
           _providerDetails = details;
+          _isFavorite = details['is_favorite'] == true || details['is_favorite'] == 1;
         });
       }
     } catch (e) {
@@ -390,6 +393,8 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
     }
 
     final from = _providerDetails['country']?['name'] ?? profile['address'] ?? 'Global';
+    final lastDelivery = _providerDetails['last_delivery']?.toString() ?? 'N/A';
+    final activeOrders = _providerDetails['active_orders']?.toString() ?? '0';
 
     List<Map<String, String>> languages = [];
     if (profile['languages'] is List) {
@@ -471,6 +476,8 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
               children: [
                 _buildInfoRow(Icons.location_on_outlined, 'From', from),
                 _buildInfoRow(Icons.person_outline, 'Member since', memberSince),
+                _buildInfoRow(Icons.access_time, 'Last delivery', lastDelivery),
+                _buildInfoRow(Icons.work_outline, 'Active orders', activeOrders),
                 _buildInfoRow(Icons.visibility_outlined, 'Last active', 'Today', isLast: true),
               ],
             ),

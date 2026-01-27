@@ -10,7 +10,7 @@ class FavoriteController extends Controller
     public function toggle(Request $request)
     {
         $request->validate([
-            'type' => 'required|string|in:gig',
+            'type' => 'required|string|in:gig,provider',
             'id' => 'required|integer',
         ]);
 
@@ -20,6 +20,7 @@ class FavoriteController extends Controller
         
         $modelClass = match($type) {
             'gig' => \App\Models\Gig::class,
+            'provider' => \App\Models\User::class,
             default => null,
         };
 

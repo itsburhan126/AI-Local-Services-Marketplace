@@ -47,10 +47,32 @@ class ProviderController extends Controller
         $completed_orders = \App\Models\GigOrder::where('provider_id', $id)
             ->where('status', 'completed')
             ->count();
+        
+        $active_orders = \App\Models\GigOrder::where('provider_id', $id)
+            ->whereIn('status', ['pending', 'accepted', 'in_progress'])
+            ->count();
+
+        $last_delivery_order = \App\Models\GigOrder::where('provider_id', $id)
+            ->whereIn('status', ['completed', 'delivered'])
+            ->latest('updated_at')
+            ->first();
+            
+        $last_delivery = $last_delivery_order ? $last_delivery_order->updated_at->diffForHumans() : 'N/A';
+        
+        $is_favorite = false;
+        if (auth('sanctum')->check()) {
+            $is_favorite = \App\Models\Favorite::where('user_id', auth('sanctum')->id())
+                ->where('favorable_id', $id)
+                ->where('favorable_type', \App\Models\User::class)
+                ->exists();
+        }
 
         $provider->rating = $rating;
         $provider->reviews_count = $reviews_count;
         $provider->completed_orders = $completed_orders;
+        $provider->active_orders = $active_orders;
+        $provider->last_delivery = $last_delivery;
+        $provider->is_favorite = $is_favorite;
 
         return response()->json([
             'success' => true,
