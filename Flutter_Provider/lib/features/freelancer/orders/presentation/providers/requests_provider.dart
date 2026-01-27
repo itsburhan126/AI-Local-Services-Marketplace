@@ -92,11 +92,9 @@ class RequestsProvider extends ChangeNotifier {
     final token = _authProvider?.user?.token;
     if (token == null) return false;
 
-    final success = await _service.updateOrderStatus(token, id, 'accepted'); // or 'in_progress' ?
-    // My backend supports: accepted, completed, cancelled, in_progress.
-    // 'active' tab in frontend maps to 'active' query in backend which maps to ['pending', 'accepted', 'in_progress'].
-    // Wait, if I change to 'accepted', it should move to 'active' tab.
-    // Currently 'pending' tab shows 'pending' status.
+    // Direct transition to in_progress to skip "Start Order" step as per requirement
+    final success = await _service.updateOrderStatus(token, id, 'in_progress'); 
+    
     if (success) {
       // Refresh list
       await fetchOrders();
@@ -130,5 +128,27 @@ class RequestsProvider extends ChangeNotifier {
       await fetchOrders();
     }
     return success;
+  }
+
+  Future<bool> deliverWork(int id, String note, List<String> filePaths) async {
+    final token = _authProvider?.user?.token;
+    if (token == null) return false;
+    
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final success = await _service.deliverWork(token, id, note, filePaths);
+      if (success) {
+        await fetchOrders();
+      }
+      return success;
+    } catch (e) {
+      _error = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }

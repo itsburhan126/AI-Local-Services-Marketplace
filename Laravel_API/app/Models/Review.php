@@ -13,6 +13,7 @@ class Review extends Model
         'booking_id',
         'service_id',
         'gig_id',
+        'gig_order_id',
         'provider_id',
         'customer_id',
         'rating',

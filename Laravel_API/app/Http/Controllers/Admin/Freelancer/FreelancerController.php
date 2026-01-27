@@ -93,6 +93,28 @@ class FreelancerController extends Controller
         return view('admin.freelancers.index', compact('stats', 'freelancers', 'gigs', 'serviceTypes', 'tags', 'tab'));
     }
 
+    public function settings()
+    {
+        $settings = [
+            'freelancer_payment_delay_days' => Setting::get('freelancer_payment_delay_days', 0),
+            'freelancer_pending_balance_popup_text' => Setting::get('freelancer_pending_balance_popup_text', 'Your earnings are in pending status and will be available after the cooling period.'),
+        ];
+        return view('admin.freelancers.settings', compact('settings'));
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $request->validate([
+            'freelancer_payment_delay_days' => 'required|integer|min:0',
+            'freelancer_pending_balance_popup_text' => 'required|string',
+        ]);
+
+        Setting::set('freelancer_payment_delay_days', $request->freelancer_payment_delay_days, 'freelancer');
+        Setting::set('freelancer_pending_balance_popup_text', $request->freelancer_pending_balance_popup_text, 'freelancer');
+
+        return redirect()->back()->with('success', 'Settings updated successfully');
+    }
+
     public function banners(Request $request)
     {
         $banners = FreelancerBanner::orderBy('order', 'asc')->get();

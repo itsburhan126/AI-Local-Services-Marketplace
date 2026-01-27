@@ -70,6 +70,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('freelancers/banners', [\App\Http\Controllers\Admin\Freelancer\FreelancerController::class, 'banners'])->name('freelancers.banners');
         Route::post('freelancers/banners', [\App\Http\Controllers\Admin\Freelancer\FreelancerController::class, 'storeBanner'])->name('freelancers.banners.store');
         Route::delete('freelancers/banners/{banner}', [\App\Http\Controllers\Admin\Freelancer\FreelancerController::class, 'destroyBanner'])->name('freelancers.banners.destroy');
+        
+        // Freelancer Settings
+        Route::get('freelancers/settings', [\App\Http\Controllers\Admin\Freelancer\FreelancerController::class, 'settings'])->name('freelancers.settings');
+        Route::post('freelancers/settings', [\App\Http\Controllers\Admin\Freelancer\FreelancerController::class, 'updateSettings'])->name('freelancers.settings.update');
+
         Route::get('freelancers', [\App\Http\Controllers\Admin\Freelancer\FreelancerController::class, 'index'])->name('freelancers.index');
         
         // Freelancer Interests

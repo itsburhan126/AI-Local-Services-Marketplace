@@ -13,6 +13,8 @@ class OrderModel {
   final String paymentStatus;
   final String? address;
   final String? notes;
+  final String? deliveryNote;
+  final List<String>? deliveryFiles;
   final UserModel? user;
   final GigModel? gig;
   final GigPackageModel? package;
@@ -30,6 +32,8 @@ class OrderModel {
     required this.paymentStatus,
     this.address,
     this.notes,
+    this.deliveryNote,
+    this.deliveryFiles,
     this.user,
     this.gig,
     this.package,
@@ -51,6 +55,10 @@ class OrderModel {
       paymentStatus: json['payment_status'] ?? 'pending',
       address: json['address'],
       notes: json['notes'],
+      deliveryNote: json['delivery_note'],
+      deliveryFiles: json['delivery_files'] != null
+          ? List<String>.from(json['delivery_files'])
+          : null,
       user: json['user'] != null ? UserModel.fromJson(json['user']) : null,
       gig: json['gig'] != null ? GigModel.fromJson(json['gig']) : null,
       package: json['package'] != null

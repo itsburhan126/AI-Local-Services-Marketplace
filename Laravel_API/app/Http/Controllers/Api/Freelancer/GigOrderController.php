@@ -10,6 +10,7 @@ use App\Services\FCMService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\WalletTransaction;
 
 use App\Events\NewGigOrder;
 use App\Models\User;
@@ -153,11 +154,6 @@ class GigOrderController extends Controller
     {
         $status = $request->query('status');
         $user = Auth::user();
-
-        // Check if the user is fetching as a provider or customer
-        // Default to provider logic if not specified, but usually we distinguish by route or user role
-        // For now, let's assume this is for Provider as per class location.
-        // BUT, I will add logic to support Customer fetching too if needed, or create a separate method.
         
         $query = GigOrder::where('provider_id', $user->id)
             ->with(['user', 'gig', 'package']) // Load customer info
@@ -165,9 +161,9 @@ class GigOrderController extends Controller
 
         if ($status) {
             if ($status === 'active') {
-                $query->whereIn('status', ['accepted', 'in_progress']);
+                $query->whereIn('status', ['accepted', 'in_progress', 'delivered']);
             } elseif ($status === 'completed') {
-                $query->where('status', 'completed');
+                $query->whereIn('status', ['completed', 'cancelled', 'rejected']);
             } elseif ($status === 'pending') {
                  $query->where('status', 'pending');
             } else {
@@ -202,9 +198,9 @@ class GigOrderController extends Controller
 
         if ($status) {
             if ($status === 'active') {
-                $query->whereIn('status', ['pending', 'accepted', 'in_progress']);
+                $query->whereIn('status', ['pending', 'accepted', 'in_progress', 'delivered']);
             } elseif ($status === 'history') { // 'history' usually means completed or cancelled
-                 $query->whereIn('status', ['completed', 'cancelled', 'disputed']);
+                 $query->whereIn('status', ['completed', 'cancelled', 'disputed', 'rejected']);
             } elseif ($status === 'completed') {
                 $query->where('status', 'completed');
             } elseif ($status === 'cancelled') {
@@ -269,5 +265,183 @@ class GigOrderController extends Controller
             'message' => 'Order status updated successfully',
             'data' => $gigOrder
         ]);
+    }
+
+    /**
+     * Deliver work for the order (Provider only).
+     */
+    public function deliverWork(Request $request, $id)
+    {
+        $request->validate([
+            'delivery_note' => 'nullable|string',
+            'delivery_files' => 'nullable|array',
+            'delivery_files.*' => 'file|max:20480', // Max 20MB per file
+        ]);
+
+        $gigOrder = GigOrder::where('provider_id', Auth::id())->findOrFail($id);
+
+        if ($gigOrder->status !== 'in_progress') {
+            return response()->json(['status' => 'error', 'message' => 'Order must be in progress to deliver work.'], 422);
+        }
+
+        $filePaths = [];
+        if ($request->hasFile('delivery_files')) {
+            foreach ($request->file('delivery_files') as $file) {
+                $path = $file->store('gig_deliveries', 'public');
+                $filePaths[] = 'storage/' . $path;
+            }
+        }
+
+        $gigOrder->status = 'delivered';
+        $gigOrder->delivery_note = $request->delivery_note;
+        $gigOrder->delivery_files = $filePaths;
+        $gigOrder->save();
+        
+        // Notify Customer (Implementation depends on notification system)
+        try {
+             $customer = User::find($gigOrder->user_id);
+             if ($customer && $customer->fcm_token) {
+                 $fcmService = new FCMService();
+                 $fcmService->sendNotification(
+                     $customer->fcm_token,
+                     'Order Delivered',
+                     'Your order #' . $gigOrder->id . ' has been delivered. Please review and approve.',
+                     ['type' => 'order_delivered', 'order_id' => (string)$gigOrder->id]
+                 );
+             }
+        } catch (\Exception $e) {
+            // Log error
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Work delivered successfully',
+            'data' => $gigOrder
+        ]);
+    }
+
+    /**
+     * Reject delivered work (Customer only).
+     */
+    public function rejectWork(Request $request, $id)
+    {
+        $gigOrder = GigOrder::where('user_id', Auth::id())->findOrFail($id);
+
+        if ($gigOrder->status !== 'delivered') {
+            return response()->json(['status' => 'error', 'message' => 'Order must be delivered to reject.'], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $gigOrder->status = 'rejected';
+            $gigOrder->save();
+
+            $refundAmount = $gigOrder->total_amount;
+            $cancellationFee = 0; // Set fee if needed
+            $refundAmount -= $cancellationFee;
+
+            $user = User::find(Auth::id());
+            $user->wallet_balance += $refundAmount;
+            $user->save();
+
+            // Record Transaction
+            WalletTransaction::create([
+                'user_id' => $user->id,
+                'amount' => $refundAmount,
+                'type' => 'credit',
+                'description' => 'Refund for rejected order #' . $gigOrder->id,
+                'reference_id' => $gigOrder->id,
+                'reference_type' => 'gig_order',
+            ]);
+
+            // Notify Provider
+            try {
+                $provider = User::find($gigOrder->provider_id);
+                if ($provider && $provider->fcm_token) {
+                    $fcmService = new FCMService();
+                    $fcmService->sendNotification(
+                        $provider->fcm_token,
+                        'Work Rejected',
+                        'Your delivery for order #' . $gigOrder->id . ' was rejected.',
+                        ['type' => 'order_rejected', 'order_id' => (string)$gigOrder->id]
+                    );
+                }
+            } catch (\Exception $e) {
+                // Log notification error
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Work rejected. Refund added to your wallet.',
+                'data' => $gigOrder
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to reject work: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Approve delivered work (Customer only).
+     */
+    public function approveWork(Request $request, $id)
+    {
+        $gigOrder = GigOrder::where('user_id', Auth::id())->findOrFail($id);
+
+        if ($gigOrder->status !== 'delivered') {
+            return response()->json(['status' => 'error', 'message' => 'Order must be delivered to approve.'], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $gigOrder->status = 'completed';
+            $gigOrder->save();
+            
+            // Payment Release Logic
+            $provider = User::find($gigOrder->provider_id);
+            if ($provider) {
+                $amount = $gigOrder->provider_amount;
+                
+                // Get delay setting
+                $delayDays = \App\Models\Setting::get('freelancer_payment_delay_days', 0);
+                $availableAt = now()->addDays($delayDays);
+                
+                // Add to pending balance
+                $provider->pending_balance += $amount;
+                $provider->save();
+                
+                // Create Transaction
+                WalletTransaction::create([
+                    'user_id' => $provider->id,
+                    'amount' => $amount,
+                    'type' => 'credit',
+                    'description' => 'Payment for order #' . $gigOrder->id,
+                    'reference_id' => $gigOrder->id,
+                    'reference_type' => 'gig_order',
+                    'status' => 'pending',
+                    'available_at' => $availableAt,
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Order approved and completed successfully',
+                'data' => $gigOrder
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['status' => 'error', 'message' => 'Failed to approve work: ' . $e->getMessage()], 500);
+        }
     }
 }

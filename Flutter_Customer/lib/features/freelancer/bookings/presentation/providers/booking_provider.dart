@@ -85,4 +85,88 @@ class BookingProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<bool> deliverWork(String orderId, String note, List<String>? files) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = _authProvider?.user?.token;
+      if (token == null) throw Exception("Authentication required");
+
+      await _bookingService.deliverWork(token, orderId, note, files);
+      await loadBookings();
+      return true;
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> approveWork(String orderId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = _authProvider?.user?.token;
+      if (token == null) throw Exception("Authentication required");
+
+      await _bookingService.approveWork(token, orderId);
+      await loadBookings();
+      return true;
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> rejectWork(String orderId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = _authProvider?.user?.token;
+      if (token == null) throw Exception("Authentication required");
+
+      await _bookingService.rejectWork(token, orderId);
+      await loadBookings();
+      return true;
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> submitReview(String orderId, int rating, String review) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final token = _authProvider?.user?.token;
+      if (token == null) throw Exception("Authentication required");
+
+      await _bookingService.submitReview(token, orderId, rating, review);
+      await loadBookings();
+      return true;
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

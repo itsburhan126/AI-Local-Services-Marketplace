@@ -155,6 +155,17 @@
                 </div>
             </div>
         </a>
+        <a href="{{ route('admin.freelancers.settings') }}" class="group bg-white p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-md transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-teal-50 text-teal-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-cog"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-700 text-sm group-hover:text-indigo-600 transition-colors">Delivery Settings</h4>
+                    <p class="text-xs text-slate-400">Payment & Pending</p>
+                </div>
+            </div>
+        </a>
     </div>
 
     <!-- Tabs -->

@@ -25,11 +25,14 @@ class GigOrder extends Model
         'notes',
         'address',
         'extras',
+        'delivery_note',
+        'delivery_files',
     ];
 
     protected $casts = [
         'scheduled_at' => 'datetime',
         'extras' => 'array',
+        'delivery_files' => 'array',
     ];
 
     public function user()

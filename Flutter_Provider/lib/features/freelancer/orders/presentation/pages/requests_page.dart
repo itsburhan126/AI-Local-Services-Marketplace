@@ -138,6 +138,10 @@ class _RequestsPageState extends State<RequestsPage> {
         statusColor = Colors.red;
         statusText = 'Cancelled';
         break;
+      case 'rejected':
+        statusColor = Colors.red;
+        statusText = 'Rejected';
+        break;
       default:
         statusColor = Colors.orange;
         statusText = 'Pending';
@@ -303,22 +307,46 @@ class _RequestsPageState extends State<RequestsPage> {
                    const SizedBox(height: 16),
                    const Divider(),
                    const SizedBox(height: 12),
-                   SizedBox(
-                     width: double.infinity,
-                     child: ElevatedButton(
-                          onPressed: () {
-                              context.read<RequestsProvider>().completeOrder(order.id);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                   if (order.status == 'accepted' || order.status == 'in_progress')
+                     SizedBox(
+                       width: double.infinity,
+                       child: ElevatedButton(
+                            onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => OrderDetailsPage(order: order),
+                                  ),
+                                );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
                             ),
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
+                            child: const Text('Deliver Work'),
                           ),
-                          child: const Text('Mark as Completed'),
-                        ),
-                   ),
+                     )
+                   else if (order.status == 'delivered')
+                     Container(
+                       width: double.infinity,
+                       padding: const EdgeInsets.symmetric(vertical: 12),
+                       alignment: Alignment.center,
+                       decoration: BoxDecoration(
+                         color: Colors.orange.withOpacity(0.1),
+                         borderRadius: BorderRadius.circular(12),
+                         border: Border.all(color: Colors.orange),
+                       ),
+                       child: Text(
+                         'Waiting for Approval',
+                         style: GoogleFonts.plusJakartaSans(
+                           fontWeight: FontWeight.bold,
+                           color: Colors.orange,
+                         ),
+                       ),
+                     ),
                 ]
               ],
             ),

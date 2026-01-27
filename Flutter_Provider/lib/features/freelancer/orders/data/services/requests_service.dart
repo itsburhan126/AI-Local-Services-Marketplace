@@ -42,4 +42,33 @@ class RequestsService {
       return false;
     }
   }
+
+  Future<bool> deliverWork(String token, int id, String note, List<String> filePaths) async {
+    try {
+      FormData formData = FormData.fromMap({
+        'delivery_note': note,
+      });
+
+      for (var path in filePaths) {
+        formData.files.add(MapEntry(
+          'delivery_files[]',
+          await MultipartFile.fromFile(path),
+        ));
+      }
+
+      final response = await _dio.post(
+        '${ApiConstants.baseUrl}/api/freelancer/orders/$id/deliver',
+        data: formData,
+        options: Options(headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        }),
+      );
+
+      return response.statusCode == 200 && response.data['status'] == 'success';
+    } catch (e) {
+      debugPrint('[RequestsService] deliverWork error: $e');
+      return false;
+    }
+  }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -9,6 +11,7 @@ import '../providers/requests_provider.dart';
 import '../../../gigs/presentation/pages/gig_details_page.dart';
 import '../../../../../core/constants/api_constants.dart';
 import '../../../../../core/utils/image_helper.dart';
+import '../../../../chat/presentation/pages/chat_details_page.dart';
 
 class OrderDetailsPage extends StatefulWidget {
   final OrderModel order;
@@ -74,11 +77,30 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                   _buildCustomerSection(),
                   const SizedBox(height: 24),
                   _buildOrderDetailsSection(),
-                  const SizedBox(height: 32),
-                  _buildActionButtons(requestsProvider),
+                  if (widget.order.status == 'delivered' || widget.order.status == 'completed' || widget.order.status == 'rejected') ...[
+                    const SizedBox(height: 24),
+                    _buildDeliverySection(),
+                  ],
+                  const SizedBox(height: 100), // Bottom padding
                 ],
               ),
             ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: _buildActionButtons(requestsProvider),
+        ),
+      ),
     );
   }
 
@@ -88,9 +110,16 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
 
     switch (widget.order.status) {
       case 'in_progress':
-      case 'accepted':
         statusColor = Colors.green;
         statusText = 'In Progress';
+        break;
+      case 'accepted':
+        statusColor = Colors.blue;
+        statusText = 'Accepted';
+        break;
+      case 'delivered':
+        statusColor = Colors.orange;
+        statusText = 'Delivered';
         break;
       case 'completed':
         statusColor = Colors.blue;
@@ -99,6 +128,10 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       case 'cancelled':
         statusColor = Colors.red;
         statusText = 'Cancelled';
+        break;
+      case 'rejected':
+        statusColor = Colors.red;
+        statusText = 'Rejected';
         break;
       default:
         statusColor = Colors.orange;
@@ -322,8 +355,14 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
               IconButton(
                 icon: const Icon(Icons.message_outlined, color: Color(0xFF6366F1)),
                 onPressed: () {
-                  // Navigate to chat
-                  // context.push('/chat/${widget.order.userId}');
+                  if (widget.order.user != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChatDetailsPage(otherUser: widget.order.user!),
+                      ),
+                    );
+                  }
                 },
               ),
             ],
@@ -416,9 +455,144 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     );
   }
 
+  Widget _buildDeliverySection() {
+    if (widget.order.deliveryFiles == null && widget.order.deliveryNote == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Delivery Details',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF1E293B),
+            ),
+          ),
+          const SizedBox(height: 16),
+          if (widget.order.deliveryNote != null) ...[
+            Text(
+              'Note:',
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              widget.order.deliveryNote!,
+              style: GoogleFonts.plusJakartaSans(color: const Color(0xFF1E293B)),
+            ),
+            const SizedBox(height: 16),
+          ],
+          if (widget.order.deliveryFiles != null && widget.order.deliveryFiles!.isNotEmpty) ...[
+            Text(
+              'Files:',
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...widget.order.deliveryFiles!.map((file) {
+              String filePath = file.toString();
+              String fileName = filePath.split('/').last;
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.description, color: Colors.blue, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        fileName,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF1E293B),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.download_rounded, color: Colors.grey),
+                      onPressed: () async {
+                        String url = filePath;
+                        if (!url.startsWith('http')) {
+                          url = '${ApiConstants.baseUrl}/$url'.replaceAll('//', '/').replaceFirst('http:/', 'http://').replaceFirst('https:/', 'https://');
+                        }
+                        final uri = Uri.parse(url);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Could not open file')),
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _buildActionButtons(RequestsProvider provider) {
     if (widget.order.status == 'completed' || widget.order.status == 'cancelled') {
       return const SizedBox.shrink();
+    }
+
+    if (widget.order.status == 'rejected') {
+       return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.red.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.red),
+        ),
+        child: Text(
+          'Work Rejected by Customer',
+          style: GoogleFonts.plusJakartaSans(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+            color: Colors.red,
+          ),
+        ),
+      );
     }
 
     return Column(
@@ -468,13 +642,13 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
             width: double.infinity,
             height: 50,
             child: ElevatedButton(
-              onPressed: () => _handleAction(() => provider.completeOrder(widget.order.id)),
+              onPressed: () => _showDeliverWorkDialog(context, provider),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF10B981),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               child: Text(
-                'Mark as Completed',
+                'Deliver Work',
                 style: GoogleFonts.plusJakartaSans(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -483,8 +657,161 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
               ),
             ),
           ),
+        ] else if (widget.order.status == 'delivered') ...[
+          
         ],
       ],
     );
   }
+
+  void _showDeliverWorkDialog(BuildContext context, RequestsProvider provider) {
+    final noteController = TextEditingController();
+    List<String> selectedFiles = [];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.85,
+          ),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 20,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+              Text(
+                'Deliver Work',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: noteController,
+                maxLines: 4,
+                decoration: InputDecoration(
+                  hintText: 'Describe your delivery...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[50],
+                ),
+              ),
+              const SizedBox(height: 20),
+              // File Picker
+              GestureDetector(
+                onTap: () async {
+                  FilePickerResult? result = await FilePicker.platform.pickFiles(
+                    allowMultiple: true,
+                    type: FileType.any,
+                  );
+
+                  if (result != null) {
+                    setModalState(() {
+                      selectedFiles = result.paths.whereType<String>().toList();
+                    });
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey[300]!),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.attach_file, color: Colors.grey),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          selectedFiles.isEmpty
+                              ? 'Attach Files'
+                              : '${selectedFiles.length} files selected',
+                          style: GoogleFonts.plusJakartaSans(
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (selectedFiles.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: selectedFiles.map((path) {
+                    return Chip(
+                      label: Text(
+                        path.split(Platform.pathSeparator).last,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      onDeleted: () {
+                        setModalState(() {
+                          selectedFiles.remove(path);
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ],
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Close sheet
+                    _handleAction(() async {
+                      if (widget.order.status == 'accepted') {
+                         // Auto-start order for legacy compatibility or direct flow
+                         final started = await provider.startOrder(widget.order.id);
+                         if (!started) return false;
+                      }
+                      return provider.deliverWork(
+                        widget.order.id,
+                        noteController.text,
+                        selectedFiles,
+                      );
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF10B981),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'Submit Delivery',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
 }

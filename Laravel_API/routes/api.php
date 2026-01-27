@@ -33,6 +33,7 @@ Route::get('/countries', [\App\Http\Controllers\Api\CountryController::class, 'i
 Route::get('/languages', [\App\Http\Controllers\Api\LanguageController::class, 'index']);
 Route::get('/skills', [\App\Http\Controllers\Api\SkillController::class, 'index']);
 Route::get('/tags', [\App\Http\Controllers\Api\TagController::class, 'index']);
+Route::get('/settings', [\App\Http\Controllers\Api\SettingController::class, 'index']);
 Route::get('/gigs', [\App\Http\Controllers\Api\GigController::class, 'index']);
 Route::get('/gigs/{id}', [\App\Http\Controllers\Api\GigController::class, 'show']);
 
@@ -56,11 +57,18 @@ Route::middleware('auth:sanctum')->group(function () {
     // Freelancer Orders (Provider Side)
     Route::get('/freelancer/orders', [\App\Http\Controllers\Api\Freelancer\GigOrderController::class, 'index']);
     Route::patch('/freelancer/orders/{id}/status', [\App\Http\Controllers\Api\Freelancer\GigOrderController::class, 'updateStatus']);
+    Route::post('/freelancer/orders/{id}/deliver', [\App\Http\Controllers\Api\Freelancer\GigOrderController::class, 'deliverWork']);
     
     // Freelancer Orders (Customer Side)
     // Note: The store method is for creating an order (by customer)
     Route::post('/freelancer/orders', [\App\Http\Controllers\Api\Freelancer\GigOrderController::class, 'store']);
     Route::get('/freelancer/customer/orders', [\App\Http\Controllers\Api\Freelancer\GigOrderController::class, 'customerIndex']);
+    Route::post('/freelancer/orders/{id}/approve', [\App\Http\Controllers\Api\Freelancer\GigOrderController::class, 'approveWork']);
+    Route::post('/freelancer/orders/{id}/reject', [\App\Http\Controllers\Api\Freelancer\GigOrderController::class, 'rejectWork']);
+
+    // Wallet & Withdrawals
+    Route::get('/freelancer/wallet', [\App\Http\Controllers\Api\Freelancer\WalletController::class, 'index']);
+    Route::post('/freelancer/withdraw', [\App\Http\Controllers\Api\Freelancer\WalletController::class, 'withdraw']);
 
     Route::post('/freelancer/gigs/{id}/view', [\App\Http\Controllers\Api\Freelancer\GigOrderController::class, 'view']); 
     
@@ -73,6 +81,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Favorites
     Route::post('/favorites/toggle', [FavoriteController::class, 'toggle']);
+    
+    // Reviews
+    Route::post('/reviews', [\App\Http\Controllers\Api\ReviewController::class, 'store']);
     
     // Chat Routes
     Route::get('/chat/config', [ChatController::class, 'config']);

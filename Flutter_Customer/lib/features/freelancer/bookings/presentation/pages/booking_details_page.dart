@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../../features/auth/data/models/user_model.dart';
+import '../../../../features/chat/presentation/pages/chat_details_page.dart';
 import '../providers/booking_provider.dart';
 import 'package:flutter_customer/core/constants/api_constants.dart';
 
@@ -42,6 +45,9 @@ class BookingDetailsPage extends StatelessWidget {
     if (imageUrl != null && !imageUrl.startsWith('http')) {
       imageUrl = '${ApiConstants.baseUrl}/$imageUrl'.replaceAll('//', '/').replaceFirst('http:/', 'http://').replaceFirst('https:/', 'https://');
     }
+
+    final deliveryNote = _asString(booking?['delivery_note']);
+    final deliveryFiles = booking?['delivery_files'] as List?;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -153,7 +159,65 @@ class BookingDetailsPage extends StatelessWidget {
                   const SizedBox(height: 16),
                   _buildDetailRow('Time', displayTime),
                   const SizedBox(height: 16),
-                  _buildDetailRow('Provider', providerName),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Provider',
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 14,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            providerName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: Color(0xFF1E293B),
+                            ),
+                          ),
+                          if (!isNew) ...[
+                            const SizedBox(width: 8),
+                            InkWell(
+                              onTap: () {
+                                if (booking?['provider_id'] != null || booking?['provider'] != null) {
+                                  final providerData = booking?['provider'];
+                                  final providerId = int.tryParse(booking?['provider_id']?.toString() ?? providerData?['id']?.toString() ?? '0');
+                                  
+                                  if (providerId != null && providerId != 0) {
+                                     final user = UserModel(
+                                      id: providerId,
+                                      name: providerName,
+                                      email: providerData?['email'],
+                                      profileImage: providerData?['profile_image'] ?? providerData?['image'],
+                                    );
+                                    
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ChatDetailsPage(otherUser: user),
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.message_outlined, color: Colors.blue, size: 16),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 16),
                   const Divider(),
                   const SizedBox(height: 16),
@@ -195,9 +259,149 @@ class BookingDetailsPage extends StatelessWidget {
               ).animate().fadeIn(delay: 200.ms).moveY(begin: 20, end: 0),
             ],
 
-            const SizedBox(height: 32),
-            Consumer<BookingProvider>(
+            if (!isNew && (status.toLowerCase() == 'delivered' || status.toLowerCase() == 'completed')) ...[
+              const SizedBox(height: 24),
+              _buildDeliverySection(context, deliveryNote, deliveryFiles),
+            ],
+
+            const SizedBox(height: 100), // Bottom padding for fixed button
+          ],
+        ),
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: Consumer<BookingProvider>(
               builder: (context, provider, child) {
+                if (!isNew && status.toLowerCase() == 'delivered') {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: provider.isLoading ? null : () async {
+                            final success = await provider.approveWork(booking?['id'].toString() ?? '');
+                            if (success && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Work Approved! Order Completed.'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                              context.pop(); 
+                            } else if (context.mounted) {
+                               ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(provider.error ?? 'Failed to approve work'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
+                          child: provider.isLoading 
+                            ? const SizedBox(
+                                height: 20, 
+                                width: 20, 
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                              )
+                            : const Text(
+                                'Approve Work & Complete Order',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: provider.isLoading ? null : () async {
+                            final success = await provider.rejectWork(booking?['id'].toString() ?? '');
+                            if (success && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Work Rejected. Refund processed.'),
+                                  backgroundColor: Colors.orange,
+                                ),
+                              );
+                              context.pop();
+                            } else if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(provider.error ?? 'Failed to reject work'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.red),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
+                          child: provider.isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.red),
+                                )
+                              : const Text(
+                                  'Reject Work & Request Refund',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
+                  );
+                } else if (!isNew && status.toLowerCase() == 'completed') {
+                   return SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _showRatingDialog(context, provider, booking?['id'].toString() ?? '');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      child: const Text(
+                        'Rate Freelancer',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
                 return SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -280,18 +484,87 @@ class BookingDetailsPage extends StatelessWidget {
                 );
               }
             ),
-          ],
         ),
       ),
     );
   }
 
+  void _showRatingDialog(BuildContext context, BookingProvider provider, String orderId) {
+    int rating = 5;
+    final reviewController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Rate Freelancer'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(5, (index) {
+                    return IconButton(
+                      icon: Icon(
+                        index < rating ? Icons.star : Icons.star,
+                        color: index < rating ? Colors.amber : Colors.grey[300],
+                        size: 32,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          rating = index + 1;
+                        });
+                      },
+                    );
+                  }),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: reviewController,
+                  decoration: const InputDecoration(
+                    hintText: 'Write a review (optional)',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final success = await provider.submitReview(orderId, rating, reviewController.text);
+                  if (success && context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Review submitted!'), backgroundColor: Colors.green),
+                    );
+                  } else if (context.mounted) {
+                     ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(provider.error ?? 'Failed to submit review'), backgroundColor: Colors.red),
+                    );
+                  }
+                },
+                child: const Text('Submit'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildStatusTimeline(String currentStatus, String? createdAt) {
-    final statusOrder = ['pending', 'accepted', 'in_progress', 'completed'];
+    final statusOrder = ['pending', 'accepted', 'in_progress', 'delivered', 'completed'];
     final statusLabels = {
       'pending': 'Order Placed',
       'accepted': 'Provider Accepted',
       'in_progress': 'Gig In Progress',
+      'delivered': 'Work Delivered',
       'completed': 'Gig Completed'
     };
     
@@ -336,6 +609,130 @@ class BookingDetailsPage extends StatelessWidget {
         );
       }),
     );
+  }
+
+  Widget _buildDeliverySection(BuildContext context, String note, List? files) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Delivery Details',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: Color(0xFF1E293B),
+            ),
+          ),
+          const SizedBox(height: 16),
+          if (note.isNotEmpty) ...[
+            Text(
+              'Note:',
+              style: TextStyle(fontWeight: FontWeight.w600, color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 8),
+            Text(note, style: const TextStyle(color: Color(0xFF1E293B))),
+            const SizedBox(height: 16),
+          ],
+          if (files != null && files.isNotEmpty) ...[
+            Text(
+              'Files:',
+              style: TextStyle(fontWeight: FontWeight.w600, color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 12),
+            ...files.map((file) {
+                 String filePath = file.toString();
+                 String fileName = filePath.split('/').last;
+                 String ext = fileName.split('.').last.toLowerCase();
+                 bool isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext);
+                 
+                 String url = filePath;
+                 if (!url.startsWith('http')) {
+                    url = '${ApiConstants.baseUrl}/$url'.replaceAll('//', '/').replaceFirst('http:/', 'http://').replaceFirst('https:/', 'https://');
+                 }
+
+                 return Container(
+                   margin: const EdgeInsets.only(bottom: 8),
+                   padding: const EdgeInsets.all(12),
+                   decoration: BoxDecoration(
+                     color: Colors.grey[50],
+                     borderRadius: BorderRadius.circular(12),
+                     border: Border.all(color: Colors.grey[200]!),
+                   ),
+                   child: Column(
+                     crossAxisAlignment: CrossAxisAlignment.start,
+                     children: [
+                       if (isImage) ...[
+                         ClipRRect(
+                           borderRadius: BorderRadius.circular(8),
+                           child: Image.network(
+                             url,
+                             height: 150,
+                             width: double.infinity,
+                             fit: BoxFit.cover,
+                             errorBuilder: (c, e, s) => const Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                           ),
+                         ),
+                         const SizedBox(height: 12),
+                       ],
+                       Row(
+                         children: [
+                           Container(
+                             padding: const EdgeInsets.all(8),
+                             decoration: BoxDecoration(
+                               color: Colors.blue.withOpacity(0.1),
+                               borderRadius: BorderRadius.circular(8),
+                             ),
+                             child: Icon(isImage ? Icons.image : Icons.description, color: Colors.blue, size: 20),
+                           ),
+                           const SizedBox(width: 12),
+                           Expanded(
+                             child: Text(
+                               fileName,
+                               style: const TextStyle(
+                                 fontWeight: FontWeight.w500,
+                                 color: Color(0xFF1E293B),
+                               ),
+                               maxLines: 1,
+                               overflow: TextOverflow.ellipsis,
+                             ),
+                           ),
+                           IconButton(
+                             icon: const Icon(Icons.download_rounded, color: Colors.grey),
+                             onPressed: () async {
+                               final uri = Uri.parse(url);
+                               if (await canLaunchUrl(uri)) {
+                                 await launchUrl(uri, mode: LaunchMode.externalApplication);
+                               } else {
+                                 ScaffoldMessenger.of(context).showSnackBar(
+                                   const SnackBar(content: Text('Could not open file')),
+                                 );
+                               }
+                             },
+                           ),
+                         ],
+                       ),
+                     ],
+                   ),
+                 );
+            }).toList(),
+          ],
+        ],
+      ),
+    ).animate().fadeIn(delay: 300.ms).moveY(begin: 20, end: 0);
   }
 
   Widget _buildDetailRow(String label, String value, {bool isBold = false}) {

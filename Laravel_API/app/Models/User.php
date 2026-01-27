@@ -26,6 +26,8 @@ class User extends Authenticatable
         'google_id',
         'avatar',
         'fcm_token',
+        'wallet_balance',
+        'pending_balance',
     ];
 
     /**
