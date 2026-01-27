@@ -497,13 +497,22 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
                 Positioned(
                   top: 12,
                   right: 12,
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      shape: BoxShape.circle,
+                  child: GestureDetector(
+                    onTap: () {
+                      Provider.of<HomeProvider>(context, listen: false).toggleGigFavorite(gig['id']);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        (gig['is_favorite'] ?? false) ? Icons.favorite : Icons.favorite_border,
+                        size: 18,
+                        color: const Color(0xFFEF4444),
+                      ),
                     ),
-                    child: const Icon(Icons.favorite_border, size: 18, color: Color(0xFFEF4444)),
                   ),
                 ),
               ],

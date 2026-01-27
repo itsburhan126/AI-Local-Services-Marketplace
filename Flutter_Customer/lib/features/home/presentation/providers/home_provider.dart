@@ -130,4 +130,33 @@ class HomeProvider with ChangeNotifier {
       return [];
     }
   }
+
+  Future<void> toggleGigFavorite(int gigId) async {
+    // Optimistic Update helper
+    void updateList(List<dynamic> list) {
+      final index = list.indexWhere((item) => item['id'] == gigId);
+      if (index != -1) {
+        list[index]['is_favorite'] = !(list[index]['is_favorite'] ?? false);
+      }
+    }
+
+    // Update all lists where this gig might appear
+    updateList(newServices);
+    updateList(popularServices);
+    updateList(recommendedServices);
+    updateList(recentlyViewed);
+    
+    notifyListeners();
+
+    final result = await _homeService.toggleFavorite(gigId);
+    
+    if (!result['success']) {
+      // Revert if failed
+      updateList(newServices);
+      updateList(popularServices);
+      updateList(recommendedServices);
+      updateList(recentlyViewed);
+      notifyListeners();
+    }
+  }
 }

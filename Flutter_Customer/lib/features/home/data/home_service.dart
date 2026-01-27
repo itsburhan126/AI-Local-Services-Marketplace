@@ -144,6 +144,40 @@ class HomeService {
     }
   }
 
+  Future<Map<String, dynamic>> toggleFavorite(int id, {String type = 'gig'}) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      
+      if (token == null) {
+        return {'success': false, 'message': 'Please login to favorite'};
+      }
+
+      final response = await _dio.post(
+        '${ApiConstants.baseUrl}/api/favorites/toggle',
+        data: {'id': id, 'type': type},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'is_favorite': response.data['is_favorite'],
+          'message': response.data['message']
+        };
+      }
+      return {'success': false, 'message': 'Failed to toggle favorite'};
+    } catch (e) {
+      debugPrint('Error toggling favorite: $e');
+      return {'success': false, 'message': 'Error toggling favorite'};
+    }
+  }
+
   // Helper to fix relative image URLs recursively
   dynamic _fixDataUrls(dynamic data) {
     if (data is Map<String, dynamic>) {
