@@ -7,8 +7,62 @@ use App\Http\Controllers\Admin\DashboardController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 Route::get('/', function () {
-    return redirect()->route('admin.dashboard');
+    return view('landing');
+})->name('landing');
+
+Route::get('/join-as-pro', function () {
+    return view('join-selection');
+})->name('join.pro');
+
+Route::prefix('freelancer')->name('provider.freelancer.')->group(function () {
+    Route::get('/register', function () {
+        return view('Provider.Freelancer.auth.register');
+    })->name('register');
+    
+    Route::post('/register', [\App\Http\Controllers\Provider\AuthController::class, 'registerFreelancer'])->name('register.submit');
+
+    Route::get('/login', function () {
+        return view('Provider.Freelancer.auth.login');
+    })->name('login');
+    
+    Route::post('/login', [\App\Http\Controllers\Provider\AuthController::class, 'login'])->name('login.submit');
+
+    Route::get('/dashboard', function () {
+        return view('Provider.Freelancer.dashboard');
+    })->middleware('auth:web')->name('dashboard');
+
+    Route::middleware('auth:web')->group(function () {
+        // Gig Routes
+        Route::resource('gigs', \App\Http\Controllers\Provider\Freelancer\GigController::class);
+
+        // Order Routes
+        Route::get('orders', [\App\Http\Controllers\Provider\Freelancer\OrderController::class, 'index'])->name('orders.index');
+        Route::get('orders/{id}', [\App\Http\Controllers\Provider\Freelancer\OrderController::class, 'show'])->name('orders.show');
+        Route::post('orders/{id}/accept', [\App\Http\Controllers\Provider\Freelancer\OrderController::class, 'accept'])->name('orders.accept');
+        Route::post('orders/{id}/decline', [\App\Http\Controllers\Provider\Freelancer\OrderController::class, 'decline'])->name('orders.decline');
+        Route::post('orders/{id}/deliver', [\App\Http\Controllers\Provider\Freelancer\OrderController::class, 'deliver'])->name('orders.deliver');
+        
+        // Chat Routes
+        Route::get('chat', [\App\Http\Controllers\Provider\Freelancer\ChatController::class, 'index'])->name('chat.index');
+        Route::post('chat/send', [\App\Http\Controllers\Provider\Freelancer\ChatController::class, 'store'])->name('chat.store');
+    });
 });
+
+Route::prefix('provider/local')->name('provider.local.')->group(function () {
+    Route::get('/register', function () {
+        return view('Provider.Local.auth.register');
+    })->name('register');
+    
+    Route::post('/register', [\App\Http\Controllers\Provider\AuthController::class, 'registerLocal'])->name('register.submit');
+
+    Route::get('/login', function () {
+        return view('Provider.Local.auth.login');
+    })->name('login');
+    
+    Route::post('/login', [\App\Http\Controllers\Provider\AuthController::class, 'login'])->name('login.submit');
+});
+
+Route::post('/provider/logout', [\App\Http\Controllers\Provider\AuthController::class, 'logout'])->name('provider.logout');
 
  
  

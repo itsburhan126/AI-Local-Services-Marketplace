@@ -127,9 +127,9 @@ class HomeService {
   }
 
   // Fetch Gigs by Category
-  Future<List<dynamic>> getGigsByCategory(int categoryId, {int? serviceTypeId, double? minPrice, double? maxPrice, String? sellerLevel}) async {
+  Future<List<dynamic>> getGigsByCategory(int categoryId, {int? serviceTypeId, double? minPrice, double? maxPrice, String? sellerLevel, String? deliveryTime}) async {
     try {
-      debugPrint('[HomeService] GET gigs by category: ${ApiConstants.baseUrl}/api/gigs?category_id=$categoryId&service_type_id=$serviceTypeId&min_price=$minPrice&max_price=$maxPrice&seller_level=$sellerLevel');
+      debugPrint('[HomeService] GET gigs by category: ${ApiConstants.baseUrl}/api/gigs?category_id=$categoryId&service_type_id=$serviceTypeId&min_price=$minPrice&max_price=$maxPrice&seller_level=$sellerLevel&delivery_time=$deliveryTime');
       final Map<String, dynamic> queryParams = {'category_id': categoryId};
       if (serviceTypeId != null) {
         queryParams['service_type_id'] = serviceTypeId;
@@ -142,6 +142,9 @@ class HomeService {
       }
       if (sellerLevel != null) {
         queryParams['seller_level'] = sellerLevel;
+      }
+      if (deliveryTime != null) {
+        queryParams['delivery_time'] = deliveryTime;
       }
 
       final response = await _dio.get(

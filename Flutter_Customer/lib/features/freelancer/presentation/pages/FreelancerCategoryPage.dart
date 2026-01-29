@@ -82,6 +82,8 @@ class _FreelancerCategoryPageState extends State<FreelancerCategoryPage> {
           serviceTypeId: _selectedServiceTypeId,
           minPrice: _minPrice,
           maxPrice: _maxPrice,
+          sellerLevel: _selectedSellerLevel,
+          deliveryTime: _selectedDeliveryTime,
         ),
       ]);
 

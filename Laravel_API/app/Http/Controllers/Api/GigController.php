@@ -62,6 +62,24 @@ class GigController extends Controller
             });
         }
 
+        // Filter by Delivery Time
+        if ($request->has('delivery_time')) {
+            $days = match($request->delivery_time) {
+                '24 Hour' => 1,
+                '3 Days' => 3,
+                '5 Days' => 5,
+                '7 Days' => 7,
+                default => 0,
+            };
+            
+            if ($days > 0) {
+                $query->whereHas('packages', function($q) use ($days) {
+                    $q->where('tier', 'Basic')
+                      ->where('delivery_days', '<=', $days);
+                });
+            }
+        }
+
         // Search
         if ($request->has('search')) {
             $search = $request->search;

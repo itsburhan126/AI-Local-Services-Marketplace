@@ -404,32 +404,38 @@ class _CreateGigPageState extends ConsumerState<CreateGigPage> {
           onPressed: () => context.pop(),
         ),
       ),
-      body: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            _buildStepIndicator(),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  children: [
-                    if (_currentStep == 0) _buildOverviewStep(),
-                    if (_currentStep == 1) _buildPricingStep(),
-                    if (_currentStep == 2) _buildDescriptionStep(),
-                    if (_currentStep == 3) _buildGalleryStep(),
-                    if (_currentStep == 4) _buildFaqStep(),
-                    const SizedBox(height: 32),
-                  ],
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1000),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                _buildStepIndicator(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      children: [
+                        if (_currentStep == 0) _buildOverviewStep(),
+                        if (_currentStep == 1) _buildPricingStep(),
+                        if (_currentStep == 2) _buildDescriptionStep(),
+                        if (_currentStep == 3) _buildGalleryStep(),
+                        if (_currentStep == 4) _buildFaqStep(),
+                        const SizedBox(height: 32),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  color: const Color(0xFFF8FAFC),
+                  child: SafeArea(top: false, child: _buildBottomControls()),
+                ),
+              ],
             ),
-            Container(
-              padding: const EdgeInsets.all(24),
-              color: const Color(0xFFF8FAFC),
-              child: SafeArea(top: false, child: _buildBottomControls()),
-            ),
-          ],
+          ),
         ),
       ),
     );
