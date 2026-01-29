@@ -51,6 +51,16 @@ Route::prefix('freelancer')->name('provider.freelancer.')->group(function () {
         // Chat Routes
         Route::get('chat', [\App\Http\Controllers\Provider\Freelancer\ChatController::class, 'index'])->name('chat.index');
         Route::post('chat/send', [\App\Http\Controllers\Provider\Freelancer\ChatController::class, 'store'])->name('chat.store');
+
+        // Payout Methods
+        Route::get('payout-methods', [\App\Http\Controllers\Provider\Freelancer\PayoutController::class, 'index'])->name('payout.index');
+        Route::get('payout-methods/create/{payoutMethod}', [\App\Http\Controllers\Provider\Freelancer\PayoutController::class, 'create'])->name('payout.create');
+        Route::post('payout-methods/{payoutMethod}', [\App\Http\Controllers\Provider\Freelancer\PayoutController::class, 'store'])->name('payout.store');
+        Route::delete('payout-methods/{userPayoutMethod}', [\App\Http\Controllers\Provider\Freelancer\PayoutController::class, 'destroy'])->name('payout.destroy');
+        
+        // Withdrawals
+        Route::get('withdraw', [\App\Http\Controllers\Provider\Freelancer\PayoutController::class, 'withdrawPage'])->name('withdraw.page');
+        Route::post('withdraw', [\App\Http\Controllers\Provider\Freelancer\PayoutController::class, 'withdrawRequest'])->name('withdraw.request');
     });
 });
 
@@ -80,6 +90,8 @@ Route::get('login', function() {
 Route::get('/page/{slug}', [\App\Http\Controllers\PageController::class, 'show'])->name('page.show');
 
 // Admin Routes
+use App\Http\Controllers\Admin\PayoutMethodController;
+
 Route::prefix('admin')->name('admin.')->group(function () {
     // Guest Admin Routes
     Route::middleware('guest:admin')->group(function () {
@@ -96,6 +108,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::middleware('admin.permission:dashboard_access')->group(function () {
             Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
         });
+        
+        Route::resource('payout-methods', PayoutMethodController::class);
         
     
         

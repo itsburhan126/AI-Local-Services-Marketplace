@@ -46,10 +46,10 @@
             </div>
             
             <div>
-                <button class="w-full bg-black hover:bg-slate-800 text-white font-bold py-3.5 px-4 rounded-[4px] transition-colors mb-4 text-sm">
+                <a href="{{ route('provider.freelancer.withdraw.page') }}" class="w-full inline-flex justify-center bg-black hover:bg-slate-800 text-white font-bold py-3.5 px-4 rounded-[4px] transition-colors mb-4 text-sm">
                     Withdraw balance
-                </button>
-                <a href="#" class="block text-center text-sm font-medium text-slate-500 hover:text-green-600 hover:underline transition-colors">
+                </a>
+                <a href="{{ route('provider.freelancer.payout.index') }}" class="block text-center text-sm font-medium text-slate-500 hover:text-green-600 hover:underline transition-colors">
                     Manage payout methods
                 </a>
             </div>

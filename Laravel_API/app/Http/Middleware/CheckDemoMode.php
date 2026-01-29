@@ -25,6 +25,14 @@ class CheckDemoMode
                 return $next($request);
             }
 
+            // Allow specific actions in demo mode
+            $whitelist = [
+                'admin.payout-methods.store',
+            ];
+            if (Route::is($whitelist)) {
+                return $next($request);
+            }
+
             // Block everything else
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json(['message' => 'Action disabled in Demo Mode.'], 403);

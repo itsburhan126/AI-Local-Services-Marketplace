@@ -213,6 +213,11 @@
                     <span>Withdrawals</span>
                 </a>
 
+                <a href="{{ route('admin.payout-methods.index') }}" class="nav-item flex items-center px-4 py-3.5 text-sm font-medium rounded-xl group {{ request()->routeIs('admin.payout-methods.*') ? 'nav-item-active' : 'text-slate-400' }}">
+                    <i class="fas fa-wallet w-6 text-lg {{ request()->routeIs('admin.payout-methods.*') ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300' }}"></i>
+                    <span>Payout Methods</span>
+                </a>
+
                 <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-8 mb-4">Marketing & Tools</p>
                 
                 <a href="{{ route('admin.chat.index') }}" class="nav-item flex items-center px-4 py-3.5 text-sm font-medium rounded-xl group {{ request()->routeIs('admin.chat.*') ? 'nav-item-active' : 'text-slate-400' }}">
