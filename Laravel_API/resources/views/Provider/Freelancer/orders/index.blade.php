@@ -29,7 +29,7 @@
                 <h3 class="text-2xl font-bold text-slate-800 mt-1">{{ $activeOrders->count() }}</h3>
             </div>
             <div class="h-10 w-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
-                <i class="fas fa-spinner text-lg"></i>
+                <i class="fas fa-bolt text-lg"></i>
             </div>
         </div>
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
@@ -77,7 +77,7 @@
         </div>
 
         <!-- Active Tab -->
-        <div x-show="activeTab === 'active'" class="space-y-4" style="display: none;">
+        <div x-show="activeTab === 'active'" class="space-y-4" x-cloak>
             @forelse($activeOrders as $order)
                 @include('Provider.Freelancer.orders.partials.order-card', ['order' => $order])
             @empty
@@ -92,7 +92,7 @@
         </div>
 
         <!-- Completed Tab -->
-        <div x-show="activeTab === 'completed'" class="space-y-4" style="display: none;">
+        <div x-show="activeTab === 'completed'" class="space-y-4" x-cloak>
             @forelse($completedOrders as $order)
                 @include('Provider.Freelancer.orders.partials.order-card', ['order' => $order])
             @empty
