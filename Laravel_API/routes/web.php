@@ -7,6 +7,9 @@ use App\Http\Controllers\Admin\DashboardController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 Route::get('/', function () {
+    if (Auth::guard('web')->check()) {
+        return redirect()->route('provider.freelancer.dashboard');
+    }
     return view('landing');
 })->name('landing');
 
@@ -27,9 +30,12 @@ Route::prefix('freelancer')->name('provider.freelancer.')->group(function () {
     
     Route::post('/login', [\App\Http\Controllers\Provider\AuthController::class, 'login'])->name('login.submit');
 
-    Route::get('/dashboard', function () {
-        return view('Provider.Freelancer.dashboard');
-    })->middleware('auth:web')->name('dashboard');
+    Route::get('/dashboard', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'index'])->middleware('auth:web')->name('dashboard');
+    Route::get('/analytics', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'analytics'])->middleware('auth:web')->name('analytics');
+    Route::get('/earnings', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'earnings'])->middleware('auth:web')->name('earnings');
+    Route::get('/profile', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'profile'])->middleware('auth:web')->name('profile');
+    Route::put('/profile/update', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'updateProfile'])->middleware('auth:web')->name('profile.update');
+    Route::get('/marketing', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'marketing'])->middleware('auth:web')->name('marketing');
 
     Route::middleware('auth:web')->group(function () {
         // Gig Routes

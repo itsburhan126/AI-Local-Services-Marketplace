@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Freelancer Dashboard - {{ config('app.name') }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -52,6 +53,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        [x-cloak] { display: none !important; }
         body { font-family: 'Instrument Sans', sans-serif; background-color: #f8fafc; }
         
         .glass-panel {
@@ -129,22 +131,21 @@
         @endif
     </div>
 
-    <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar -->
-        @include('partials.freelancer.sidebar')
+    <div class="min-h-screen bg-slate-50 flex flex-col">
+        <!-- Header (Full Width) -->
+        @include('partials.freelancer.header')
 
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col overflow-hidden relative md:ml-64 transition-all duration-300">
-            <!-- Header -->
-            @include('partials.freelancer.header')
-
+        <div class="flex-1 flex flex-col relative w-full {{ request()->routeIs('provider.freelancer.chat.*') ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8' }}">
             <!-- Content Body -->
-            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50 p-4 md:p-6 flex flex-col">
+            <main class="flex-1 flex flex-col">
                 @yield('content')
-                
-                <!-- Footer -->
-                @include('partials.freelancer.footer')
             </main>
+        </div>
+        
+        <!-- Footer -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+            @include('partials.freelancer.footer')
         </div>
     </div>
 

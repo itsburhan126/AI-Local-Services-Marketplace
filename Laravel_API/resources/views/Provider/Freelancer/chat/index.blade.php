@@ -3,7 +3,7 @@
 @section('title', 'Messages')
 
 @section('content')
-<div class="h-[calc(100vh-8.5rem)] flex bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden max-w-screen-2xl mx-auto">
+<div class="h-[calc(100vh-4rem)] flex bg-white border-t border-slate-200 overflow-hidden w-full">
     
     <!-- Left Sidebar: Conversation List -->
     <div class="w-full md:w-80 lg:w-96 border-r border-slate-200 flex flex-col bg-white z-10 shrink-0">
@@ -30,7 +30,7 @@
                 <ul class="divide-y divide-slate-50">
                     @foreach($conversations as $conversation)
                         <li>
-                            <a href="{{ route('provider.freelancer.chat.index', ['user_id' => $conversation->id]) }}" class="block p-4 hover:bg-slate-50 transition-all {{ isset($selectedConversation) && $selectedConversation->id === $conversation->id ? 'bg-white border-r-2 border-primary-500 relative z-10 shadow-[inset_4px_0_0_0_theme(colors.primary.500)]' : 'bg-white' }}">
+                            <a href="{{ route('provider.freelancer.chat.index', ['user_id' => $conversation->id]) }}" class="block p-4 hover:bg-slate-50 transition-all {{ isset($selectedConversation) && $selectedConversation->id === $conversation->id ? 'bg-primary-50 relative z-10 border-r-[3px] border-primary-500' : 'bg-white' }}">
                                 <div class="flex gap-3">
                                     <div class="relative flex-shrink-0">
                                         <img src="{{ $conversation->avatar ? asset('storage/' . $conversation->avatar) : asset('images/default-avatar.png') }}" class="w-12 h-12 rounded-full object-cover border border-slate-200 shadow-sm">
@@ -47,13 +47,16 @@
                                         </div>
                                         <div class="flex justify-between items-center">
                                             <p class="text-sm text-slate-500 truncate max-w-[160px] {{ $conversation->unread_count > 0 ? 'font-bold text-slate-800' : '' }}">
+                                                @if($conversation->last_message_sender_id === Auth::id())
+                                                    <span class="text-slate-400 mr-1">Me:</span>
+                                                @endif
                                                 {{ $conversation->last_message_content ?? 'Start a conversation' }}
                                             </p>
                                             <div class="flex gap-2 items-center">
                                                 @if($conversation->unread_count > 0)
                                                     <span class="bg-primary-600 text-white text-[10px] font-bold h-5 min-w-[20px] px-1.5 flex items-center justify-center rounded-full shadow-sm">{{ $conversation->unread_count }}</span>
                                                 @endif
-                                                <button class="text-slate-300 hover:text-yellow-400 transition-colors"><i class="fas fa-star"></i></button>
+                                                <button class="text-slate-300 hover:text-yellow-400 transition-colors {{ $conversation->is_starred ? 'text-yellow-400' : '' }}"><i class="fas fa-star"></i></button>
                                             </div>
                                         </div>
                                     </div>
@@ -133,28 +136,25 @@
                     @csrf
                     <input type="hidden" name="receiver_id" value="{{ $selectedConversation->id }}">
                     
-                    <div class="bg-white border border-slate-300 rounded-xl p-3 focus-within:ring-1 focus-within:ring-primary-500 focus-within:border-primary-500 transition-all shadow-sm">
-                        <textarea name="message" rows="1" class="w-full bg-transparent border-0 focus:ring-0 text-slate-700 placeholder-slate-400 resize-none p-0 min-h-[24px] max-h-48 leading-relaxed" placeholder="Type a message..." required id="message-input"></textarea>
+                    <div class="bg-white border border-slate-300 rounded-xl focus-within:ring-1 focus-within:ring-slate-400 focus-within:border-slate-400 transition-all shadow-sm">
+                        <textarea name="message" rows="1" class="w-full bg-transparent border-0 focus:ring-0 text-slate-700 placeholder-slate-400 resize-none p-4 min-h-[50px] max-h-48 leading-relaxed" placeholder="Type a message..." required id="message-input"></textarea>
                         
-                        <div class="flex justify-between items-center mt-3 pt-2 border-t border-slate-100">
-                            <div class="flex items-center gap-1">
+                        <div class="flex justify-between items-center px-2 pb-2">
+                            <div class="flex items-center gap-0.5">
                                 <button type="button" class="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-100" title="Emoji">
                                     <i class="far fa-smile text-lg"></i>
                                 </button>
                                 <button type="button" class="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-100" title="Attach file">
                                     <i class="fas fa-paperclip text-lg"></i>
                                 </button>
-                                <button type="button" class="p-2 text-slate-400 hover:text-primary-600 transition-colors rounded-full hover:bg-slate-100" title="Quick Response">
-                                    <i class="fas fa-bolt text-lg"></i>
-                                </button>
                             </div>
                             
                             <div class="flex items-center gap-3">
-                                <button type="button" class="px-4 py-2 bg-slate-100 text-slate-600 text-sm font-semibold rounded-lg hover:bg-slate-200 transition-colors">
+                                <button type="button" class="px-4 py-1.5 bg-slate-800 text-white text-sm font-bold rounded hover:bg-slate-700 transition-colors shadow-sm">
                                     Create an Offer
                                 </button>
-                                <button type="submit" class="px-4 py-2 bg-slate-900 text-white text-sm font-semibold rounded-lg hover:bg-slate-800 transition-colors flex items-center gap-2">
-                                    Send <i class="far fa-paper-plane"></i>
+                                <button type="submit" class="p-2 text-slate-400 hover:text-primary-600 transition-colors rounded-full hover:bg-primary-50" title="Send Message">
+                                    <i class="fas fa-paper-plane text-lg"></i>
                                 </button>
                             </div>
                         </div>
