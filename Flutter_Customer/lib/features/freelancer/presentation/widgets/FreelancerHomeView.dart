@@ -63,6 +63,17 @@ class _FreelancerHomeViewState extends State<FreelancerHomeView> {
 
   // --- Widgets ---
 
+  String _getValidUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+    if (url.startsWith('http')) return url;
+    
+    String cleanPath = url.startsWith('/') ? url.substring(1) : url;
+    if (cleanPath.startsWith('storage/')) {
+       return '${ApiConstants.baseUrl}/$cleanPath';
+    }
+    return '${ApiConstants.baseUrl}/storage/$cleanPath';
+  }
+
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -118,9 +129,7 @@ class _FreelancerHomeViewState extends State<FreelancerHomeView> {
                   shape: BoxShape.circle,
                 ),
                 child: CustomAvatar(
-                  imageUrl: (user?.profileImage != null && !user!.profileImage!.startsWith('http'))
-                      ? '${ApiConstants.baseUrl}/storage/${user!.profileImage}'
-                      : user?.profileImage,
+                  imageUrl: _getValidUrl(user?.profileImage),
                   name: user?.name,
                   size: 44,
                 ),

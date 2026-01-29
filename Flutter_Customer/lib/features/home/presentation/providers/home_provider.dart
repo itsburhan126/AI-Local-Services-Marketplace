@@ -31,6 +31,9 @@ class HomeProvider with ChangeNotifier {
   String? get error => _error;
 
   List<dynamic> _interests = [];
+  List<dynamic> _allCategories = [];
+
+  List<dynamic> get allCategories => _allCategories;
 
   Future<void> loadHomeData({String type = 'local_service'}) async {
     debugPrint('[HomeProvider] loadHomeData: start type=$type');
@@ -84,6 +87,21 @@ class HomeProvider with ChangeNotifier {
       _interests = await _homeService.getInterests(type: type);
     } catch (e) {
       debugPrint('Error loading interests: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadAllCategories({String type = 'local_service'}) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      _allCategories = await _homeService.getAllCategories(type: type);
+      debugPrint('[HomeProvider] loadAllCategories: fetched ${_allCategories.length}');
+    } catch (e) {
+      debugPrint('Error loading all categories: $e');
+      _error = e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();

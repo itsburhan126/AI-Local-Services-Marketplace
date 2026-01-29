@@ -6,11 +6,19 @@
 <div class="content-transition">
     <div class="flex justify-between items-center mb-8">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800 font-jakarta">Freelancer Categories</h1>
+            <h1 class="text-2xl font-bold text-gray-800 font-jakarta">
+                @if($parent)
+                    <a href="{{ route('admin.freelancer-categories.index') }}" class="text-indigo-500 hover:underline">Freelancer Categories</a>
+                    <span class="text-gray-400 mx-2">/</span>
+                    {{ $parent->name }}
+                @else
+                    Freelancer Categories
+                @endif
+            </h1>
             <p class="text-gray-500 mt-1">Manage freelancer service categories and hierarchy</p>
         </div>
-        <a href="{{ route('admin.categories.create') }}" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all flex items-center gap-2 group">
-            <i class="fas fa-plus transition-transform group-hover:rotate-180"></i> Add Category
+        <a href="{{ route('admin.freelancer-categories.create', ['parent_id' => $parent ? $parent->id : null]) }}" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all flex items-center gap-2 group">
+            <i class="fas fa-plus transition-transform group-hover:rotate-180"></i> Add {{ $parent ? 'Subcategory' : 'Category' }}
         </a>
     </div>
 
@@ -57,11 +65,17 @@
                         </td>
                         <td class="px-4 py-4 text-right">
                             <div class="flex items-center justify-end gap-2">
-                                <a href="{{ route('admin.categories.edit', $category->id) }}" 
+                                @if(!$parent)
+                                <a href="{{ route('admin.freelancer-categories.index', ['parent_id' => $category->id]) }}" 
+                                   class="px-3 py-1 rounded-lg bg-indigo-50 text-indigo-600 text-sm font-medium hover:bg-indigo-100 transition-all mr-2">
+                                    Subcategories
+                                </a>
+                                @endif
+                                <a href="{{ route('admin.freelancer-categories.edit', $category->id) }}" 
                                    class="w-8 h-8 rounded-lg flex items-center justify-center bg-white border border-gray-100 shadow-sm hover:shadow-md hover:text-indigo-600 transition-all">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form action="{{ route('admin.categories.destroy', $category->id) }}" method="POST" onsubmit="return confirm('Are you sure?');">
+                                <form action="{{ route('admin.freelancer-categories.destroy', $category->id) }}" method="POST" onsubmit="return confirm('Are you sure?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="w-8 h-8 rounded-lg flex items-center justify-center bg-white border border-gray-100 shadow-sm hover:shadow-md hover:text-red-600 transition-all">

@@ -48,9 +48,9 @@ final serviceTypesProvider = FutureProvider<List<ServiceTypeModel>>((
   return repository.getServiceTypes();
 });
 
-final categoriesProvider = FutureProvider<List<CategoryModel>>((ref) async {
+final categoriesProvider = FutureProvider.family<List<CategoryModel>, int?>((ref, parentId) async {
   final repository = ref.watch(gigRepositoryProvider);
-  return repository.getCategories();
+  return repository.getCategories(parentId: parentId);
 });
 
 final tagsProvider = FutureProvider.family<List<TagModel>, String?>((

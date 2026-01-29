@@ -2,11 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_customer/core/widgets/custom_avatar.dart';
+import 'package:flutter_customer/core/constants/api_constants.dart';
 
 class TestimonialsSection extends StatelessWidget {
   final List<dynamic> items;
 
   const TestimonialsSection({super.key, required this.items});
+
+  String _getValidUrl(String? url) {
+    if (url == null || url.isEmpty || url == 'default') {
+      return '';
+    }
+    if (url.startsWith('http') || url.startsWith('assets')) return url;
+    
+    String cleanPath = url.startsWith('/') ? url.substring(1) : url;
+    
+    if (cleanPath.startsWith('storage/')) {
+      return '${ApiConstants.baseUrl}/$cleanPath';
+    }
+    
+    return '${ApiConstants.baseUrl}/storage/$cleanPath';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +86,7 @@ class TestimonialsSection extends StatelessWidget {
                   border: Border.all(color: const Color(0xFFE2E8F0), width: 2),
                 ),
                 child: CustomAvatar(
-                  imageUrl: item['image'],
+                  imageUrl: _getValidUrl(item['image']),
                   name: item['user'],
                   size: 40,
                 ),

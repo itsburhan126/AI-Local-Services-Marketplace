@@ -15,6 +15,21 @@ class AllReviewsBottomSheet extends StatelessWidget {
     required this.avgRating,
   });
 
+  String _getValidUrl(String? url) {
+    if (url == null || url.isEmpty || url == 'default') {
+      return 'https://placehold.co/400x300?text=No+Image';
+    }
+    if (url.startsWith('http') || url.startsWith('assets')) return url;
+    
+    String cleanPath = url.startsWith('/') ? url.substring(1) : url;
+    
+    if (cleanPath.startsWith('storage/')) {
+      return '${ApiConstants.baseUrl}/$cleanPath';
+    }
+    
+    return '${ApiConstants.baseUrl}/storage/$cleanPath';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -144,12 +159,7 @@ class AllReviewsBottomSheet extends StatelessWidget {
     // Image Resolution Logic
     String? profileImage;
     if (user != null && user['profile_image'] != null) {
-       String img = user['profile_image'];
-       if (img.startsWith('http')) {
-          profileImage = img;
-       } else {
-          profileImage = '${ApiConstants.baseUrl}/storage/$img';
-       }
+       profileImage = _getValidUrl(user['profile_image']);
     }
 
     return Column(

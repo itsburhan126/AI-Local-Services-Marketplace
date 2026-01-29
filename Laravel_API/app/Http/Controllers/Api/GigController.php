@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Gig;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class GigController extends Controller
@@ -16,14 +17,49 @@ class GigController extends Controller
             ->withCount('reviews')
             ->withAvg('reviews', 'rating');
 
-        // Filter by Category
+        // Filter by Category (including subcategories)
         if ($request->has('category_id')) {
-            $query->where('category_id', $request->category_id);
+            $categoryId = $request->category_id;
+            
+            // Get subcategories IDs
+            $categoryIds = Category::where('parent_id', $categoryId)
+                ->pluck('id')
+                ->toArray();
+            
+            // Add the parent category ID
+            $categoryIds[] = $categoryId;
+            
+            $query->whereIn('category_id', $categoryIds);
+        }
+
+        // Filter by Service Type
+        if ($request->has('service_type_id')) {
+            $query->where('service_type_id', $request->service_type_id);
+        }
+
+        // Filter by Price Range
+        if ($request->has('min_price') || $request->has('max_price')) {
+            $query->whereHas('packages', function($q) use ($request) {
+                $q->where('tier', 'Basic');
+                if ($request->has('min_price')) {
+                    $q->where('price', '>=', $request->min_price);
+                }
+                if ($request->has('max_price')) {
+                    $q->where('price', '<=', $request->max_price);
+                }
+            });
         }
 
         // Filter by Provider
         if ($request->has('provider_id')) {
             $query->where('provider_id', $request->provider_id);
+        }
+
+        // Filter by Seller Level
+        if ($request->has('seller_level')) {
+            $query->whereHas('provider.providerProfile', function($q) use ($request) {
+                $q->where('seller_level', $request->seller_level);
+            });
         }
 
         // Search

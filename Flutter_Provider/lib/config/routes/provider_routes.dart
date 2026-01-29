@@ -8,6 +8,7 @@ import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/freelancer/gigs/presentation/pages/create_gig_page.dart';
 import '../../features/chat/presentation/pages/chat_details_page.dart';
 import '../../features/auth/data/models/user_model.dart';
+import '../../features/freelancer/gigs/data/models/gig_model.dart';
 
 import '../../features/auth/presentation/pages/provider_mode_selection_page.dart';
 
@@ -37,7 +38,10 @@ class ProviderRouter {
       ),
       GoRoute(
         path: '/create-gig',
-        builder: (context, state) => const CreateGigPage(),
+        builder: (context, state) {
+          final gig = state.extra as GigModel?;
+          return CreateGigPage(gig: gig);
+        },
       ),
       GoRoute(
         path: '/chat-details',

@@ -24,7 +24,7 @@
                     <p class="text-xl font-bold text-slate-800">{{ $gig->title }}</p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Category</label>
                         <span class="inline-block bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg text-sm font-bold border border-indigo-100">
@@ -36,6 +36,16 @@
                         <span class="inline-block bg-purple-50 text-purple-600 px-3 py-1 rounded-lg text-sm font-bold border border-purple-100">
                             {{ $gig->serviceType->name ?? 'N/A' }}
                         </span>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Starting Price</label>
+                        <p class="text-xl font-bold text-emerald-600">
+                            @if($gig->packages->count() > 0)
+                                ${{ number_format($gig->packages->min('price'), 2) }}
+                            @else
+                                <span class="text-slate-400 text-sm font-normal">N/A</span>
+                            @endif
+                        </p>
                     </div>
                 </div>
 
@@ -57,14 +67,13 @@
                     <div class="relative group aspect-video w-full md:w-1/2 rounded-xl overflow-hidden shadow-sm border border-slate-100">
                         @php
                             $thumbnail = $gig->thumbnail_image;
-                            if (strpos($thumbnail, '/storage/') !== false) {
-                                $parts = explode('/storage/', $thumbnail);
-                                if (count($parts) > 1) {
-                                    $thumbnail = asset('storage/' . $parts[1]);
-                                }
+                            if (Str::startsWith($thumbnail, ['http://', 'https://'])) {
+                                $thumbnailUrl = $thumbnail;
+                            } else {
+                                $thumbnailUrl = asset(Str::startsWith($thumbnail, 'storage/') ? $thumbnail : 'storage/' . $thumbnail);
                             }
                         @endphp
-                        <img src="{{ $thumbnail }}" class="w-full h-full object-cover" alt="Gig Thumbnail">
+                        <img src="{{ $thumbnailUrl }}" class="w-full h-full object-cover" alt="Gig Thumbnail">
                     </div>
                 </div>
                 @endif
@@ -75,11 +84,10 @@
                     @foreach($gig->images as $image)
                     @php
                         $imageUrl = $image;
-                        if (strpos($imageUrl, '/storage/') !== false) {
-                            $parts = explode('/storage/', $imageUrl);
-                            if (count($parts) > 1) {
-                                $imageUrl = asset('storage/' . $parts[1]);
-                            }
+                        if (Str::startsWith($imageUrl, ['http://', 'https://'])) {
+                            // Do nothing, already full URL
+                        } else {
+                            $imageUrl = asset(Str::startsWith($imageUrl, 'storage/') ? $imageUrl : 'storage/' . $imageUrl);
                         }
                     @endphp
                     <div class="relative group aspect-square rounded-xl overflow-hidden shadow-sm border border-slate-100">
@@ -149,6 +157,8 @@
                         {{ $gig->status === 'approved' ? 'bg-emerald-100 text-emerald-600' : '' }}
                         {{ $gig->status === 'pending' ? 'bg-amber-100 text-amber-600' : '' }}
                         {{ $gig->status === 'rejected' ? 'bg-red-100 text-red-600' : '' }}
+                        {{ $gig->status === 'suspended' ? 'bg-red-100 text-red-800' : '' }}
+                        {{ $gig->status === 'paused' ? 'bg-orange-100 text-orange-600' : '' }}
                     ">
                         {{ $gig->status }}
                     </span>
@@ -167,6 +177,24 @@
                         <i class="fas fa-times-circle"></i> Reject Gig
                     </button>
                 </div>
+                @elseif($gig->status === 'approved')
+                <div class="space-y-3">
+                    <button onclick="document.getElementById('pauseModal').classList.remove('hidden')" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-orange-200 transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-pause-circle"></i> Pause Gig
+                    </button>
+                    <button onclick="document.getElementById('suspendModal').classList.remove('hidden')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-red-200 transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-ban"></i> Suspend Gig
+                    </button>
+                </div>
+                @else
+                <div class="space-y-3">
+                     <form action="{{ route('admin.gigs.approve', $gig->id) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-emerald-200 transition-all flex items-center justify-center gap-2">
+                            <i class="fas fa-check-circle"></i> Reactivate Gig
+                        </button>
+                    </form>
+                </div>
                 @endif
             </div>
 
@@ -174,12 +202,21 @@
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
                 <h2 class="text-lg font-bold text-slate-800 mb-4">Freelancer</h2>
                 <div class="flex items-center gap-3 mb-4">
-                    <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xl">
-                        {{ substr($gig->provider->name, 0, 1) }}
+                    <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xl overflow-hidden">
+                        @if($gig->provider->avatar)
+                            <img src="{{ $gig->provider->avatar }}" class="w-full h-full object-cover">
+                        @else
+                            {{ substr($gig->provider->name, 0, 1) }}
+                        @endif
                     </div>
                     <div>
                         <h3 class="font-bold text-slate-800">{{ $gig->provider->name }}</h3>
                         <p class="text-xs text-slate-500">{{ $gig->provider->email }}</p>
+                        <div class="flex items-center gap-1 text-amber-500 text-xs mt-1 font-bold">
+                             <i class="fas fa-star"></i>
+                             <span>{{ $providerRating }}</span>
+                             <span class="text-slate-400 font-normal">({{ $providerReviewsCount }} reviews)</span>
+                        </div>
                     </div>
                 </div>
                 <a href="{{ route('admin.providers.show', $gig->provider->id) }}" class="block w-full text-center bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold py-2 rounded-lg text-sm transition-colors">
@@ -210,6 +247,60 @@
                     </button>
                     <button type="submit" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-red-200 transition-colors">
                         Reject Gig
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Pause Modal -->
+<div id="pauseModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all">
+        <div class="p-6">
+            <h3 class="text-xl font-bold text-slate-800 mb-2">Pause Gig</h3>
+            <p class="text-slate-500 text-sm mb-4">Temporarily pause this gig. The freelancer will be notified.</p>
+            
+            <form action="{{ route('admin.gigs.pause', $gig->id) }}" method="POST">
+                @csrf
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Pause Reason</label>
+                    <textarea name="admin_note" rows="4" class="w-full border-slate-200 rounded-xl focus:ring-orange-500 focus:border-orange-500 text-sm" placeholder="e.g., Verification required, temporary issue..." required></textarea>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button type="button" onclick="document.getElementById('pauseModal').classList.add('hidden')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-orange-200 transition-colors">
+                        Pause Gig
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Suspend Modal -->
+<div id="suspendModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all">
+        <div class="p-6">
+            <h3 class="text-xl font-bold text-slate-800 mb-2">Suspend Gig</h3>
+            <p class="text-slate-500 text-sm mb-4">Suspend this gig due to policy violations. This action is severe.</p>
+            
+            <form action="{{ route('admin.gigs.suspend', $gig->id) }}" method="POST">
+                @csrf
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Suspension Reason</label>
+                    <textarea name="admin_note" rows="4" class="w-full border-slate-200 rounded-xl focus:ring-red-500 focus:border-red-500 text-sm" placeholder="e.g., Policy violation, fraudulent activity..." required></textarea>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button type="button" onclick="document.getElementById('suspendModal').classList.add('hidden')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-red-200 transition-colors">
+                        Suspend Gig
                     </button>
                 </div>
             </form>

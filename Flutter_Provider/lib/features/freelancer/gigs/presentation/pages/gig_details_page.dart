@@ -30,6 +30,7 @@ class GigDetailsPage extends ConsumerStatefulWidget {
 class _GigDetailsPageState extends ConsumerState<GigDetailsPage> {
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _analyticsKey = GlobalKey();
+  int _currentImageIndex = 0;
 
   @override
   void initState() {
@@ -317,9 +318,9 @@ class _GigDetailsPageState extends ConsumerState<GigDetailsPage> {
                     const SizedBox(height: 24),
                     _buildActionButtons(gig),
                     const SizedBox(height: 32),
-                    if (gig.status == 'rejected' &&
+                    if (['rejected', 'suspended', 'paused'].contains(gig.status.toLowerCase()) &&
                         gig.adminNote != null)
-                      _buildRejectionNote(gig),
+                      _buildStatusNote(gig),
                     Container(
                       key: _analyticsKey,
                       child: _buildPerformanceGrid(analyticsAsync),
@@ -352,6 +353,13 @@ class _GigDetailsPageState extends ConsumerState<GigDetailsPage> {
   }
 
   Widget _buildAppBar(BuildContext context, GigModel gig) {
+    // Collect all images (Thumbnail + Images)
+    final List<String> allImages = [];
+    if (gig.thumbnail != null && gig.thumbnail!.isNotEmpty) {
+      allImages.add(gig.thumbnail!);
+    }
+    allImages.addAll(gig.images);
+
     return SliverAppBar(
       expandedHeight: 300,
       pinned: true,
@@ -360,30 +368,73 @@ class _GigDetailsPageState extends ConsumerState<GigDetailsPage> {
         background: Stack(
           fit: StackFit.expand,
           children: [
-            (gig.images.isNotEmpty || gig.thumbnail != null)
-                ? Image.network(
-                    // Ensure resolveImageUrl is used
-                    resolveImageUrl(gig.images.isNotEmpty 
-                        ? gig.images.first 
-                        : gig.thumbnail!), 
+            if (allImages.isNotEmpty)
+              PageView.builder(
+                itemCount: allImages.length,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentImageIndex = index;
+                  });
+                },
+                itemBuilder: (context, index) {
+                  return Image.network(
+                    resolveImageUrl(allImages[index]),
                     fit: BoxFit.cover,
-                  )
-                : Container(color: const Color(0xFF1E293B)),
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
+                  );
+                },
+              )
+            else
+              Container(color: const Color(0xFF1E293B)),
+            IgnorePointer(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
+                  ),
                 ),
               ),
             ),
+            if (allImages.length > 1)
+              Positioned(
+                bottom: 12,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: List.generate(allImages.length, (index) {
+                        return Container(
+                          width: 8,
+                          height: 8,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _currentImageIndex == index
+                                ? Colors.white
+                                : Colors.white.withOpacity(0.4),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+              ),
             Positioned(
-              bottom: 20,
+              bottom: 36,
               left: 20,
               right: 20,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -641,31 +692,75 @@ class _GigDetailsPageState extends ConsumerState<GigDetailsPage> {
     );
   }
 
-  Widget _buildRejectionNote(GigModel gig) {
+  Widget _buildStatusNote(GigModel gig) {
+    if (gig.adminNote == null || gig.adminNote!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    Color bgColor;
+    Color borderColor;
+    Color iconColor;
+    Color titleColor;
+    Color textColor;
+    String title;
+    IconData icon;
+
+    switch (gig.status.toLowerCase()) {
+      case 'rejected':
+        bgColor = const Color(0xFFFEF2F2);
+        borderColor = const Color(0xFFFECACA);
+        iconColor = const Color(0xFFDC2626);
+        titleColor = const Color(0xFF991B1B);
+        textColor = const Color(0xFF7F1D1D);
+        title = 'Rejection Reason';
+        icon = Icons.error_outline_rounded;
+        break;
+      case 'suspended':
+        bgColor = const Color(0xFFFEF2F2);
+        borderColor = const Color(0xFFFECACA);
+        iconColor = const Color(0xFFDC2626);
+        titleColor = const Color(0xFF991B1B);
+        textColor = const Color(0xFF7F1D1D);
+        title = 'Suspension Reason';
+        icon = Icons.block_rounded;
+        break;
+      case 'paused':
+        bgColor = const Color(0xFFFFFBEB);
+        borderColor = const Color(0xFFFDE68A);
+        iconColor = const Color(0xFFD97706);
+        titleColor = const Color(0xFF92400E);
+        textColor = const Color(0xFF78350F);
+        title = 'Paused Reason';
+        icon = Icons.pause_circle_outline_rounded;
+        break;
+      default:
+        return const SizedBox.shrink();
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEF2F2),
+        color: bgColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFFECACA)),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.info_outline_rounded,
-                color: Color(0xFFDC2626),
+              Icon(
+                icon,
+                color: iconColor,
                 size: 20,
               ),
               const SizedBox(width: 8),
               Text(
-                'Rejection Reason',
+                title,
                 style: GoogleFonts.plusJakartaSans(
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF991B1B),
+                  color: titleColor,
                 ),
               ),
             ],
@@ -674,7 +769,7 @@ class _GigDetailsPageState extends ConsumerState<GigDetailsPage> {
           Text(
             gig.adminNote!,
             style: GoogleFonts.plusJakartaSans(
-              color: const Color(0xFF7F1D1D),
+              color: textColor,
               fontSize: 14,
             ),
           ),

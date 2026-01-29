@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../../core/utils/image_helper.dart';
 import '../../data/models/gig_model.dart';
 import '../../data/models/gig_faq_model.dart';
 import '../../data/models/tag_model.dart';
@@ -27,7 +28,8 @@ class _CreateGigPageState extends ConsumerState<CreateGigPage> {
   // Form Data
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  int? _selectedCategoryId;
+  int? _selectedMainCategoryId;
+  int? _selectedSubCategoryId;
   int? _selectedServiceTypeId;
   final List<String> _selectedTags = [];
 
@@ -99,7 +101,15 @@ class _CreateGigPageState extends ConsumerState<CreateGigPage> {
     final gig = widget.gig!;
     _titleController.text = gig.title;
     _descriptionController.text = gig.description;
-    _selectedCategoryId = gig.categoryId;
+    
+    if (gig.category?.parentId != null) {
+      _selectedMainCategoryId = gig.category!.parentId;
+      _selectedSubCategoryId = gig.categoryId;
+    } else {
+      _selectedMainCategoryId = gig.categoryId;
+      _selectedSubCategoryId = null;
+    }
+
     _selectedServiceTypeId = gig.serviceTypeId;
     _selectedTags.addAll(gig.tags);
     _existingThumbnail = gig.thumbnail;
@@ -195,7 +205,7 @@ class _CreateGigPageState extends ConsumerState<CreateGigPage> {
       final gig = GigModel(
         id: widget.gig?.id,
         providerId: widget.gig?.providerId ?? 0,
-        categoryId: _selectedCategoryId!,
+        categoryId: _selectedSubCategoryId ?? _selectedMainCategoryId!,
         serviceTypeId: _selectedServiceTypeId,
         title: _titleController.text,
         slug: widget.gig?.slug ?? '',
@@ -611,7 +621,8 @@ class _CreateGigPageState extends ConsumerState<CreateGigPage> {
   }
 
   Widget _buildOverviewStep() {
-    final categoriesAsync = ref.watch(categoriesProvider);
+    final mainCategoriesAsync = ref.watch(categoriesProvider(null));
+    final subCategoriesAsync = ref.watch(categoriesProvider(_selectedMainCategoryId));
     final serviceTypesAsync = ref.watch(serviceTypesProvider);
 
     return Column(
@@ -627,27 +638,70 @@ class _CreateGigPageState extends ConsumerState<CreateGigPage> {
         const SizedBox(height: 24),
 
         _buildSectionTitle('Category', 'Select the category that fits best'),
-        categoriesAsync.when(
-          data: (categories) => DropdownButtonFormField<int>(
-            isExpanded: true,
-            decoration: _inputDecoration(
-              'Select Category',
-              Icons.category_outlined,
-            ),
-            value: _selectedCategoryId,
-            items: categories
-                .map(
-                  (c) => DropdownMenuItem(
-                    value: c.id,
-                    child: Text(
-                      c.name,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                )
-                .toList(),
-            onChanged: (val) => setState(() => _selectedCategoryId = val),
-            validator: (val) => val == null ? 'Required' : null,
+        mainCategoriesAsync.when(
+          data: (categories) => Column(
+            children: [
+              DropdownButtonFormField<int>(
+                isExpanded: true,
+                decoration: _inputDecoration(
+                  'Select Main Category',
+                  Icons.category_outlined,
+                ),
+                value: _selectedMainCategoryId,
+                items: categories
+                    .map(
+                      (c) => DropdownMenuItem(
+                        value: c.id,
+                        child: Text(
+                          c.name,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (val) {
+                  if (val != _selectedMainCategoryId) {
+                    setState(() {
+                      _selectedMainCategoryId = val;
+                      _selectedSubCategoryId = null;
+                    });
+                  }
+                },
+                validator: (val) => val == null ? 'Required' : null,
+              ),
+              if (_selectedMainCategoryId != null) ...[
+                const SizedBox(height: 16),
+                subCategoriesAsync.when(
+                  data: (subCategories) {
+                    if (subCategories.isEmpty) return const SizedBox();
+                    return DropdownButtonFormField<int>(
+                      isExpanded: true,
+                      decoration: _inputDecoration(
+                        'Select Sub Category',
+                        Icons.subdirectory_arrow_right,
+                      ),
+                      value: _selectedSubCategoryId,
+                      items: subCategories
+                          .map(
+                            (c) => DropdownMenuItem(
+                              value: c.id,
+                              child: Text(
+                                c.name,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (val) =>
+                          setState(() => _selectedSubCategoryId = val),
+                      validator: (val) => val == null ? 'Required' : null,
+                    );
+                  },
+                  loading: () => const LinearProgressIndicator(),
+                  error: (_, __) => const SizedBox(),
+                ),
+              ],
+            ],
           ),
           loading: () => const LinearProgressIndicator(),
           error: (_, __) => const Text('Failed to load categories'),
@@ -1141,7 +1195,7 @@ class _CreateGigPageState extends ConsumerState<CreateGigPage> {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: Image.network(
-                              url,
+                              resolveImageUrl(url),
                               width: 80,
                               height: 80,
                               fit: BoxFit.cover,

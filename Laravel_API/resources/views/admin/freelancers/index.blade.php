@@ -206,7 +206,9 @@
                     <div class="space-y-4">
                         @foreach($freelancers->take(5) as $freelancer)
                         <div class="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                             <img src="{{ $freelancer->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode($freelancer->name) }}" class="w-10 h-10 rounded-full object-cover">
+                             <img src="{{ !empty($freelancer->avatar) ? $freelancer->avatar : 'https://ui-avatars.com/api/?name='.urlencode($freelancer->name).'&color=7F9CF5&background=EBF4FF' }}" 
+                                  onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($freelancer->name) }}&color=7F9CF5&background=EBF4FF';"
+                                  class="w-10 h-10 rounded-full object-cover shadow-sm">
                              <div>
                                  <h4 class="font-bold text-slate-800 text-sm">{{ $freelancer->name }}</h4>
                                  <p class="text-xs text-slate-500">{{ $freelancer->email }}</p>
@@ -223,7 +225,9 @@
                      <div class="space-y-4">
                         @foreach($gigs->take(5) as $gig)
                         <div class="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                             <img src="{{ $gig->image_url ?? 'https://via.placeholder.com/150' }}" class="w-10 h-10 rounded-lg object-cover">
+                             <img src="{{ !empty($gig->image_url) ? $gig->image_url : 'https://placehold.co/100x100?text=Gig' }}" 
+                                  onerror="this.onerror=null;this.src='https://placehold.co/100x100?text=Gig';"
+                                  class="w-10 h-10 rounded-lg object-cover shadow-sm border border-slate-100">
                              <div>
                                  <h4 class="font-bold text-slate-800 text-sm">{{ Str::limit($gig->title, 30) }}</h4>
                                  <p class="text-xs text-slate-500">{{ $gig->provider->name ?? 'Unknown' }}</p>
@@ -253,7 +257,9 @@
                             <tr class="hover:bg-slate-50/50 transition-colors">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
-                                        <img src="{{ $freelancer->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode($freelancer->name) }}" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm">
+                                        <img src="{{ !empty($freelancer->avatar) ? $freelancer->avatar : 'https://ui-avatars.com/api/?name='.urlencode($freelancer->name).'&color=7F9CF5&background=EBF4FF' }}" 
+                                             onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($freelancer->name) }}&color=7F9CF5&background=EBF4FF';"
+                                             class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm">
                                         <div>
                                             <p class="font-bold text-slate-800 text-sm">{{ $freelancer->name }}</p>
                                             <p class="text-xs text-slate-500">{{ $freelancer->email }}</p>

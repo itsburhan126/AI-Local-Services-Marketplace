@@ -36,7 +36,17 @@ class GigController extends Controller
     public function show(Gig $gig)
     {
         $gig->load(['provider', 'category', 'serviceType', 'packages', 'extras', 'relatedTags']);
-        return view('admin.gigs.show', compact('gig'));
+        
+        // Calculate dynamic stats for the provider
+        $providerId = $gig->provider_id;
+        $providerReviewStats = \App\Models\Review::where('provider_id', $providerId)
+            ->selectRaw('count(*) as count, avg(rating) as rating')
+            ->first();
+            
+        $providerRating = $providerReviewStats ? round($providerReviewStats->rating, 1) : 0.0;
+        $providerReviewsCount = $providerReviewStats ? $providerReviewStats->count : 0;
+
+        return view('admin.gigs.show', compact('gig', 'providerRating', 'providerReviewsCount'));
     }
 
     public function approve(Gig $gig)
@@ -63,5 +73,35 @@ class GigController extends Controller
         // Optional: Send notification to provider
 
         return redirect()->back()->with('success', 'Gig rejected.');
+    }
+
+    public function suspend(Request $request, Gig $gig)
+    {
+        $request->validate([
+            'admin_note' => 'required|string',
+        ]);
+
+        $gig->update([
+            'status' => 'suspended', 
+            'is_active' => false,
+            'admin_note' => $request->admin_note
+        ]);
+
+        return redirect()->back()->with('success', 'Gig suspended successfully.');
+    }
+
+    public function pause(Request $request, Gig $gig)
+    {
+        $request->validate([
+            'admin_note' => 'required|string',
+        ]);
+
+        $gig->update([
+            'status' => 'paused', 
+            'is_active' => false,
+            'admin_note' => $request->admin_note
+        ]);
+
+        return redirect()->back()->with('success', 'Gig paused successfully.');
     }
 }

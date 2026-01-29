@@ -191,9 +191,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
                               ],
                             ),
                             child: CustomAvatar(
-                              imageUrl: (image.isNotEmpty && !image.contains('default.png') && !image.contains('via.placeholder.com'))
-                                  ? image
-                                  : null,
+                              imageUrl: _getValidUrl(image),
                               name: name,
                               size: 110,
                             ),
@@ -374,6 +372,23 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
         ),
       ],
     );
+  }
+
+  String _getValidUrl(String? url) {
+    if (url == null || url.isEmpty || url == 'default') {
+      return '';
+    }
+    if (url.startsWith('http') || url.startsWith('assets')) return url;
+    
+    String cleanPath = url.startsWith('/') ? url.substring(1) : url;
+    
+    // Check if path already has storage/ prefix
+    if (cleanPath.startsWith('storage/')) {
+      return '${ApiConstants.baseUrl}/$cleanPath';
+    }
+    
+    // Default to storage folder for relative paths
+    return '${ApiConstants.baseUrl}/storage/$cleanPath';
   }
 
   Widget _buildAboutTab() {
@@ -628,7 +643,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
       itemCount: _gigs.length,
       itemBuilder: (context, index) {
         final gig = _gigs[index];
-        final gigImage = gig['thumbnail_image'] ?? gig['image'] ?? '';
+        final gigImage = _getValidUrl(gig['thumbnail_image'] ?? gig['image']);
         final title = gig['title'] ?? gig['name'] ?? 'Untitled';
         final rating = double.tryParse(gig['rating']?.toString() ?? '0') ?? 0.0;
         final reviews = (gig['reviews'] as List?)?.length ?? 0;
@@ -667,7 +682,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                   child: CachedNetworkImage(
-                    imageUrl: (gigImage.isNotEmpty && gigImage.startsWith('http')) 
+                    imageUrl: gigImage.isNotEmpty 
                         ? gigImage 
                         : 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop',
                     height: 140,
@@ -905,7 +920,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
       itemCount: portfolios.length,
       itemBuilder: (context, index) {
         final item = portfolios[index];
-        final image = item['image_url'] ?? item['image'] ?? '';
+        final image = _getValidUrl(item['image_url'] ?? item['image']);
         final title = item['title'] ?? '';
 
         return ClipRRect(
@@ -914,7 +929,7 @@ class _FreelancerProfilePageState extends State<FreelancerProfilePage> with Sing
             fit: StackFit.expand,
             children: [
               CachedNetworkImage(
-                imageUrl: image.startsWith('http') ? image : '${ApiConstants.baseUrl}/storage/$image',
+                imageUrl: image.isNotEmpty ? image : 'https://placehold.co/400x400?text=No+Image',
                 fit: BoxFit.cover,
                 placeholder: (context, url) => Container(
                   color: Colors.grey[200],

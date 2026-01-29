@@ -52,6 +52,21 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
   String _searchQuery = '';
   late ChatProvider _chatProvider;
 
+  String _getValidUrl(String? url) {
+    if (url == null || url.isEmpty || url == 'default') {
+      return 'https://placehold.co/400x300?text=No+Image';
+    }
+    if (url.startsWith('http') || url.startsWith('assets')) return url;
+    
+    String cleanPath = url.startsWith('/') ? url.substring(1) : url;
+    
+    if (cleanPath.startsWith('storage/')) {
+      return '${ApiConstants.baseUrl}/$cleanPath';
+    }
+    
+    return '${ApiConstants.baseUrl}/storage/$cleanPath';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -423,13 +438,8 @@ class _ChatDetailsPageState extends State<ChatDetailsPage> {
     bool isVideo = type == 'video' || (type == null && (path.endsWith('.mp4') || path.endsWith('.mov')));
 
     if (isImage) {
-      String displayPath = path;
-      bool isNetwork = path.startsWith('http');
-      
-      if (!isNetwork && path.startsWith('/storage')) {
-         displayPath = '${ApiConstants.baseUrl}$path';
-         isNetwork = true;
-      }
+      String displayPath = _getValidUrl(path);
+      bool isNetwork = displayPath.startsWith('http');
 
       return Padding(
         padding: const EdgeInsets.only(bottom: 8),

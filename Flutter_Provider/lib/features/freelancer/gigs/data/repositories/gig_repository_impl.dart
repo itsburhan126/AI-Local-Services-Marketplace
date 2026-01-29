@@ -99,8 +99,8 @@ class GigRepositoryImpl implements GigRepository {
   }
 
   @override
-  Future<List<CategoryModel>> getCategories() async {
-    return await remoteDataSource.getCategories();
+  Future<List<CategoryModel>> getCategories({int? parentId}) async {
+    return await remoteDataSource.getCategories(parentId: parentId);
   }
 
   @override

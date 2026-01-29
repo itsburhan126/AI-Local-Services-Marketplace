@@ -4,6 +4,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import '../../../../../core/utils/image_helper.dart';
 import '../../data/models/gig_model.dart';
 import '../providers/gig_provider.dart';
 import 'gig_details_page.dart';
@@ -61,18 +63,22 @@ class GigsPage extends ConsumerWidget {
           if (gigs.isEmpty) {
             return _buildEmptyState(context);
           }
-          return RefreshIndicator(
+          return LiquidPullToRefresh(
             onRefresh: () => ref.refresh(providerGigsProvider.future),
             color: const Color(0xFF6366F1),
+            backgroundColor: Colors.white,
+            height: 100,
+            animSpeedFactor: 2.0,
+            showChildOpacityTransition: false,
             child: CustomScrollView(
               physics: const BouncingScrollPhysics(),
               slivers: [
                 SliverPadding(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final gig = gigs[index];
-                      return _buildGigCard(context, gig, index);
+                      return _buildGigCard(context, ref, gig, index);
                     }, childCount: gigs.length),
                   ),
                 ),
@@ -277,7 +283,7 @@ class GigsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildGigCard(BuildContext context, GigModel gig, int index) {
+  Widget _buildGigCard(BuildContext context, WidgetRef widgetRef, GigModel gig, int index) {
     final basicPrice = gig.packages.isNotEmpty
         ? gig.packages
               .firstWhere(
@@ -326,13 +332,18 @@ class GigsPage extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(16),
                           image: gig.images.isNotEmpty
                               ? DecorationImage(
-                                  image: NetworkImage(gig.images.first),
+                                  image: NetworkImage(resolveImageUrl(gig.images.first)),
                                   fit: BoxFit.cover,
                                 )
-                              : null,
+                              : (gig.thumbnail != null
+                                  ? DecorationImage(
+                                      image: NetworkImage(resolveImageUrl(gig.thumbnail!)),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null),
                           color: const Color(0xFFF1F5F9),
                         ),
-                        child: gig.images.isEmpty
+                        child: gig.images.isEmpty && gig.thumbnail == null
                             ? Icon(
                                 Icons.image_outlined,
                                 color: Colors.grey[400],
@@ -351,7 +362,7 @@ class GigsPage extends ConsumerWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               _buildStatusChip(gig.status),
-                              _buildMenuButton(context),
+                              _buildMenuButton(context, widgetRef, gig),
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -456,15 +467,102 @@ class GigsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildMenuButton(BuildContext context) {
+  Widget _buildMenuButton(BuildContext context, WidgetRef ref, GigModel gig) {
     return SizedBox(
       width: 32,
       height: 32,
-      child: IconButton(
-        onPressed: () {},
-        icon: const Icon(Icons.more_horiz_rounded, size: 20),
-        color: const Color(0xFF94A3B8),
+      child: PopupMenuButton<String>(
+        onSelected: (value) {
+          switch (value) {
+            case 'edit':
+              context.push('/create-gig', extra: gig);
+              break;
+            case 'delete':
+              _showDeleteConfirmation(context, ref, gig);
+              break;
+            case 'view':
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => GigDetailsPage(gig: gig)),
+              );
+              break;
+          }
+        },
+        itemBuilder: (context) => [
+          PopupMenuItem(
+            value: 'view',
+            child: Row(
+              children: [
+                Icon(Icons.visibility_rounded,
+                    size: 20, color: Colors.grey[700]),
+                const SizedBox(width: 8),
+                Text('View Details',
+                    style: GoogleFonts.plusJakartaSans(fontSize: 14)),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: 'edit',
+            child: Row(
+              children: [
+                Icon(Icons.edit_rounded, size: 20, color: Colors.blue[700]),
+                const SizedBox(width: 8),
+                Text('Edit Gig',
+                    style: GoogleFonts.plusJakartaSans(fontSize: 14)),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: 'delete',
+            child: Row(
+              children: [
+                Icon(Icons.delete_rounded, size: 20, color: Colors.red[700]),
+                const SizedBox(width: 8),
+                Text('Delete',
+                    style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14, color: Colors.red[700])),
+              ],
+            ),
+          ),
+        ],
+        icon: const Icon(Icons.more_horiz_rounded,
+            size: 20, color: Color(0xFF94A3B8)),
         padding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(
+      BuildContext context, WidgetRef ref, GigModel gig) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete Gig?',
+            style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+        content: Text(
+          'Are you sure you want to delete "${gig.title}"? This action cannot be undone.',
+          style: GoogleFonts.plusJakartaSans(),
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel',
+                style: GoogleFonts.plusJakartaSans(color: Colors.grey[600])),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              if (gig.id != null) {
+                ref.read(gigControllerProvider.notifier).deleteGig(gig.id!);
+              }
+            },
+            child: Text('Delete',
+                style: GoogleFonts.plusJakartaSans(
+                    color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
       ),
     );
   }

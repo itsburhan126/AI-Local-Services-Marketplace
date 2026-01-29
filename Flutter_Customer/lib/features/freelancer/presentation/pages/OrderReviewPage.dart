@@ -19,6 +19,21 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
   String _selectedPaymentMethod = 'credit_card';
   bool _isProcessing = false;
 
+  String _getValidUrl(String? url) {
+    if (url == null || url.isEmpty || url == 'default') {
+      return 'https://placehold.co/400x300?text=No+Image';
+    }
+    if (url.startsWith('http') || url.startsWith('assets')) return url;
+    
+    String cleanPath = url.startsWith('/') ? url.substring(1) : url;
+    
+    if (cleanPath.startsWith('storage/')) {
+      return '${ApiConstants.baseUrl}/$cleanPath';
+    }
+    
+    return '${ApiConstants.baseUrl}/storage/$cleanPath';
+  }
+
   double get _totalPrice => double.tryParse(widget.bookingData['total_price'].toString()) ?? 0.0;
   double get _serviceFee => (_totalPrice * 0.05).clamp(2.0, 50.0); // 5% fee
   double get _grandTotal => _totalPrice + _serviceFee;
@@ -74,9 +89,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.network(
-                          widget.bookingData['image'] != null && !widget.bookingData['image'].toString().startsWith('http')
-                              ? '${ApiConstants.baseUrl}/${widget.bookingData['image']}'.replaceAll('//', '/').replaceFirst('http:/', 'http://').replaceFirst('https:/', 'https://')
-                              : widget.bookingData['image'] ?? '',
+                          _getValidUrl(widget.bookingData['image']),
                           width: 80,
                           height: 80,
                           fit: BoxFit.cover,

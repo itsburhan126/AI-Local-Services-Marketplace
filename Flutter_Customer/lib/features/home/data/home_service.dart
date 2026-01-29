@@ -80,13 +80,73 @@ class HomeService {
     }
   }
 
-  // Fetch Gigs by Category
-  Future<List<dynamic>> getGigsByCategory(int categoryId) async {
+  // Fetch Service Types
+  Future<List<dynamic>> getServiceTypes() async {
     try {
-      debugPrint('[HomeService] GET gigs by category: ${ApiConstants.baseUrl}/api/gigs?category_id=$categoryId');
+      debugPrint('[HomeService] GET service types: ${ApiConstants.baseUrl}/api/service-types');
+      final response = await _dio.get('${ApiConstants.baseUrl}/api/service-types');
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'] ?? [];
+        return data;
+      }
+      return [];
+    } catch (e) {
+      debugPrint('[HomeService] getServiceTypes error: $e');
+      return [];
+    }
+  }
+
+  // Fetch Sub Categories
+  Future<List<dynamic>> getSubCategories(dynamic parentId, {String type = 'freelancer'}) async {
+    try {
+      debugPrint('[HomeService] GET sub categories: ${ApiConstants.baseUrl}/api/categories?parent_id=$parentId&type=$type');
+      final response = await _dio.get(
+        '${ApiConstants.baseUrl}/api/categories',
+        queryParameters: {
+          'type': type,
+          'parent_id': parentId,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        dynamic rawData = response.data['data'];
+        // Handle pagination if present
+        if (rawData is Map && rawData.containsKey('data')) {
+          rawData = rawData['data'];
+        }
+        final data = _fixDataUrls(rawData ?? []);
+        debugPrint('[HomeService] sub categories status: ${response.statusCode}, count: ${data.length}');
+        return data;
+      }
+      return [];
+    } catch (e) {
+      debugPrint('[HomeService] getSubCategories error: $e');
+      return [];
+    }
+  }
+
+  // Fetch Gigs by Category
+  Future<List<dynamic>> getGigsByCategory(int categoryId, {int? serviceTypeId, double? minPrice, double? maxPrice, String? sellerLevel}) async {
+    try {
+      debugPrint('[HomeService] GET gigs by category: ${ApiConstants.baseUrl}/api/gigs?category_id=$categoryId&service_type_id=$serviceTypeId&min_price=$minPrice&max_price=$maxPrice&seller_level=$sellerLevel');
+      final Map<String, dynamic> queryParams = {'category_id': categoryId};
+      if (serviceTypeId != null) {
+        queryParams['service_type_id'] = serviceTypeId;
+      }
+      if (minPrice != null) {
+        queryParams['min_price'] = minPrice;
+      }
+      if (maxPrice != null) {
+        queryParams['max_price'] = maxPrice;
+      }
+      if (sellerLevel != null) {
+        queryParams['seller_level'] = sellerLevel;
+      }
+
       final response = await _dio.get(
         '${ApiConstants.baseUrl}/api/gigs',
-        queryParameters: {'category_id': categoryId},
+        queryParameters: queryParams,
       );
 
       if (response.statusCode == 200) {
@@ -236,8 +296,12 @@ class HomeService {
       return 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80';
     }
     if (url.startsWith('http')) return url;
-    if (url.startsWith('/')) return '${ApiConstants.baseUrl}$url';
-    return '${ApiConstants.baseUrl}/$url';
+    
+    String cleanPath = url.startsWith('/') ? url.substring(1) : url;
+    if (cleanPath.startsWith('storage/')) {
+       return '${ApiConstants.baseUrl}/$cleanPath';
+    }
+    return '${ApiConstants.baseUrl}/storage/$cleanPath';
   }
 
   Future<List<dynamic>> getCategories() async {

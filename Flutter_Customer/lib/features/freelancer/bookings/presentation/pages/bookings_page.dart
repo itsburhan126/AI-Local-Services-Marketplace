@@ -179,8 +179,8 @@ class _BookingsPageState extends State<BookingsPage> with SingleTickerProviderSt
 
   Widget _buildBookingCard(BuildContext context, dynamic booking, int index) {
     String? imageUrl = booking['image'];
-    if (imageUrl != null && !imageUrl.startsWith('http')) {
-      imageUrl = '${ApiConstants.baseUrl}/$imageUrl'.replaceAll('//', '/').replaceFirst('http:/', 'http://').replaceFirst('https:/', 'https://');
+    if (imageUrl != null) {
+      imageUrl = _getValidUrl(imageUrl);
     }
 
     return Container(
@@ -299,7 +299,7 @@ class _BookingsPageState extends State<BookingsPage> with SingleTickerProviderSt
                   children: [
                     CustomAvatar(
                       imageUrl: booking['provider_image'] != null
-                          ? '${ApiConstants.baseUrl}/${booking['provider_image']}'.replaceAll('//', '/').replaceFirst('http:/', 'http://').replaceFirst('https:/', 'https://')
+                          ? _getValidUrl(booking['provider_image'])
                           : null,
                       name: booking['provider_name'],
                       size: 24,
@@ -344,5 +344,22 @@ class _BookingsPageState extends State<BookingsPage> with SingleTickerProviderSt
         ),
       ),
     ).animate().fadeIn(delay: (50 * index).ms).slideY(begin: 0.1);
+  }
+
+  String _getValidUrl(String? url) {
+    if (url == null || url.isEmpty || url == 'default') {
+      return 'https://placehold.co/400x300?text=No+Image';
+    }
+    if (url.startsWith('http') || url.startsWith('assets')) return url;
+    
+    String cleanPath = url.startsWith('/') ? url.substring(1) : url;
+    
+    // Check if path already has storage/ prefix
+    if (cleanPath.startsWith('storage/')) {
+      return '${ApiConstants.baseUrl}/$cleanPath';
+    }
+    
+    // Default to storage folder for relative paths
+    return '${ApiConstants.baseUrl}/storage/$cleanPath';
   }
 }

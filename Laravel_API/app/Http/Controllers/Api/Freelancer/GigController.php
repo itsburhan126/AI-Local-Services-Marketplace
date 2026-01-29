@@ -27,7 +27,113 @@ class GigController extends Controller
 
     public function store(Request $request)
     {
-        // ... (store method implementation)
+        try {
+            DB::beginTransaction();
+
+            $request->validate([
+                'title' => 'required|string|max:255',
+                'category_id' => 'required|exists:categories,id',
+                'description' => 'required|string',
+                'packages' => 'required',
+            ]);
+
+            $thumbnailPath = null;
+            if ($request->hasFile('thumbnail')) {
+                $thumbnailPath = $request->file('thumbnail')->store('gigs/thumbnails', 'public');
+            }
+
+            $imagePaths = [];
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $imagePaths[] = $image->store('gigs/images', 'public');
+                }
+            }
+
+            $videoPath = null;
+            if ($request->hasFile('video')) {
+                $videoPath = $request->file('video')->store('gigs/videos', 'public');
+            }
+
+            $documentPaths = [];
+            if ($request->hasFile('documents')) {
+                foreach ($request->file('documents') as $doc) {
+                    $documentPaths[] = $doc->store('gigs/documents', 'public');
+                }
+            }
+
+            $packages = json_decode($request->packages, true);
+            $faqs = $request->faqs ? json_decode($request->faqs, true) : [];
+            $extras = $request->extras ? json_decode($request->extras, true) : [];
+            $tags = $request->tags ? json_decode($request->tags, true) : [];
+            $metadata = $request->metadata ? json_decode($request->metadata, true) : [];
+
+            $gig = Gig::create([
+                'provider_id' => auth()->id(),
+                'category_id' => $request->category_id,
+                'service_type_id' => $request->service_type_id,
+                'title' => $request->title,
+                'slug' => \Illuminate\Support\Str::slug($request->title) . '-' . uniqid(),
+                'description' => $request->description,
+                'thumbnail_image' => $thumbnailPath,
+                'images' => $imagePaths,
+                'video' => $videoPath,
+                'documents' => $documentPaths,
+                'tags' => $tags,
+                'metadata' => $metadata,
+                'is_active' => true,
+                'status' => 'pending',
+                'view_count' => 0,
+            ]);
+
+            if (!empty($packages)) {
+                foreach ($packages as $pkg) {
+                    $gig->packages()->create([
+                        'tier' => $pkg['tier'] ?? null,
+                        'name' => $pkg['name'] ?? 'Package',
+                        'description' => $pkg['description'] ?? '',
+                        'price' => $pkg['price'] ?? 0,
+                        'delivery_days' => $pkg['delivery_days'] ?? 1,
+                        'revisions' => $pkg['revisions'] ?? 0,
+                        'features' => $pkg['features'] ?? [],
+                    ]);
+                }
+            }
+
+            if (!empty($faqs)) {
+                foreach ($faqs as $faq) {
+                    $gig->faqs()->create([
+                        'question' => $faq['question'],
+                        'answer' => $faq['answer'],
+                    ]);
+                }
+            }
+
+            if (!empty($extras)) {
+                foreach ($extras as $extra) {
+                    $gig->extras()->create([
+                        'title' => $extra['title'] ?? '',
+                        'description' => $extra['description'] ?? '',
+                        'price' => $extra['price'] ?? 0,
+                        'additional_days' => $extra['additional_days'] ?? 0,
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'data' => $gig->load(['category', 'serviceType', 'packages', 'faqs'])
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gig Creation Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create gig: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function show($id)

@@ -23,6 +23,21 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _searchController = TextEditingController();
   int _activeFilter = 0;
 
+  String _getValidUrl(String? url) {
+    if (url == null || url.isEmpty || url == 'default') {
+      return 'https://placehold.co/400x300?text=No+Image';
+    }
+    if (url.startsWith('http') || url.startsWith('assets')) return url;
+    
+    String cleanPath = url.startsWith('/') ? url.substring(1) : url;
+    
+    if (cleanPath.startsWith('storage/')) {
+      return '${ApiConstants.baseUrl}/$cleanPath';
+    }
+    
+    return '${ApiConstants.baseUrl}/storage/$cleanPath';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -471,9 +486,7 @@ class _ChatPageState extends State<ChatPage> {
             Stack(
               children: [
                 CustomAvatar(
-                  imageUrl: (otherUser.profileImage != null && !otherUser.profileImage!.startsWith('http'))
-                      ? '${ApiConstants.baseUrl}/storage/${otherUser.profileImage}'
-                      : otherUser.profileImage,
+                  imageUrl: _getValidUrl(otherUser.profileImage),
                   name: otherUser.name,
                   size: 58,
                 ),

@@ -1,9 +1,11 @@
 import 'gig_faq_model.dart';
+import '../../../../services/data/models/category_model.dart';
 
 class GigModel {
   final int? id;
   final int providerId;
   final int categoryId;
+  final CategoryModel? category;
   final int? serviceTypeId;
   final String title;
   final String slug;
@@ -28,6 +30,7 @@ class GigModel {
     this.id,
     required this.providerId,
     required this.categoryId,
+    this.category,
     this.serviceTypeId,
     required this.title,
     required this.slug,
@@ -54,6 +57,9 @@ class GigModel {
       id: int.tryParse(json['id'].toString()),
       providerId: int.tryParse(json['provider_id'].toString()) ?? 0,
       categoryId: int.tryParse(json['category_id'].toString()) ?? 0,
+      category: json['category'] != null
+          ? CategoryModel.fromJson(json['category'])
+          : null,
       serviceTypeId: json['service_type_id'] != null
           ? int.tryParse(json['service_type_id'].toString())
           : null,

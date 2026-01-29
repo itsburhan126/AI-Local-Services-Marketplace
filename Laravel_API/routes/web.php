@@ -83,11 +83,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         
         // Freelancer Categories
         Route::get('freelancer-categories', [\App\Http\Controllers\Admin\Freelancer\FreelancerCategoryController::class, 'index'])->name('freelancer-categories.index');
+        Route::get('freelancer-categories/create', [\App\Http\Controllers\Admin\Freelancer\FreelancerCategoryController::class, 'create'])->name('freelancer-categories.create');
+        Route::post('freelancer-categories', [\App\Http\Controllers\Admin\Freelancer\FreelancerCategoryController::class, 'store'])->name('freelancer-categories.store');
+        Route::get('freelancer-categories/{id}/edit', [\App\Http\Controllers\Admin\Freelancer\FreelancerCategoryController::class, 'edit'])->name('freelancer-categories.edit');
+        Route::put('freelancer-categories/{id}', [\App\Http\Controllers\Admin\Freelancer\FreelancerCategoryController::class, 'update'])->name('freelancer-categories.update');
+        Route::delete('freelancer-categories/{id}', [\App\Http\Controllers\Admin\Freelancer\FreelancerCategoryController::class, 'destroy'])->name('freelancer-categories.destroy');
 
         // Gig Management
         Route::get('gig-requests', [\App\Http\Controllers\Admin\Freelancer\GigController::class, 'requests'])->name('gigs.requests');
         Route::post('gigs/{gig}/approve', [\App\Http\Controllers\Admin\Freelancer\GigController::class, 'approve'])->name('gigs.approve');
         Route::post('gigs/{gig}/reject', [\App\Http\Controllers\Admin\Freelancer\GigController::class, 'reject'])->name('gigs.reject');
+        Route::post('gigs/{gig}/suspend', [\App\Http\Controllers\Admin\Freelancer\GigController::class, 'suspend'])->name('gigs.suspend');
+        Route::post('gigs/{gig}/pause', [\App\Http\Controllers\Admin\Freelancer\GigController::class, 'pause'])->name('gigs.pause');
         Route::resource('gigs', \App\Http\Controllers\Admin\Freelancer\GigController::class);
 
         // Monetization

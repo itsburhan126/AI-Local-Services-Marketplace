@@ -90,14 +90,31 @@ class _RatingPageState extends State<RatingPage> {
     context.go('/bookings');
   }
 
+  String _getValidUrl(String? url) {
+    if (url == null || url.isEmpty || url == 'default') {
+      return 'https://placehold.co/400x300?text=No+Image';
+    }
+    if (url.startsWith('http') || url.startsWith('assets')) return url;
+    
+    String cleanPath = url.startsWith('/') ? url.substring(1) : url;
+    
+    // Check if path already has storage/ prefix
+    if (cleanPath.startsWith('storage/')) {
+      return '${ApiConstants.baseUrl}/$cleanPath';
+    }
+    
+    // Default to storage folder for relative paths
+    return '${ApiConstants.baseUrl}/storage/$cleanPath';
+  }
+
   @override
   Widget build(BuildContext context) {
     final serviceName = widget.bookingData?['service_name'] ?? widget.bookingData?['name'] ?? 'Service';
     final providerName = widget.bookingData?['provider_name'] ?? widget.bookingData?['provider']?['name'] ?? 'Provider';
+
     String? imageUrl = widget.bookingData?['image'];
-    
-    if (imageUrl != null && !imageUrl.startsWith('http')) {
-      imageUrl = '${ApiConstants.baseUrl}/$imageUrl'.replaceAll('//', '/').replaceFirst('http:/', 'http://').replaceFirst('https:/', 'https://');
+    if (imageUrl != null) {
+      imageUrl = _getValidUrl(imageUrl);
     }
 
     return Scaffold(

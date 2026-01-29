@@ -21,13 +21,10 @@ class _CategoryPageState extends State<CategoryPage> {
   @override
   void initState() {
     super.initState();
-    // If we have a specific type and no categories loaded (or just to be safe), we could trigger load.
-    // But usually HomeProvider already has data if we came from Home.
-    // For now, we rely on existing data to avoid double fetch, 
-    // or if empty, we might trigger (optional).
-    if (widget.type != null && context.read<HomeProvider>().categories.isEmpty) {
+    // If we are viewing root categories (widget.category is null), fetch ALL categories
+    if (widget.category == null) {
        WidgetsBinding.instance.addPostFrameCallback((_) {
-         context.read<HomeProvider>().loadHomeData(type: widget.type!);
+         context.read<HomeProvider>().loadAllCategories(type: widget.type ?? 'local_service');
        });
     }
   }
@@ -36,12 +33,11 @@ class _CategoryPageState extends State<CategoryPage> {
   Widget build(BuildContext context) {
     final categoryName = widget.category?['name'] ?? 'Categories';
     final provider = context.watch<HomeProvider>();
-    final categories = widget.category == null ? provider.categories : []; 
-    // If widget.category is NOT null, we are likely in a sub-category view (not implemented fully here yet),
-    // or we should show services. For now, if category is null, we show ALL categories.
+    // Use allCategories if we are at root, otherwise (if we were supporting sub-cats here) use passed data
+    final categories = widget.category == null ? provider.allCategories : []; 
     
-    // Fallback if provider empty (e.g. direct nav or error)
-    final displayCategories = categories.isNotEmpty ? categories : _getFallbackCategories();
+    // Fallback if provider empty (e.g. loading or error)
+    final displayCategories = categories.isNotEmpty ? categories : (provider.isLoading ? [] : _getFallbackCategories());
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -75,17 +71,19 @@ class _CategoryPageState extends State<CategoryPage> {
           children: [
             _buildSearchAndFilter(context),
             Expanded(
-              child: GridView.builder(
-                padding: const EdgeInsets.all(20),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.85,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                ),
-                itemCount: displayCategories.length,
-                itemBuilder: (context, index) => _buildCategoryCard(context, displayCategories[index], index),
-              ),
+              child: provider.isLoading && displayCategories.isEmpty
+                  ? const Center(child: CircularProgressIndicator())
+                  : GridView.builder(
+                      padding: const EdgeInsets.all(20),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.85,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                      ),
+                      itemCount: displayCategories.length,
+                      itemBuilder: (context, index) => _buildCategoryCard(context, displayCategories[index], index),
+                    ),
             ),
           ],
         ),

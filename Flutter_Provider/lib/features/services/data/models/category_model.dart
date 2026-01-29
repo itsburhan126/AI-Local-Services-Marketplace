@@ -4,6 +4,7 @@ class CategoryModel {
   final String slug;
   final String? image;
   final String? type;
+  final int? parentId;
 
   CategoryModel({
     required this.id,
@@ -11,6 +12,7 @@ class CategoryModel {
     required this.slug,
     this.image,
     this.type,
+    this.parentId,
   });
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class CategoryModel {
       slug: json['slug'],
       image: json['image'],
       type: json['type'],
+      parentId: json['parent_id'],
     );
   }
 }

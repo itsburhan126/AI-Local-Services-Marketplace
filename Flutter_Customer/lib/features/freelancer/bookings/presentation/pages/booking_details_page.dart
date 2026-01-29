@@ -18,6 +18,23 @@ class BookingDetailsPage extends StatelessWidget {
 
   const BookingDetailsPage({super.key, this.booking});
 
+  String _getValidUrl(String? url) {
+    if (url == null || url.isEmpty || url == 'default') {
+      return 'https://placehold.co/400x300?text=No+Image';
+    }
+    if (url.startsWith('http') || url.startsWith('assets')) return url;
+    
+    String cleanPath = url.startsWith('/') ? url.substring(1) : url;
+    
+    // Check if path already has storage/ prefix
+    if (cleanPath.startsWith('storage/')) {
+      return '${ApiConstants.baseUrl}/$cleanPath';
+    }
+    
+    // Default to storage folder for relative paths
+    return '${ApiConstants.baseUrl}/storage/$cleanPath';
+  }
+
   String _asString(dynamic v, {String fallback = ''}) {
     return v?.toString() ?? fallback;
   }
@@ -50,10 +67,7 @@ class BookingDetailsPage extends StatelessWidget {
     final String? customerReview = booking?['customer_review'] ?? (reviewData is Map<String, dynamic> ? reviewData['review']?.toString() : null);
     final bool hasReview = customerRating != null;
 
-    String? imageUrl = booking?['image'];
-    if (imageUrl != null && !imageUrl.startsWith('http')) {
-      imageUrl = '${ApiConstants.baseUrl}/$imageUrl'.replaceAll('//', '/').replaceFirst('http:/', 'http://').replaceFirst('https:/', 'https://');
-    }
+    final String? imageUrl = _getValidUrl(booking?['image']);
 
     final deliveryNote = _asString(booking?['delivery_note']);
     final deliveryFiles = booking?['delivery_files'] as List?;
@@ -904,10 +918,7 @@ class BookingDetailsPage extends StatelessWidget {
                  String ext = fileName.split('.').last.toLowerCase();
                  bool isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext);
                  
-                 String url = filePath;
-                 if (!url.startsWith('http')) {
-                    url = '${ApiConstants.baseUrl}/$url'.replaceAll('//', '/').replaceFirst('http:/', 'http://').replaceFirst('https:/', 'https://');
-                 }
+                 String url = _getValidUrl(filePath);
 
                  return Container(
                    margin: const EdgeInsets.only(bottom: 8),

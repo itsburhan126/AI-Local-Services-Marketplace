@@ -16,6 +16,21 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  String _getValidUrl(String? url) {
+    if (url == null || url.isEmpty || url == 'default') {
+      return 'https://placehold.co/400x300?text=No+Image';
+    }
+    if (url.startsWith('http') || url.startsWith('assets')) return url;
+    
+    String cleanPath = url.startsWith('/') ? url.substring(1) : url;
+    
+    if (cleanPath.startsWith('storage/')) {
+      return '${ApiConstants.baseUrl}/$cleanPath';
+    }
+    
+    return '${ApiConstants.baseUrl}/storage/$cleanPath';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -61,9 +76,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2), width: 2),
                         ),
                         child: CustomAvatar(
-                          imageUrl: (user?.profileImage != null && !user!.profileImage!.startsWith('http')) 
-                              ? '${ApiConstants.baseUrl}/storage/${user!.profileImage}' 
-                              : user?.profileImage,
+                          imageUrl: _getValidUrl(user?.profileImage),
                           name: user?.name,
                           size: 80,
                         ),

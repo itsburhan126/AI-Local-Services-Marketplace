@@ -44,8 +44,26 @@
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                @if(!empty($gig->images) && count($gig->images) > 0)
-                                    <img src="{{ $gig->images[0] }}" class="w-10 h-10 rounded-lg object-cover shadow-sm" alt="Gig">
+                                @if(!empty($gig->thumbnail_image))
+                                    @php
+                                        $thumbnail = $gig->thumbnail_image;
+                                        if (Str::startsWith($thumbnail, ['http://', 'https://'])) {
+                                            $thumbnailUrl = $thumbnail;
+                                        } else {
+                                            $thumbnailUrl = asset(Str::startsWith($thumbnail, 'storage/') ? $thumbnail : 'storage/' . $thumbnail);
+                                        }
+                                    @endphp
+                                    <img src="{{ $thumbnailUrl }}" class="w-10 h-10 rounded-lg object-cover shadow-sm" alt="Gig">
+                                @elseif(!empty($gig->images) && count($gig->images) > 0)
+                                    @php
+                                        $image = $gig->images[0];
+                                        if (Str::startsWith($image, ['http://', 'https://'])) {
+                                            $imageUrl = $image;
+                                        } else {
+                                            $imageUrl = asset(Str::startsWith($image, 'storage/') ? $image : 'storage/' . $image);
+                                        }
+                                    @endphp
+                                    <img src="{{ $imageUrl }}" class="w-10 h-10 rounded-lg object-cover shadow-sm" alt="Gig">
                                 @else
                                     <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center">
                                         <i class="fas fa-briefcase"></i>

@@ -156,7 +156,11 @@ class GigService {
       return '';
     }
     if (url.startsWith('http')) return url;
-    if (url.startsWith('/')) return '${ApiConstants.baseUrl}$url';
-    return '${ApiConstants.baseUrl}/$url';
+    
+    String cleanPath = url.startsWith('/') ? url.substring(1) : url;
+    if (cleanPath.startsWith('storage/')) {
+       return '${ApiConstants.baseUrl}/$cleanPath';
+    }
+    return '${ApiConstants.baseUrl}/storage/$cleanPath';
   }
 }

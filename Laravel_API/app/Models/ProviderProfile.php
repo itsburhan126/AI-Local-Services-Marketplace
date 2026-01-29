@@ -24,6 +24,7 @@ class ProviderProfile extends Model
         'longitude',
         'rating',
         'reviews_count',
+        'seller_level',
     ];
 
     protected $casts = [

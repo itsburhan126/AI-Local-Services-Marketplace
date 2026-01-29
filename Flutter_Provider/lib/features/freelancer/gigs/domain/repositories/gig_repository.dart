@@ -30,7 +30,7 @@ abstract class GigRepository {
   });
 
   Future<List<ServiceTypeModel>> getServiceTypes();
-  Future<List<CategoryModel>> getCategories();
+  Future<List<CategoryModel>> getCategories({int? parentId});
   Future<List<TagModel>> getTags({String? query});
   Future<GigModel> updateGigStatus(int id, String status);
 }

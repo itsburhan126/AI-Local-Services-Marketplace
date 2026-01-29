@@ -216,9 +216,7 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(24),
                     child: CachedNetworkImage(
-                      imageUrl: (banner['image'] != null && banner['image'].toString().isNotEmpty) 
-                          ? banner['image'] 
-                          : 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+                      imageUrl: _getValidUrl(banner['image']),
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
                           color: Colors.grey[200],
@@ -315,8 +313,8 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
     var iconValue = cat['image'] ?? cat['icon'];
     final name = cat['name'] as String? ?? 'Unknown';
     
-    if (iconValue is String && !iconValue.startsWith('http') && !iconValue.startsWith('assets')) {
-        iconValue = '${ApiConstants.baseUrl}/storage/$iconValue';
+    if (iconValue is String) {
+      iconValue = _getValidUrl(iconValue);
     }
 
     final isUrl = iconValue is String && (iconValue.startsWith('http') || iconValue.startsWith('assets'));
@@ -455,19 +453,13 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
   }
 
   Widget _buildGigCard(BuildContext context, dynamic gig) {
-    var imageUrl = gig['thumbnail'] ?? gig['image'] ?? '';
-    if (imageUrl.toString().isNotEmpty && !imageUrl.toString().startsWith('http') && !imageUrl.toString().startsWith('assets')) {
-         imageUrl = '${ApiConstants.baseUrl}/storage/$imageUrl';
-    }
-    final hasImage = imageUrl.toString().isNotEmpty;
+    var imageUrl = _getValidUrl(gig['thumbnail'] ?? gig['image']);
+    final hasImage = imageUrl.isNotEmpty;
 
     // Extract seller info
     final provider = gig['provider'];
     final sellerName = provider is Map ? (provider['name'] ?? 'Seller') : 'Seller';
-    var sellerImage = provider is Map && provider['image'] != null ? provider['image'] : '';
-    if (sellerImage.toString().isNotEmpty && !sellerImage.toString().startsWith('http') && !sellerImage.toString().startsWith('assets')) {
-         sellerImage = '${ApiConstants.baseUrl}/storage/$sellerImage';
-    }
+    var sellerImage = _getValidUrl(provider is Map ? provider['image'] : null);
 
     final reviewsData = gig['reviews'];
     final reviewsCount = (reviewsData is List) ? reviewsData.length : (gig['reviews_count'] ?? 0);
@@ -586,10 +578,7 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
   }
 
   Widget _buildSingleBanner(dynamic banner) {
-    var imageUrl = banner['image_url'] ?? banner['image'] ?? '';
-    if (imageUrl.toString().isNotEmpty && !imageUrl.toString().startsWith('http')) {
-        imageUrl = '${ApiConstants.baseUrl}/storage/$imageUrl';
-    }
+    var imageUrl = _getValidUrl(banner['image_url'] ?? banner['image']);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
@@ -625,7 +614,7 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: CachedNetworkImage(
-                imageUrl: banners[0]['image'] ?? '',
+                imageUrl: _getValidUrl(banners[0]['image']),
                 fit: BoxFit.cover,
                 height: double.infinity,
               ),
@@ -636,7 +625,7 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: CachedNetworkImage(
-                imageUrl: banners[1]['image'] ?? '',
+                imageUrl: _getValidUrl(banners[1]['image']),
                 fit: BoxFit.cover,
                 height: double.infinity,
               ),
@@ -710,6 +699,22 @@ class _FreelancerHomeContentState extends State<FreelancerHomeContent> {
         ],
       ),
     );
+  }
+  String _getValidUrl(String? url) {
+    if (url == null || url.isEmpty || url == 'default') {
+      return 'https://placehold.co/400x300?text=No+Image';
+    }
+    if (url.startsWith('http') || url.startsWith('assets')) return url;
+    
+    String cleanPath = url.startsWith('/') ? url.substring(1) : url;
+    
+    // Check if path already has storage/ prefix
+    if (cleanPath.startsWith('storage/')) {
+      return '${ApiConstants.baseUrl}/$cleanPath';
+    }
+    
+    // Default to storage folder for relative paths
+    return '${ApiConstants.baseUrl}/storage/$cleanPath';
   }
 }
 

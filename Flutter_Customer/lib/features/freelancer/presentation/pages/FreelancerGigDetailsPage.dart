@@ -189,7 +189,14 @@ class _FreelancerGigDetailsPageState extends State<FreelancerGigDetailsPage> {
       if (url.startsWith('http') || url.startsWith('assets')) return url;
       
       String cleanPath = url.startsWith('/') ? url.substring(1) : url;
-      return '${ApiConstants.baseUrl}/$cleanPath';
+      
+      // Check if path already has storage/ prefix
+      if (cleanPath.startsWith('storage/')) {
+        return '${ApiConstants.baseUrl}/$cleanPath';
+      }
+      
+      // Default to storage folder for relative paths
+      return '${ApiConstants.baseUrl}/storage/$cleanPath';
     }
     return null;
   }

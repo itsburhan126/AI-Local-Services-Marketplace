@@ -35,6 +35,23 @@ class _HomeViewState extends State<HomeView> {
     });
   }
 
+  String _getValidUrl(String? url) {
+    if (url == null || url.isEmpty || url == 'default') {
+      return 'https://placehold.co/400x300?text=No+Image';
+    }
+    if (url.startsWith('http') || url.startsWith('assets')) return url;
+    
+    String cleanPath = url.startsWith('/') ? url.substring(1) : url;
+    
+    // Check if path already has storage/ prefix
+    if (cleanPath.startsWith('storage/')) {
+      return '${ApiConstants.baseUrl}/$cleanPath';
+    }
+    
+    // Default to storage folder for relative paths
+    return '${ApiConstants.baseUrl}/storage/$cleanPath';
+  }
+
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
@@ -363,7 +380,7 @@ class _HomeViewState extends State<HomeView> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(24),
                     child: CachedNetworkImage(
-                      imageUrl: banner['image'] ?? '',
+                      imageUrl: _getValidUrl(banner['image']),
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
                         color: Colors.grey[200],
@@ -644,7 +661,7 @@ class _HomeViewState extends State<HomeView> {
     final price = service?['price'] ?? '80.00';
     final rating = service?['rating'] ?? 4.8;
     final reviews = service?['reviews_count'] ?? 120;
-    final image = service?['image'] ?? 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80';
+    final image = _getValidUrl(service?['image']);
     final providerName = service?['provider']?['name'] ?? 'John Doe';
 
     return GestureDetector(
@@ -841,7 +858,7 @@ class _HomeViewState extends State<HomeView> {
           child: Stack(
             children: [
               CachedNetworkImage(
-                imageUrl: banner['image'] ?? 'https://via.placeholder.com/800x400',
+                imageUrl: _getValidUrl(banner['image']),
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
@@ -924,7 +941,7 @@ class _HomeViewState extends State<HomeView> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         image: DecorationImage(
-          image: CachedNetworkImageProvider(banner['image'] ?? 'https://via.placeholder.com/400x600'),
+          image: CachedNetworkImageProvider(_getValidUrl(banner['image'])),
           fit: BoxFit.cover,
         ),
         boxShadow: [

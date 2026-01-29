@@ -30,7 +30,7 @@ abstract class GigRemoteDataSource {
   Future<List<GigModel>> getProviderGigs(String token);
   Future<void> deleteGig(String token, int id);
   Future<List<ServiceTypeModel>> getServiceTypes();
-  Future<List<CategoryModel>> getCategories();
+  Future<List<CategoryModel>> getCategories({int? parentId});
   Future<List<TagModel>> getTags({String? query});
   Future<GigAnalyticsModel> getGigAnalytics(String token, int id);
   Future<PaginatedReviewsModel> getGigReviews(String token, int id, int page);
@@ -62,11 +62,16 @@ class GigRemoteDataSourceImpl implements GigRemoteDataSource {
   }
 
   @override
-  Future<List<CategoryModel>> getCategories() async {
+  Future<List<CategoryModel>> getCategories({int? parentId}) async {
     try {
+      final queryParams = {'type': 'freelancer'};
+      if (parentId != null) {
+        queryParams['parent_id'] = parentId.toString();
+      }
+
       final response = await dio.get(
         '/api/categories',
-        queryParameters: {'type': 'freelancer'},
+        queryParameters: queryParams,
       );
 
       if (response.statusCode == 200) {
