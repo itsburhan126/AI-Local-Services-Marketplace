@@ -13,6 +13,19 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->redirectGuestsTo(function (\Illuminate\Http\Request $request) {
+            if ($request->is('freelancer') || $request->is('freelancer/*')) {
+                return route('provider.freelancer.login');
+            }
+            if ($request->is('provider/local') || $request->is('provider/local/*')) {
+                return route('provider.local.login');
+            }
+            if ($request->is('admin') || $request->is('admin/*')) {
+                return route('admin.login');
+            }
+            return route('login');
+        });
+
         $middleware->web(append: [
              \CodeLab\LicenseSystem\Http\Middleware\CheckLicense::class,
         ]);
