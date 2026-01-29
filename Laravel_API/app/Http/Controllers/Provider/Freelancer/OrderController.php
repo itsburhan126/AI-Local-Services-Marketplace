@@ -4,8 +4,12 @@ namespace App\Http\Controllers\Provider\Freelancer;
 
 use App\Http\Controllers\Controller;
 use App\Models\GigOrder;
+use App\Models\WalletTransaction;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class OrderController extends Controller
 {
@@ -19,7 +23,7 @@ class OrderController extends Controller
             ->get();
 
         $pendingOrders = $bookings->where('status', 'pending');
-        $activeOrders = $bookings->whereIn('status', ['accepted', 'in_progress', 'ready']);
+        $activeOrders = $bookings->whereIn('status', ['accepted', 'in_progress', 'ready', 'delivered']);
         $completedOrders = $bookings->whereIn('status', ['completed', 'cancelled', 'refunded']);
 
         return view('Provider.Freelancer.orders.index', compact('bookings', 'pendingOrders', 'activeOrders', 'completedOrders'));
@@ -62,7 +66,7 @@ class OrderController extends Controller
         return back()->with('success', 'Order declined.');
     }
 
-    public function deliver($id)
+    public function deliver(Request $request, $id)
     {
         $order = GigOrder::where('provider_id', Auth::id())->findOrFail($id);
         
@@ -70,9 +74,58 @@ class OrderController extends Controller
             return back()->with('error', 'Order cannot be delivered.');
         }
 
-        $order->update(['status' => 'completed']); // Or 'delivered' if using that status
-        // Optional: Notify user
+        $request->validate([
+            'delivery_note' => 'required|string|min:10',
+            'delivery_files.*' => 'nullable|file|max:10240', // Max 10MB per file
+        ]);
 
-        return back()->with('success', 'Order marked as completed.');
+        $deliveryFiles = [];
+        if ($request->hasFile('delivery_files')) {
+            foreach ($request->file('delivery_files') as $file) {
+                $path = $file->store('order_deliveries', 'public');
+                $deliveryFiles[] = $path;
+            }
+        }
+
+        // Update Order with Delivery Info and set status to 'delivered'
+        $order->update([
+            'status' => 'delivered',
+            'delivery_note' => $request->delivery_note,
+            'delivery_files' => $deliveryFiles,
+        ]);
+        
+        // Handle Wallet Transaction (Pending Clearance)
+        // NOTE: In a full flow, this might happen after client approval (completed). 
+        // For now, we trigger it on delivery as per previous instructions to show "Payments being cleared".
+        $amount = $order->provider_amount ?? $order->total_amount;
+        
+        // Get Clearance Delay from Settings (Default 0 if not set)
+        $delayDays = (int) Setting::get('freelancer_payment_delay_days', 0);
+
+        // Create Transaction
+        WalletTransaction::create([
+            'user_id' => $order->provider_id,
+            'amount' => $amount,
+            'type' => 'credit',
+            'description' => 'Order Revenue for #' . $order->id,
+            'reference_id' => $order->id,
+            'reference_type' => 'GigOrder',
+            'status' => 'pending',
+            'available_at' => Carbon::now()->addDays($delayDays),
+        ]);
+
+        // Update User Pending Balance
+        $user = Auth::user();
+        $user->pending_balance = ($user->pending_balance ?? 0) + $amount;
+        $user->save();
+
+        $message = 'Work delivered successfully. Waiting for customer approval.';
+        if ($delayDays > 0) {
+            $message .= " Funds are pending clearance for {$delayDays} days.";
+        } else {
+            $message .= " Funds will be available shortly.";
+        }
+
+        return back()->with('success', $message);
     }
 }

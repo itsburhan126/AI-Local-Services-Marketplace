@@ -3,7 +3,7 @@
 @section('title', 'Order #' . $order->id)
 
 @section('content')
-<div class="w-full max-w-screen-2xl mx-auto" x-data="{ activeTab: 'activity' }">
+<div class="w-full max-w-screen-2xl mx-auto" x-data="{ activeTab: 'activity', showDeliveryModal: false, files: [] }">
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div class="flex items-center gap-4">
@@ -51,12 +51,9 @@
                     </button>
                 </form>
             @elseif(in_array($order->status, ['accepted', 'in_progress']))
-                <form action="{{ route('provider.freelancer.orders.deliver', $order->id) }}" method="POST">
-                    @csrf
-                    <button type="submit" class="px-6 py-2.5 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 shadow-md shadow-green-200 transition-all flex items-center gap-2">
-                        <i class="fas fa-check-circle"></i> Deliver Now
-                    </button>
-                </form>
+                <button @click="showDeliveryModal = true" class="px-6 py-2.5 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 shadow-md shadow-green-200 transition-all flex items-center gap-2">
+                    <i class="fas fa-check-circle"></i> Deliver Now
+                </button>
             @endif
         </div>
     </div>
@@ -134,50 +131,7 @@
                     </div>
                 </div>
 
-                <!-- Messages / Chat Placeholder -->
-                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-[400px]">
-                    <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                            <i class="far fa-comments text-slate-400"></i> Messages
-                        </h3>
-                        <span class="text-xs text-slate-400">Encrypted & Secure</span>
-                    </div>
-                    
-                    <div class="flex-1 p-6 bg-slate-50/30 overflow-y-auto space-y-4">
-                        <!-- System Message -->
-                        <div class="flex justify-center">
-                            <span class="bg-slate-200 text-slate-600 text-xs px-3 py-1 rounded-full">
-                                Order started on {{ $order->created_at->format('M d, Y') }}
-                            </span>
-                        </div>
 
-                        <!-- Buyer Message (Mockup) -->
-                        <div class="flex gap-3">
-                            <img src="{{ $order->user->profile_photo_url ?? asset('images/default-avatar.png') }}" class="w-8 h-8 rounded-full object-cover mt-1">
-                            <div class="bg-white border border-slate-200 p-3 rounded-2xl rounded-tl-none shadow-sm max-w-[80%]">
-                                <p class="text-slate-700 text-sm">Hi! I just placed the order. Please let me know if you need anything else.</p>
-                                <span class="text-[10px] text-slate-400 mt-1 block">{{ $order->created_at->format('h:i A') }}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Input Area -->
-                    <div class="p-4 bg-white border-t border-slate-100">
-                        <div class="relative">
-                            <textarea placeholder="Type your message here..." class="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-primary-300 focus:ring-4 focus:ring-primary-50 transition-all resize-none h-14"></textarea>
-                            <button class="absolute right-2 top-2 bottom-2 w-10 bg-primary-600 hover:bg-primary-700 text-white rounded-lg flex items-center justify-center transition-colors">
-                                <i class="fas fa-paper-plane text-sm"></i>
-                            </button>
-                        </div>
-                        <div class="flex justify-between items-center mt-2 px-1">
-                            <div class="flex gap-2 text-slate-400">
-                                <button class="hover:text-slate-600 transition-colors"><i class="fas fa-paperclip"></i></button>
-                                <button class="hover:text-slate-600 transition-colors"><i class="far fa-smile"></i></button>
-                            </div>
-                            <span class="text-xs text-slate-400">Press Enter to send</span>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Tab: Details -->
@@ -275,7 +229,7 @@
             <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                 <h3 class="font-bold text-slate-900 mb-4">About the Buyer</h3>
                 <div class="flex items-center gap-4 mb-6">
-                    <img src="{{ $order->user->avatar ? asset('storage/' . $order->user->avatar) : asset('images/default-avatar.png') }}" class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm">
+                    <img src="{{ $order->user->avatar ? asset('storage/' . $order->user->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($order->user->name) . '&color=7F9CF5&background=EBF4FF' }}" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($order->user->name) }}&color=7F9CF5&background=EBF4FF'" class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm">
                     <div>
                         <h4 class="font-bold text-slate-900">{{ $order->user->name }}</h4>
                         <p class="text-xs text-slate-500">{{ $order->user->country ?? 'Global Member' }}</p>
@@ -323,5 +277,84 @@
 
         </div>
     </div>
+
+    <!-- Delivery Modal -->
+    <div x-show="showDeliveryModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div x-show="showDeliveryModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" @click="showDeliveryModal = false"></div>
+
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+        <div x-show="showDeliveryModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+            <form action="{{ route('provider.freelancer.orders.deliver', $order->id) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <i class="fas fa-rocket text-green-600"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                Deliver Completed Work
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500 mb-4">
+                                    Submit your work for the client's review. Once delivered, the order status will change to "Delivered".
+                                </p>
+                                
+                                <!-- Work Description -->
+                                <div class="mb-4">
+                                    <label for="delivery_note" class="block text-sm font-medium text-gray-700 mb-1">Work Description</label>
+                                    <textarea name="delivery_note" id="delivery_note" rows="4" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50" placeholder="Describe the work you have completed..." required></textarea>
+                                </div>
+
+                                <!-- Attachments -->
+                                <div class="mb-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Attachments</label>
+                                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:bg-gray-50 transition-colors relative">
+                                        <div class="space-y-1 text-center">
+                                            <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
+                                            <div class="flex text-sm text-gray-600 justify-center">
+                                                <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500">
+                                                    <span>Upload files</span>
+                                                    <input id="file-upload" name="delivery_files[]" type="file" class="sr-only" multiple @change="files = Array.from($event.target.files)">
+                                                </label>
+                                                <p class="pl-1">or drag and drop</p>
+                                            </div>
+                                            <p class="text-xs text-gray-500">
+                                                PNG, JPG, PDF, ZIP up to 10MB
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- File List -->
+                                <template x-if="files.length > 0">
+                                    <div class="mt-4 space-y-2 max-h-32 overflow-y-auto">
+                                        <template x-for="file in files" :key="file.name">
+                                            <div class="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                                                <i class="fas fa-file text-gray-400"></i>
+                                                <span x-text="file.name" class="truncate"></span>
+                                                <span x-text="(file.size / 1024).toFixed(0) + ' KB'" class="text-xs text-gray-400 ml-auto"></span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Submit Delivery
+                    </button>
+                    <button type="button" @click="showDeliveryModal = false" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 </div>
 @endsection
