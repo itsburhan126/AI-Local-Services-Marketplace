@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Provider\Freelancer;
+namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Message;
 use App\Models\User;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class ChatController extends Controller
 {
@@ -19,8 +19,20 @@ class ChatController extends Controller
         $userId = Auth::id();
         $selectedUserId = $request->query('user_id');
 
+        // Fetch categories for the layout
+        $categories = Category::whereNull('parent_id')
+            ->where('is_active', true)
+            ->orderBy('order')
+            ->limit(10)
+            ->get();
+            
+        // Subcategories for mega menu
+        $subcategories = Category::whereNotNull('parent_id')
+            ->where('is_active', true)
+            ->get()
+            ->groupBy('parent_id');
+
         // Fetch conversations (users who have exchanged messages with current user)
-        // This is a simplified query; for better performance, consider a separate conversation model or optimized query
         $conversations = User::where('id', '!=', $userId)
             ->where(function($query) use ($userId) {
                 $query->whereHas('sentMessages', function($q) use ($userId) {
@@ -66,6 +78,14 @@ class ChatController extends Controller
         if ($selectedUserId) {
             $selectedConversation = User::find($selectedUserId);
             
+            // If selected user is not in conversations (new chat), add them to the list
+            if ($selectedConversation && !$conversations->contains('id', $selectedUserId)) {
+                $selectedConversation->unread_count = 0;
+                $selectedConversation->last_message_at = null;
+                $selectedConversation->last_message_content = null;
+                $conversations->prepend($selectedConversation);
+            }
+            
             if ($selectedConversation) {
                 // Fetch messages between current user and selected user
                 $messages = Message::where(function($q) use ($userId, $selectedUserId) {
@@ -85,7 +105,7 @@ class ChatController extends Controller
             }
         }
 
-        return view('Provider.Freelancer.chat.index', compact('conversations', 'selectedConversation', 'messages'));
+        return view('Customer.chat.index', compact('conversations', 'selectedConversation', 'messages', 'categories', 'subcategories'));
     }
 
     /**
@@ -115,9 +135,6 @@ class ChatController extends Controller
             'attachment' => $attachmentPath,
             'attachment_type' => $attachmentType,
         ]);
-
-        // In a real app, you would broadcast an event here for real-time updates
-        // event(new MessageSent($message));
 
         if ($request->ajax()) {
             return response()->json([

@@ -1,7 +1,22 @@
 <div class="min-w-[280px] w-[280px] bg-white rounded-2xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all duration-300 group cursor-pointer flex flex-col h-full relative overflow-hidden">
     <!-- Image -->
     <div class="relative h-[160px] overflow-hidden">
-        <img src="{{ $gig->image ? asset('storage/' . $gig->image) : 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop' }}" 
+        @php
+            $hCardImage = 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop';
+            $hThumb = $gig->thumbnail_image ?? $gig->image;
+            if (!empty($hThumb)) {
+                if (filter_var($hThumb, FILTER_VALIDATE_URL)) {
+                    $hParsed = parse_url($hThumb, PHP_URL_PATH);
+                    $hRel = preg_replace('/^\/?storage\//', '', ltrim($hParsed, '/'));
+                    if (\Illuminate\Support\Facades\Storage::disk('public')->exists($hRel)) {
+                        $hCardImage = $hThumb;
+                    }
+                } elseif (\Illuminate\Support\Facades\Storage::disk('public')->exists($hThumb)) {
+                    $hCardImage = asset('storage/' . $hThumb);
+                }
+            }
+        @endphp
+        <img src="{{ $hCardImage }}" 
              alt="{{ $gig->title }}" 
              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
         <div class="absolute top-3 right-3">
@@ -18,7 +33,23 @@
         <!-- Seller Info -->
         <div class="flex items-center gap-2 mb-3">
             <div class="relative">
-                <img src="{{ $gig->provider && $gig->provider->image ? asset('storage/' . $gig->provider->image) : 'https://ui-avatars.com/api/?name=' . ($gig->provider ? urlencode($gig->provider->name) : 'Provider') . '&background=random' }}" 
+                @php
+                    $hpName = $gig->provider->name ?? 'Provider';
+                    $hpImg = 'https://ui-avatars.com/api/?name=' . urlencode($hpName) . '&background=random';
+                    if ($gig->provider && !empty($gig->provider->image)) {
+                        $hpRaw = $gig->provider->image;
+                        if (filter_var($hpRaw, FILTER_VALIDATE_URL)) {
+                            $hpParsed = parse_url($hpRaw, PHP_URL_PATH);
+                            $hpRel = preg_replace('/^\/?storage\//', '', ltrim($hpParsed, '/'));
+                            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($hpRel)) {
+                                $hpImg = $hpRaw;
+                            }
+                        } elseif (\Illuminate\Support\Facades\Storage::disk('public')->exists($hpRaw)) {
+                            $hpImg = asset('storage/' . $hpRaw);
+                        }
+                    }
+                @endphp
+                <img src="{{ $hpImg }}" 
                      alt="Seller" 
                      class="w-6 h-6 rounded-full object-cover border border-gray-100">
                 @if(isset($gig->provider->is_online) && $gig->provider->is_online)

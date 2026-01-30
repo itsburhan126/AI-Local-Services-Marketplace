@@ -1,9 +1,13 @@
 <div class="flex gap-4 mb-6 group px-2 hover:bg-slate-50/50 rounded-lg transition-colors py-2 -mx-2">
     <div class="flex-shrink-0 pt-1">
         @if($isMe)
-            <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : asset('images/default-avatar.png') }}" class="w-10 h-10 rounded-full object-cover border border-slate-200">
+            <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&color=7F9CF5&background=EBF4FF' }}" 
+                 onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&color=7F9CF5&background=EBF4FF'"
+                 class="w-10 h-10 rounded-full object-cover border border-slate-200">
         @else
-            <img src="{{ $message->sender->avatar ? asset('storage/' . $message->sender->avatar) : asset('images/default-avatar.png') }}" class="w-10 h-10 rounded-full object-cover border border-slate-200">
+            <img src="{{ $message->sender->avatar ? asset('storage/' . $message->sender->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($message->sender->name) . '&color=7F9CF5&background=EBF4FF' }}" 
+                 onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($message->sender->name) }}&color=7F9CF5&background=EBF4FF'"
+                 class="w-10 h-10 rounded-full object-cover border border-slate-200">
         @endif
     </div>
     

@@ -98,6 +98,11 @@ class User extends Authenticatable
         return $this->hasMany(FreelancerPortfolio::class);
     }
 
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
     public function getAvatarAttribute($value)
     {
         if ($value && !str_starts_with($value, 'http')) {

@@ -1,9 +1,9 @@
-@extends('layouts.freelancer')
+@extends('layouts.customer')
 
 @section('title', 'Messages')
 
 @section('content')
-<div class="h-[calc(100vh-4rem)] flex bg-white border-t border-slate-200 overflow-hidden w-full">
+<div class="h-[calc(100vh-5rem)] flex bg-white border-t border-slate-200 overflow-hidden w-full">
     
     <!-- Left Sidebar: Conversation List -->
     <div class="w-full md:w-80 lg:w-96 border-r border-slate-200 flex flex-col bg-white z-10 shrink-0">
@@ -30,7 +30,7 @@
                 <ul class="divide-y divide-slate-50">
                     @foreach($conversations as $conversation)
                         <li>
-                            <a href="{{ route('provider.freelancer.chat.index', ['user_id' => $conversation->id]) }}" class="block p-4 hover:bg-slate-50 transition-all {{ isset($selectedConversation) && $selectedConversation->id === $conversation->id ? 'bg-primary-50 relative z-10 border-r-[3px] border-primary-500' : 'bg-white' }}">
+                            <a href="{{ route('customer.chat.index', ['user_id' => $conversation->id]) }}" class="block p-4 hover:bg-slate-50 transition-all {{ isset($selectedConversation) && $selectedConversation->id === $conversation->id ? 'bg-primary-50 relative z-10 border-r-[3px] border-primary-500' : 'bg-white' }}">
                                 <div class="flex gap-3">
                                     <div class="relative flex-shrink-0">
                                         <img src="{{ $conversation->avatar ? asset('storage/' . $conversation->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($conversation->name) . '&color=7F9CF5&background=EBF4FF' }}" 
@@ -91,7 +91,7 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <h3 class="font-bold text-slate-900 text-lg leading-tight">{{ $selectedConversation->name }}</h3>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500 uppercase tracking-wide">Buyer</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500 uppercase tracking-wide">Freelancer</span>
                         </div>
                         <div class="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
                             <span class="text-slate-400">Last seen {{ now()->subMinutes(rand(1, 59))->diffForHumans() }}</span>
@@ -104,50 +104,15 @@
                     <button class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-yellow-400 hover:bg-slate-50 rounded-full transition-colors" title="Star">
                         <i class="far fa-star"></i>
                     </button>
-                    <button onclick="showToast('Video call feature is coming soon!', 'info')" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-colors" title="Video Call">
+                    <button class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-colors" title="Video Call">
                         <i class="fas fa-video"></i>
                     </button>
-                    <button onclick="showToast('Audio call feature is coming soon!', 'info')" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-colors" title="Phone">
+                    <button class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-colors" title="Phone">
                         <i class="fas fa-phone"></i>
                     </button>
-                    
-                    <!-- 3-Dot Menu -->
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-colors" title="More">
-                            <i class="fas fa-ellipsis-h"></i>
-                        </button>
-                        
-                        <div x-show="open" 
-                             @click.away="open = false" 
-                             x-transition:enter="transition ease-out duration-100" 
-                             x-transition:enter-start="transform opacity-0 scale-95" 
-                             x-transition:enter-end="transform opacity-100 scale-100" 
-                             x-transition:leave="transition ease-in duration-75" 
-                             x-transition:leave-start="transform opacity-100 scale-100" 
-                             x-transition:leave-end="transform opacity-0 scale-95" 
-                             class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 z-50 py-1 overflow-hidden" 
-                             style="display: none;" 
-                             x-cloak>
-                            
-                            <a href="#" class="flex items-center px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors group">
-                                <span class="w-6 text-slate-400 group-hover:text-slate-600 transition-colors"><i class="far fa-user"></i></span>
-                                View Profile
-                            </a>
-                            <button onclick="showToast('Chat cleared successfully!', 'success'); this.closest('[x-data]').__x.$data.open = false" class="w-full text-left flex items-center px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors group">
-                                <span class="w-6 text-slate-400 group-hover:text-slate-600 transition-colors"><i class="far fa-trash-alt"></i></span>
-                                Clear Chat
-                            </button>
-                            <div class="h-px bg-slate-100 my-1"></div>
-                            <button onclick="showToast('User reported!', 'info'); this.closest('[x-data]').__x.$data.open = false" class="w-full text-left flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors group">
-                                <span class="w-6 text-red-400 group-hover:text-red-600 transition-colors"><i class="far fa-flag"></i></span>
-                                Report User
-                            </button>
-                            <button onclick="showToast('User blocked!', 'error'); this.closest('[x-data]').__x.$data.open = false" class="w-full text-left flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors group">
-                                <span class="w-6 text-red-400 group-hover:text-red-600 transition-colors"><i class="fas fa-ban"></i></span>
-                                Block User
-                            </button>
-                        </div>
-                    </div>
+                    <button class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-colors" title="More">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
                 </div>
             </div>
 
@@ -169,7 +134,7 @@
 
             <!-- Input Area -->
             <div class="p-4 bg-white border-t border-slate-200 shrink-0">
-                <form id="chat-form" action="{{ route('provider.freelancer.chat.store') }}" method="POST" enctype="multipart/form-data" class="relative">
+                <form id="chat-form" action="{{ route('customer.chat.store') }}" method="POST" enctype="multipart/form-data" class="relative">
                     @csrf
                     <input type="file" name="attachment" id="file-input" class="hidden" onchange="handleFileSelect(this)">
                     <input type="hidden" name="receiver_id" value="{{ $selectedConversation->id }}">
@@ -199,9 +164,7 @@
                             </div>
                             
                             <div class="flex items-center gap-3">
-                                <button type="button" class="px-4 py-1.5 bg-slate-800 text-white text-sm font-bold rounded hover:bg-slate-700 transition-colors shadow-sm">
-                                    Create an Offer
-                                </button>
+                                <!-- "Create an Offer" button removed for customer view as it's typically for sellers -->
                                 <button type="submit" class="p-2 text-slate-400 hover:text-primary-600 transition-colors rounded-full hover:bg-primary-50" title="Send Message">
                                     <i class="fas fa-paper-plane text-lg"></i>
                                 </button>
@@ -234,7 +197,7 @@
                 <span class="absolute bottom-1 right-1 w-5 h-5 bg-green-500 border-4 border-white rounded-full"></span>
             </div>
             <h3 class="font-bold text-slate-900 text-xl mb-1 hover:underline cursor-pointer">{{ $selectedConversation->name }}</h3>
-            <p class="text-sm text-slate-500 mb-4">New Buyer</p>
+            <p class="text-sm text-slate-500 mb-4">Freelancer</p>
             <button class="text-sm text-slate-500 hover:text-slate-800 border border-slate-300 rounded px-3 py-1 transition-colors">Contact Info</button>
         </div>
         
@@ -265,7 +228,7 @@
 
             <div class="pt-6 border-t border-slate-100">
                 <h4 class="font-bold text-slate-900 text-sm uppercase tracking-wide mb-4">Notes</h4>
-                <textarea class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm focus:ring-1 focus:ring-primary-500 focus:border-primary-500 transition-all resize-none" rows="4" placeholder="Add a private note about this buyer..."></textarea>
+                <textarea class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm focus:ring-1 focus:ring-primary-500 focus:border-primary-500 transition-all resize-none" rows="4" placeholder="Add a private note about this freelancer..."></textarea>
             </div>
         </div>
     </div>

@@ -162,6 +162,55 @@
                 }, 5000);
             });
         });
+
+        // Global Toast Function
+        window.showToast = function(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            // Define colors and icons based on type
+            let borderColor, iconColor, icon, title;
+            if (type === 'success') {
+                borderColor = 'border-green-500';
+                iconColor = 'text-green-500';
+                icon = 'fa-check-circle';
+                title = 'Success';
+            } else if (type === 'error') {
+                borderColor = 'border-red-500';
+                iconColor = 'text-red-500';
+                icon = 'fa-exclamation-circle';
+                title = 'Error';
+            } else if (type === 'info') {
+                borderColor = 'border-blue-500';
+                iconColor = 'text-blue-500';
+                icon = 'fa-info-circle';
+                title = 'Info';
+            }
+            
+            toast.className = `toast bg-white border-l-4 ${borderColor} shadow-premium rounded-r-lg p-4 flex items-center gap-3 min-w-[300px] transform translate-x-full animate-slide-in`;
+            toast.innerHTML = `
+                <div class="${iconColor}">
+                    <i class="fas ${icon} text-xl"></i>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800">${title}</h4>
+                    <p class="text-sm text-gray-600">${message}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" class="ml-auto text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Auto remove
+            setTimeout(() => {
+                toast.classList.replace('animate-slide-in', 'animate-slide-out');
+                setTimeout(() => {
+                    toast.remove();
+                }, 500);
+            }, 5000);
+        };
     </script>
 </body>
 </html>

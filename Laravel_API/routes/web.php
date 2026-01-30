@@ -30,6 +30,14 @@ Route::prefix('customer')->name('customer.')->group(function () {
     Route::middleware('auth:web')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Customer\DashboardController::class, 'index'])->name('dashboard');
         Route::get('/gigs/subcategory/{slug}', [\App\Http\Controllers\Customer\DashboardController::class, 'gigsBySubcategory'])->name('gigs.by.subcategory');
+        Route::get('/gigs/{slug}', [\App\Http\Controllers\Customer\GigController::class, 'show'])->name('gigs.show');
+        Route::get('/gigs/{slug}/checkout', [\App\Http\Controllers\Customer\GigController::class, 'checkout'])->name('gigs.checkout');
+        Route::post('/gigs/order', [\App\Http\Controllers\Customer\GigController::class, 'storeOrder'])->name('gigs.order.store');
+        Route::get('/seller/profile/{slug}', [\App\Http\Controllers\Customer\SellerController::class, 'show'])->name('seller.profile');
+        
+        // Chat Routes
+        Route::get('/chat', [\App\Http\Controllers\Customer\ChatController::class, 'index'])->name('chat.index');
+        Route::post('/chat/send', [\App\Http\Controllers\Customer\ChatController::class, 'store'])->name('chat.store');
     });
 });
 

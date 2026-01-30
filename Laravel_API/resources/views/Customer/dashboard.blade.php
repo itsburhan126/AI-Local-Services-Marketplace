@@ -340,11 +340,80 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
+    <main class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
         
-        <!-- Banners Section -->
+        <!-- 1. Banners Section -->
         @if(isset($banners) && $banners->count() > 0)
-            <div class="relative w-full rounded-2xl overflow-hidden shadow-2xl" x-data="{ activeSlide: 0, slides: {{ $banners->count() }}, timer: null }" x-init="timer = setInterval(() => { activeSlide = activeSlide === slides - 1 ? 0 : activeSlide + 1 }, 5000); $watch('activeSlide', () => { clearInterval(timer); timer = setInterval(() => { activeSlide = activeSlide === slides - 1 ? 0 : activeSlide + 1 }, 5000) })">
+            <div class="relative w-full rounded-2xl overflow-hidden shadow-2xl group select-none cursor-grab active:cursor-grabbing" 
+                 x-data="{ 
+                     activeSlide: 0, 
+                     slides: {{ $banners->count() }}, 
+                     timer: null,
+                     startX: 0,
+                     endX: 0,
+                     isDragging: false,
+                     startAutoPlay() {
+                         if (this.timer) clearInterval(this.timer);
+                         this.timer = setInterval(() => { this.next() }, 5000);
+                     },
+                     stopAutoPlay() {
+                         if (this.timer) clearInterval(this.timer);
+                     },
+                     next() {
+                         this.activeSlide = this.activeSlide === this.slides - 1 ? 0 : this.activeSlide + 1;
+                     },
+                     prev() {
+                         this.activeSlide = this.activeSlide === 0 ? this.slides - 1 : this.activeSlide - 1;
+                     },
+                     handleTouchStart(e) {
+                         this.startX = e.touches[0].clientX;
+                         this.stopAutoPlay();
+                     },
+                     handleTouchMove(e) {
+                         this.endX = e.touches[0].clientX;
+                     },
+                     handleTouchEnd() {
+                         if (!this.startX || !this.endX) return;
+                         let diff = this.startX - this.endX;
+                         if (diff > 50) this.next();
+                         if (diff < -50) this.prev();
+                         this.startX = 0;
+                         this.endX = 0;
+                         this.startAutoPlay();
+                     },
+                     handleMouseDown(e) {
+                         this.isDragging = true;
+                         this.startX = e.clientX;
+                         this.stopAutoPlay();
+                     },
+                     handleMouseMove(e) {
+                         if (!this.isDragging) return;
+                         this.endX = e.clientX;
+                     },
+                     handleMouseUp() {
+                         if (!this.isDragging) return;
+                         this.isDragging = false;
+                         if (this.startX && this.endX) {
+                             let diff = this.startX - this.endX;
+                             if (diff > 50) this.next();
+                             if (diff < -50) this.prev();
+                         }
+                         this.startX = 0;
+                         this.endX = 0;
+                         this.startAutoPlay();
+                     }
+                 }" 
+                 x-init="startAutoPlay()"
+                 @mouseenter="stopAutoPlay()" 
+                 @mouseleave="startAutoPlay()"
+                 @touchstart="handleTouchStart"
+                 @touchmove="handleTouchMove"
+                 @touchend="handleTouchEnd"
+                 @mousedown="handleMouseDown"
+                 @mousemove="handleMouseMove"
+                 @mouseup="handleMouseUp"
+                 @mouseleave.self="handleMouseUp">
+                 
                 <div class="relative h-[200px] md:h-[350px]">
                     @foreach($banners as $index => $banner)
                         <div x-show="activeSlide === {{ $index }}" 
@@ -355,363 +424,247 @@
                              x-transition:leave-start="opacity-100 scale-100" 
                              x-transition:leave-end="opacity-0 scale-95"
                              class="absolute inset-0 w-full h-full">
-                            <img src="{{ asset('storage/' . $banner->image) }}" class="w-full h-full object-cover" alt="Banner">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                            @php
+                                $img = $banner->image_path ?? $banner->image;
+                                $src = Str::startsWith($img, ['http://', 'https://']) ? $img : asset('storage/' . $img);
+                            @endphp
+                            <img src="{{ $src }}" class="w-full h-full object-cover pointer-events-none" alt="Banner">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
                         </div>
                     @endforeach
+                    
+                    <!-- Prev Button -->
+                    <button x-show="slides > 1" @click.stop="prev()" class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-3 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 focus:outline-none z-20">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+
+                    <!-- Next Button -->
+                    <button x-show="slides > 1" @click.stop="next()" class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-3 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 focus:outline-none z-20">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                    
                     <!-- Indicators -->
-                    <div class="absolute bottom-5 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+                    <div class="absolute bottom-5 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10" x-show="slides > 1">
                         @foreach($banners as $index => $banner)
-                            <button @click="activeSlide = {{ $index }}" :class="{'bg-white w-8': activeSlide === {{ $index }}, 'bg-white/50 w-2': activeSlide !== {{ $index }}}" class="h-2 rounded-full transition-all duration-300"></button>
+                            <button @click.stop="activeSlide = {{ $index }}" :class="{'bg-emerald-500 w-8': activeSlide === {{ $index }}, 'bg-white/50 w-2 hover:bg-white/80': activeSlide !== {{ $index }}}" class="h-2 rounded-full transition-all duration-300 focus:outline-none"></button>
                         @endforeach
                     </div>
                 </div>
             </div>
-        @else
-            <!-- Default Hero Section (Fallback) -->
-            <div class="relative rounded-2xl overflow-hidden bg-[#0d0d0d] text-white shadow-2xl min-h-[300px] flex items-center">
-                <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-900/30 rounded-full blur-[100px] -mr-32 -mt-32"></div>
-                <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-900/20 rounded-full blur-[80px] -ml-20 -mb-20"></div>
-                
-                <div class="relative z-10 w-full px-8 md:px-12 py-10 flex flex-col md:flex-row items-center justify-between">
-                    <div class="max-w-2xl">
-                        <span class="inline-block py-1 px-3 rounded-full bg-white/10 border border-white/10 text-xs font-semibold tracking-wide uppercase mb-4 text-emerald-300">
-                            Professional Dashboard
-                        </span>
-                        <h1 class="text-3xl md:text-5xl font-bold mb-4 font-sans tracking-tight leading-tight">
-                            Find the perfect <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200">freelance services</span>
-                        </h1>
-                        <p class="text-gray-400 text-lg mb-8 max-w-lg leading-relaxed">
-                            Search for any service, any time, right here.
-                        </p>
+        @endif
+
+        <!-- 2. Flash Sale (New) -->
+        @if($flashSaleGigs->count() > 0)
+            <div class="bg-gradient-to-r from-red-50 to-orange-50 rounded-3xl p-8 border border-red-100">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-2xl font-bold text-gray-900 font-display flex items-center gap-2">
+                            <span class="text-red-500">⚡</span> Flash Sale
+                        </h2>
+                        <!-- Simple Countdown Timer (Static for now, can be dynamic) -->
+                        <div class="hidden md:flex items-center gap-2 text-sm font-medium text-red-600 bg-white px-3 py-1 rounded-full shadow-sm">
+                            <span>Ending soon:</span>
+                            <span class="font-mono font-bold">05:23:12</span>
+                        </div>
                     </div>
+                    <a href="#" class="text-sm font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 transition-colors">
+                        View All <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </a>
+                </div>
+                <div class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
+                    @foreach($flashSaleGigs as $gig)
+                        @include('Customer.components.gig-card', ['gig' => $gig])
+                    @endforeach
                 </div>
             </div>
         @endif
 
-        <!-- Categories (Circular Icons) -->
+
+
+        <!-- 4. Popular Services -->
         <div>
-            <div class="flex items-center justify-between mb-6 px-2">
-                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Categories</h2>
-                <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full transition-colors">View All</a>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 font-display">Popular Services</h2>
+                <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">See All</a>
             </div>
-            <div class="flex gap-8 overflow-x-auto pb-6 scrollbar-hide px-2">
-                @foreach($categories as $category)
-                    <a href="#" class="flex flex-col items-center gap-3 min-w-[80px] group cursor-pointer">
-                        <div class="w-[72px] h-[72px] rounded-2xl bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100 flex items-center justify-center group-hover:shadow-[0_8px_25px_rgba(16,185,129,0.15)] group-hover:border-emerald-500/30 group-hover:-translate-y-1 transition-all duration-300">
-                            @if($category->image)
-                                <img src="{{ asset('storage/' . $category->image) }}" class="w-8 h-8 object-contain" alt="">
-                            @else
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-700 group-hover:text-emerald-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                                </svg>
-                            @endif
-                        </div>
-                        <span class="text-xs font-bold text-gray-600 group-hover:text-emerald-700 text-center transition-colors">{{ $category->name }}</span>
-                    </a>
+            <div class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
+                @foreach($popularGigs as $gig)
+                    @include('Customer.components.gig-card', ['gig' => $gig])
                 @endforeach
             </div>
         </div>
 
-        <!-- Popular Freelancers (Gigs) -->
-        <div>
-            <div class="flex items-center justify-between mb-6 px-2">
-                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Popular Freelancers</h2>
-                <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full transition-colors">View All</a>
+        <!-- 5. Recently Viewed (New) -->
+        @if($recentlyViewed->count() > 0)
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-6 font-display">Recently Viewed</h2>
+                <div class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
+                    @foreach($recentlyViewed as $gig)
+                        @include('Customer.components.gig-card', ['gig' => $gig])
+                    @endforeach
+                </div>
             </div>
-            <div class="flex gap-6 overflow-x-auto pb-8 scrollbar-hide px-2 -mx-2">
-                @foreach($popularGigs as $gig)
-                    @include('Customer.components.gig-card-horizontal', ['gig' => $gig])
-                @endforeach
-                @if($popularGigs->isEmpty())
-                     <div class="w-full text-center py-10 text-gray-400">No popular gigs found.</div>
+        @endif
+
+        <!-- 6. Single Promotional Banner (New) -->
+        @if($singleBanner)
+            <div class="relative w-full h-[250px] md:h-[300px] rounded-3xl overflow-hidden shadow-xl group">
+                <img src="{{ Str::startsWith($singleBanner->image, ['http://', 'https://']) ? $singleBanner->image : asset('storage/' . $singleBanner->image) }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Promo">
+                <div class="absolute inset-0 bg-black/40 flex flex-col justify-center px-8 md:px-16">
+                    <span class="text-emerald-400 font-bold uppercase tracking-wider text-sm mb-2">{{ $singleBanner->subtitle ?? 'Special Offer' }}</span>
+                    <h3 class="text-3xl md:text-5xl font-bold text-white mb-6 font-display max-w-2xl leading-tight">{{ $singleBanner->title }}</h3>
+                    <a href="{{ $singleBanner->link ?? '#' }}" class="bg-white text-gray-900 px-8 py-3 rounded-full font-bold w-fit hover:bg-emerald-50 transition-colors shadow-lg flex items-center gap-2">
+                        {{ $singleBanner->button_text ?? 'Explore Now' }}
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    </a>
+                </div>
+            </div>
+        @endif
+
+        <!-- 7. Left/Right Banners (New) -->
+        @if($leftBanner || $rightBanner)
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                @if($leftBanner)
+                    <div class="relative h-[200px] rounded-2xl overflow-hidden shadow-lg group">
+                        <img src="{{ Str::startsWith($leftBanner->image, ['http://', 'https://']) ? $leftBanner->image : asset('storage/' . $leftBanner->image) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Left Banner">
+                        <div class="absolute inset-0 bg-black/30 p-8 flex flex-col justify-center">
+                            <h3 class="text-2xl font-bold text-white mb-2">{{ $leftBanner->title }}</h3>
+                            <a href="{{ $leftBanner->link ?? '#' }}" class="text-white underline decoration-emerald-500 underline-offset-4 hover:text-emerald-300 transition-colors">Shop Now</a>
+                        </div>
+                    </div>
+                @endif
+                @if($rightBanner)
+                    <div class="relative h-[200px] rounded-2xl overflow-hidden shadow-lg group">
+                        <img src="{{ Str::startsWith($rightBanner->image, ['http://', 'https://']) ? $rightBanner->image : asset('storage/' . $rightBanner->image) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Right Banner">
+                        <div class="absolute inset-0 bg-black/30 p-8 flex flex-col justify-center">
+                            <h3 class="text-2xl font-bold text-white mb-2">{{ $rightBanner->title }}</h3>
+                            <a href="{{ $rightBanner->link ?? '#' }}" class="text-white underline decoration-emerald-500 underline-offset-4 hover:text-emerald-300 transition-colors">Discover</a>
+                        </div>
+                    </div>
                 @endif
             </div>
-        </div>
-
-        <!-- Recently Viewed -->
-        @if(isset($recentlyViewed) && $recentlyViewed->count() > 0)
-        <div>
-            <div class="flex items-center justify-between mb-6 px-2">
-                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Recently Viewed</h2>
-                <a href="#" class="text-sm font-semibold text-gray-500 hover:text-gray-900 bg-gray-50 px-3 py-1.5 rounded-full transition-colors">History</a>
-            </div>
-            <div class="flex gap-6 overflow-x-auto pb-8 scrollbar-hide px-2 -mx-2">
-                @foreach($recentlyViewed as $gig)
-                    @include('Customer.components.gig-card-horizontal', ['gig' => $gig])
-                @endforeach
-            </div>
-        </div>
         @endif
 
-        <!-- Single Promotional Banner -->
-        @if(isset($singleBanner))
-        <div class="relative rounded-2xl overflow-hidden shadow-xl group cursor-pointer h-[250px] md:h-[300px]">
-            <img src="{{ $singleBanner['image'] }}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="{{ $singleBanner['title'] }}">
-            <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent flex flex-col justify-center p-8 md:p-12">
-                <span class="inline-block py-1 px-3 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-4 w-fit backdrop-blur-sm">
-                    Recommended
-                </span>
-                <h3 class="text-3xl md:text-4xl font-bold text-white mb-2 font-display max-w-lg leading-tight">{{ $singleBanner['title'] }}</h3>
-                <p class="text-gray-300 text-lg mb-8 max-w-md">{{ $singleBanner['subtitle'] }}</p>
-                <button class="bg-white text-gray-900 font-bold py-3 px-8 rounded-xl hover:bg-emerald-50 transition-colors shadow-lg w-fit flex items-center gap-2 group/btn">
-                    Explore Now
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-        @endif
-
-        <!-- Left/Right Banners -->
-        @if(isset($promotionalBanners) && count($promotionalBanners) >= 2)
-        <div class="grid md:grid-cols-2 gap-6">
-            @foreach($promotionalBanners as $banner)
-            <div class="relative rounded-2xl overflow-hidden shadow-lg group cursor-pointer h-[200px]">
-                <img src="{{ $banner['image'] }}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="{{ $banner['title'] }}">
-                <div class="absolute inset-0 bg-black/50 hover:bg-black/40 transition-colors flex flex-col justify-center p-8">
-                    <h3 class="text-2xl font-bold text-white mb-1">{{ $banner['title'] }}</h3>
-                    <p class="text-gray-200 font-medium">{{ $banner['subtitle'] }}</p>
+        <!-- 8. Recently Saved (New) -->
+        @if($recentlySaved->count() > 0)
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-6 font-display">Recently Saved</h2>
+                <div class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
+                    @foreach($recentlySaved as $gig)
+                        @include('Customer.components.gig-card', ['gig' => $gig])
+                    @endforeach
                 </div>
             </div>
-            @endforeach
-        </div>
         @endif
 
-        <!-- Recently Saved -->
-        @if(isset($recentlySaved) && $recentlySaved->count() > 0)
-        <div>
-            <div class="flex items-center justify-between mb-6 px-2">
-                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Recently Saved</h2>
-                <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full transition-colors">See All</a>
+        <!-- 9. What Sparks Your Interest (New) -->
+        @if($interestsGigs->count() > 0)
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-6 font-display">What Sparks Your Interest</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    @foreach($interestsGigs as $gig)
+                        @include('Customer.components.gig-card', ['gig' => $gig])
+                    @endforeach
+                </div>
             </div>
-            <div class="flex gap-6 overflow-x-auto pb-8 scrollbar-hide px-2 -mx-2">
-                @foreach($recentlySaved as $gig)
-                    @include('Customer.components.gig-card-horizontal', ['gig' => $gig])
-                @endforeach
-            </div>
-        </div>
         @endif
 
-        <!-- Spark Interest Section -->
-        @if(isset($interests) && count($interests) > 0)
-        <div>
-            <div class="flex items-center justify-between mb-6 px-2">
-                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">What sparks your interest?</h2>
-                <a href="#" class="text-sm font-semibold text-gray-500 hover:text-gray-900 underline transition-colors">See All</a>
-            </div>
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 px-2">
-                @foreach($interests as $interest)
-                <div class="group bg-white rounded-xl border border-gray-100 p-4 hover:border-emerald-500 hover:shadow-md transition-all duration-200 cursor-pointer flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-gray-50 group-hover:bg-emerald-50 flex items-center justify-center text-gray-500 group-hover:text-emerald-600 transition-colors">
-                        <!-- Icon Placeholder - In real app use dynamic icons -->
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                    </div>
-                    <span class="font-semibold text-gray-700 group-hover:text-gray-900 text-sm">{{ $interest['name'] }}</span>
-                    <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
+        <!-- 10. Referral Card (New) -->
+        <div class="bg-indigo-600 rounded-3xl p-8 md:p-12 text-center md:text-left relative overflow-hidden shadow-2xl">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+            <div class="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/30 rounded-full blur-3xl -ml-10 -mb-10"></div>
+            
+            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="max-w-xl">
+                    <h2 class="text-3xl font-bold text-white font-display mb-4">Invite Friends & Earn Rewards</h2>
+                    <p class="text-indigo-100 text-lg mb-8">Share the love! Invite friends to Findlancer and you'll both get $20 off your next order.</p>
+                    <button class="bg-white text-indigo-600 px-8 py-3 rounded-xl font-bold hover:bg-indigo-50 transition-colors shadow-lg">Invite Friends</button>
+                </div>
+                <div class="hidden md:block">
+                    <!-- Illustration placeholder -->
+                    <div class="w-48 h-48 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30">
+                        <span class="text-6xl">🎁</span>
                     </div>
                 </div>
-                @endforeach
-            </div>
-        </div>
-        @endif
-
-        <!-- Referral Card -->
-        <div class="px-2">
-            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-8 md:p-10 relative overflow-hidden shadow-xl text-white">
-                 <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-                 <div class="absolute bottom-0 left-0 w-48 h-48 bg-black/20 rounded-full blur-2xl -ml-10 -mb-10"></div>
-                 
-                 <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                     <div class="max-w-xl">
-                         <h3 class="text-2xl md:text-3xl font-bold mb-3 font-display">Invite Friends & Get up to $100</h3>
-                         <p class="text-indigo-100 text-lg mb-6">Introduce your friends to the easiest way to get things done.</p>
-                         <button class="bg-white text-indigo-600 font-bold py-3 px-6 rounded-xl hover:bg-indigo-50 transition-colors shadow-lg">
-                             Invite Friends
-                         </button>
-                     </div>
-                     <div class="hidden md:block">
-                         <img src="https://cdni.iconscout.com/illustration/premium/thumb/refer-a-friend-illustration-download-in-svg-png-gif-file-formats--referral-program-marketing-business-pack-illustrations-3665319.png" alt="Referral" class="w-64 h-auto drop-shadow-2xl">
-                     </div>
-                 </div>
             </div>
         </div>
 
-        <!-- Testimonials -->
-        @if(isset($testimonials) && count($testimonials) > 0)
-        <div>
-            <div class="flex items-center justify-between mb-6 px-2">
-                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">What People Say</h2>
-            </div>
-            <div class="flex gap-6 overflow-x-auto pb-8 scrollbar-hide px-2 -mx-2">
+        <!-- 11. Testimonials (New) -->
+        <div class="bg-gray-50 rounded-3xl p-8 md:p-12">
+            <h2 class="text-2xl font-bold text-gray-900 mb-8 font-display text-center">People Love Findlancer</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 @foreach($testimonials as $testimonial)
-                <div class="min-w-[300px] w-[300px] bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow">
-                    <div class="flex items-center gap-3 mb-4">
-                        <img src="{{ $testimonial['image'] }}" alt="{{ $testimonial['name'] }}" class="w-10 h-10 rounded-full">
-                        <div>
-                            <h4 class="font-bold text-gray-900 text-sm">{{ $testimonial['name'] }}</h4>
-                            <p class="text-xs text-gray-500">{{ $testimonial['role'] }}</p>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <div class="flex items-center gap-4 mb-4">
+                            <img src="{{ $testimonial['image'] }}" class="w-12 h-12 rounded-full object-cover" alt="{{ $testimonial['name'] }}">
+                            <div>
+                                <h4 class="font-bold text-gray-900">{{ $testimonial['name'] }}</h4>
+                                <p class="text-xs text-gray-500">{{ $testimonial['role'] }}</p>
+                            </div>
                         </div>
+                        <p class="text-gray-600 italic">"{{ $testimonial['text'] }}"</p>
                     </div>
-                    <div class="flex text-yellow-400 mb-3 text-sm">
-                        @for($i = 0; $i < 5; $i++)
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 {{ $i < $testimonial['rating'] ? 'fill-current' : 'text-gray-300' }}" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                        @endfor
-                    </div>
-                    <p class="text-gray-600 text-sm leading-relaxed italic">"{{ $testimonial['content'] }}"</p>
-                </div>
                 @endforeach
             </div>
         </div>
-        @endif
 
-        <!-- Trust & Safety Section -->
-        <div class="bg-emerald-50/50 rounded-2xl p-8 md:p-12 border border-emerald-100">
-            <div class="grid md:grid-cols-2 gap-12 items-center">
-                <div>
-                    <h2 class="text-3xl font-bold text-gray-900 mb-6 font-display">Trust & Safety</h2>
-                    <div class="space-y-6">
-                        <div class="flex gap-4">
-                            <div class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-emerald-600 shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-gray-900 text-lg">Verified Freelancers</h3>
-                                <p class="text-gray-500 leading-relaxed">Every freelancer on our platform is verified to ensure high-quality service delivery.</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-4">
-                            <div class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-emerald-600 shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-gray-900 text-lg">Secure Payments</h3>
-                                <p class="text-gray-500 leading-relaxed">Your payment is held securely and only released when you approve the work.</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-4">
-                            <div class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-emerald-600 shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-gray-900 text-lg">24/7 Support</h3>
-                                <p class="text-gray-500 leading-relaxed">Our dedicated support team is here to help you around the clock.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="relative">
-                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="rounded-2xl shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-500" alt="Trust and Safety">
-                    <div class="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-xl max-w-xs animate-bounce" style="animation-duration: 3s;">
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="flex -space-x-2">
-                                <img class="w-8 h-8 rounded-full border-2 border-white" src="https://i.pravatar.cc/100?img=1" alt="">
-                                <img class="w-8 h-8 rounded-full border-2 border-white" src="https://i.pravatar.cc/100?img=2" alt="">
-                                <img class="w-8 h-8 rounded-full border-2 border-white" src="https://i.pravatar.cc/100?img=3" alt="">
-                            </div>
-                            <span class="text-sm font-bold text-gray-900">10k+ Happy Clients</span>
-                        </div>
-                        <p class="text-xs text-gray-500">Join our community of satisfied customers.</p>
-                    </div>
-                </div>
+        <!-- 12. Trust & Safety (New) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center py-8 border-t border-gray-100">
+            <div class="p-4">
+                <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-xl">🛡️</div>
+                <h3 class="font-bold text-gray-900 mb-2">Secure Payments</h3>
+                <p class="text-sm text-gray-500">Your money is held safely until you approve the work.</p>
+            </div>
+            <div class="p-4">
+                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-xl">⭐</div>
+                <h3 class="font-bold text-gray-900 mb-2">Quality Work</h3>
+                <p class="text-sm text-gray-500">Check ratings and reviews to hire the best talent.</p>
+            </div>
+            <div class="p-4">
+                <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-xl">🎧</div>
+                <h3 class="font-bold text-gray-900 mb-2">24/7 Support</h3>
+                <p class="text-sm text-gray-500">Our support team is always here to help you.</p>
             </div>
         </div>
 
-        <!-- Inspired by your history -->
-        @if(isset($inspiredByHistory) && $inspiredByHistory->count() > 0)
-        <div>
-            <div class="flex items-center justify-between mb-6 px-2">
-                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Inspired by your history</h2>
-                <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full transition-colors">View All</a>
+        <!-- 13. Inspired by Browsing History (New) -->
+        @if($inspiredByHistory->count() > 0)
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-6 font-display">Inspired by your browsing history</h2>
+                <div class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
+                    @foreach($inspiredByHistory as $gig)
+                        @include('Customer.components.gig-card', ['gig' => $gig])
+                    @endforeach
+                </div>
             </div>
-            <div class="flex gap-6 overflow-x-auto pb-8 scrollbar-hide px-2 -mx-2">
-                @foreach($inspiredByHistory as $gig)
-                     @include('Customer.components.gig-card-horizontal', ['gig' => $gig])
-                @endforeach
-            </div>
-        </div>
         @endif
 
-        <!-- New Gigs -->
+        <!-- 14. New Gigs (New) -->
         <div>
-            <div class="flex items-center justify-between mb-6 px-2">
-                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">New Gigs</h2>
-                <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full transition-colors">View All</a>
-            </div>
-            <div class="flex gap-6 overflow-x-auto pb-8 scrollbar-hide px-2 -mx-2">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 font-display">New Gigs</h2>
+            <div class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
                 @foreach($newGigs as $gig)
-                     @include('Customer.components.gig-card-horizontal', ['gig' => $gig])
+                    @include('Customer.components.gig-card', ['gig' => $gig])
                 @endforeach
             </div>
         </div>
 
     </main>
-    
-    <!-- Ultra Professional Footer -->
-    <footer class="bg-white border-t border-gray-200 mt-auto">
-        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                <div class="col-span-1 md:col-span-1">
-                    <a href="{{ url('/') }}" class="flex items-center gap-2 mb-4">
-                         <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white font-bold text-lg">f</div>
-                         <span class="text-xl font-bold text-gray-900 tracking-tight font-display">findlancer</span>
-                    </a>
-                    <p class="text-gray-500 text-sm leading-relaxed">
-                        Find the perfect freelance services for your business. Connect with talent, get work done.
-                    </p>
-                </div>
-                <div>
-                    <h4 class="font-bold text-gray-900 mb-4">Categories</h4>
-                    <ul class="space-y-2 text-sm text-gray-500">
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Graphics & Design</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Digital Marketing</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Writing & Translation</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Video & Animation</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold text-gray-900 mb-4">About</h4>
-                    <ul class="space-y-2 text-sm text-gray-500">
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Careers</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Press & News</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Partnerships</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Privacy Policy</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold text-gray-900 mb-4">Support</h4>
-                    <ul class="space-y-2 text-sm text-gray-500">
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Help & Support</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Trust & Safety</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Selling on Findlancer</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Buying on Findlancer</a></li>
-                    </ul>
-                </div>
+
+    <!-- Footer (Simple) -->
+    <footer class="bg-white border-t border-gray-100 py-12 mt-12">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white font-bold">f</div>
+                <span class="font-bold text-xl tracking-tight font-display">findlancer</span>
             </div>
-            
-            <div class="border-t border-gray-100 pt-8 flex flex-col md:flex-row items-center justify-between">
-                <span class="text-gray-400 text-sm">© {{ date('Y') }} Findlancer International Ltd. All rights reserved.</span>
-                <div class="flex space-x-6 mt-4 md:mt-0">
-                    <a href="#" class="text-gray-400 hover:text-gray-900 transition-colors"><span class="sr-only">Facebook</span><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" /></svg></a>
-                    <a href="#" class="text-gray-400 hover:text-gray-900 transition-colors"><span class="sr-only">Twitter</span><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg></a>
-                    <a href="#" class="text-gray-400 hover:text-gray-900 transition-colors"><span class="sr-only">LinkedIn</span><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" clip-rule="evenodd" /></svg></a>
-                </div>
-            </div>
+            <p class="text-gray-500 text-sm">© {{ date('Y') }} Findlancer. All rights reserved.</p>
         </div>
     </footer>
+
 </body>
 </html>
