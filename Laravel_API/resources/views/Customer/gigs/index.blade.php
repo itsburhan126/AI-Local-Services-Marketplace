@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dashboard | {{ config('app.name') }}</title>
+    <title>{{ $subcategory->name }} | {{ config('app.name') }}</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,20 +33,11 @@
                             700: '#047857', 
                             900: '#064e3b', 
                         }
-                    },
-                    boxShadow: {
-                        'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)',
-                        'glow': '0 0 15px rgba(16, 185, 129, 0.3)',
                     }
                 }
             }
         }
     </script>
-    <style>
-        [x-cloak] { display: none !important; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
 </head>
 <body class="h-full font-body text-slate-600 antialiased" x-data="{ mobileMenuOpen: false }">
 
@@ -147,7 +138,7 @@
                 </div>
             </div>
         </div>
-
+        
     <!-- Mobile Menu (Slide-over) -->
     <div class="relative z-50 lg:hidden" x-show="mobileMenuOpen" role="dialog" aria-modal="true" x-cloak>
         <div class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity" x-show="mobileMenuOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
@@ -217,6 +208,7 @@
             </div>
         </div>
     </div>
+    </nav>
 
     <!-- Secondary Navigation (Categories with Icons) -->
     <div class="border-t border-gray-100 bg-white hidden md:block relative z-40 shadow-sm" x-data="{ activeCategory: null }">
@@ -337,96 +329,19 @@
             </div>
         </div>
     </div>
-    </nav>
 
     <!-- Main Content -->
     <main class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        <!-- Hero Section: Ultra Modern Dark Theme -->
-        <div class="relative rounded-2xl overflow-hidden bg-[#0d0d0d] text-white shadow-2xl mb-12 min-h-[300px] flex items-center">
-            <!-- Background Effects -->
-            <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-900/30 rounded-full blur-[100px] -mr-32 -mt-32"></div>
-            <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-900/20 rounded-full blur-[80px] -ml-20 -mb-20"></div>
-            
-            <div class="relative z-10 w-full px-8 md:px-12 py-10 flex flex-col md:flex-row items-center justify-between">
-                <div class="max-w-2xl">
-                    <span class="inline-block py-1 px-3 rounded-full bg-white/10 border border-white/10 text-xs font-semibold tracking-wide uppercase mb-4 text-primary-300">
-                        Professional Dashboard
-                    </span>
-                    <h1 class="text-3xl md:text-5xl font-bold mb-4 font-sans tracking-tight leading-tight">
-                        Good afternoon, <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">{{ Auth::user()->name }}</span>
-                    </h1>
-                    <p class="text-gray-400 text-lg mb-8 max-w-lg leading-relaxed">
-                        Track your orders, manage projects, and find the best talent for your next big idea.
-                    </p>
-                    <div class="flex flex-wrap gap-4">
-                        <button class="bg-white text-black px-8 py-3.5 rounded-xl font-bold hover:bg-gray-100 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 flex items-center">
-                            Post a Request
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Right Side Stats/Widgets (Glassmorphism) -->
-                <div class="hidden lg:flex gap-6 mt-8 md:mt-0">
-                    <!-- Stat Card 1 -->
-                    <div class="w-48 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors cursor-pointer">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="p-2 bg-blue-500/20 rounded-lg text-blue-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                </svg>
-                            </div>
-                            <span class="text-xs text-gray-400">Active</span>
-                        </div>
-                        <div class="text-2xl font-bold">0</div>
-                        <div class="text-xs text-gray-500 mt-1">Orders in progress</div>
-                    </div>
-                    
-                    <!-- Stat Card 2 -->
-                    <div class="w-48 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors cursor-pointer">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="p-2 bg-green-500/20 rounded-lg text-green-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                                </svg>
-                            </div>
-                            <span class="text-xs text-gray-400">Wallet</span>
-                        </div>
-                        <div class="text-2xl font-bold">$0.00</div>
-                        <div class="text-xs text-gray-500 mt-1">Available balance</div>
-                    </div>
-                </div>
-            </div>
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">{{ $subcategory->name }}</h1>
+            <p class="text-gray-500 mt-2">Explore the best {{ $subcategory->name }} services</p>
         </div>
 
-        <!-- Section: Recommended Gigs -->
-        <div class="mb-16">
-            <div class="flex items-center justify-between mb-8">
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Recommended for you</h2>
-                    <p class="text-sm text-gray-500 mt-1">Handpicked services based on your interests</p>
-                </div>
-                <a href="#" class="group flex items-center text-sm font-bold text-gray-900 hover:text-primary-600 transition-colors">
-                    View All
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                </a>
-            </div>
-
+        @if($gigs->count() > 0)
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-                @forelse($recommendedGigs as $gig)
+                @foreach($gigs as $gig)
                     <div class="group bg-white rounded-xl overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 border border-gray-100 flex flex-col h-full cursor-pointer relative">
-                        <!-- Wishlist Button -->
-                        <button class="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/90 backdrop-blur-sm text-gray-400 hover:text-red-500 hover:bg-white transition-all shadow-sm opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
-                        </button>
-
                         <!-- Thumbnail -->
                         <div class="relative aspect-[4/3] overflow-hidden bg-gray-100">
                             @if($gig->thumbnail_image)
@@ -442,140 +357,51 @@
 
                         <!-- Content -->
                         <div class="p-4 flex-1 flex flex-col">
-                            <!-- Seller Info -->
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="flex items-center">
-                                    <img class="h-6 w-6 rounded-full object-cover ring-2 ring-white" src="{{ $gig->provider->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($gig->provider->name).'&background=random' }}" alt="">
-                                    <span class="ml-2 text-xs font-bold text-gray-900 truncate max-w-[100px]">{{ $gig->provider->name }}</span>
-                                </div>
-                                <span class="text-[10px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{{ $gig->provider->seller_level ?? 'Level 1' }}</span>
+                            <div class="flex items-center gap-2 mb-3">
+                                <img src="{{ $gig->provider->profile_image ? asset('storage/' . $gig->provider->profile_image) : 'https://ui-avatars.com/api/?name=' . urlencode($gig->provider->user->name) }}" alt="" class="w-6 h-6 rounded-full">
+                                <span class="text-xs font-semibold text-gray-900">{{ $gig->provider->user->name }}</span>
+                                <span class="text-xs text-gray-400">| {{ $gig->provider->seller_level ?? 'Level 1' }}</span>
                             </div>
-
-                            <!-- Title -->
-                            <h3 class="text-sm font-medium text-gray-800 hover:text-primary-600 transition-colors line-clamp-2 mb-2 leading-relaxed h-[40px]">
+                            
+                            <h3 class="text-gray-900 font-medium leading-snug mb-2 group-hover:text-primary-600 transition-colors line-clamp-2">
                                 {{ $gig->title }}
                             </h3>
-
-                            <!-- Rating -->
-                            <div class="flex items-center text-xs mb-4">
-                                <svg class="h-4 w-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            
+                            <div class="flex items-center gap-1 text-yellow-400 text-sm mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 fill-current" viewBox="0 0 20 20">
                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                 </svg>
-                                <span class="font-bold text-gray-900 ml-1">5.0</span>
-                                <span class="text-gray-400 ml-1">(42 reviews)</span>
+                                <span class="font-bold text-gray-900">5.0</span>
+                                <span class="text-gray-400">(0)</span>
                             </div>
-
-                            <!-- Footer -->
-                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
+                            
+                            <div class="mt-auto flex items-center justify-between border-t border-gray-100 pt-3">
                                 <div class="text-xs text-gray-400 font-medium">Starting at</div>
-                                <div class="text-lg font-bold text-gray-900">${{ $gig->packages->first()->price ?? '25' }}</div>
+                                <div class="text-lg font-bold text-gray-900">
+                                    ${{ $gig->packages->first() ? $gig->packages->first()->price : '0' }}
+                                </div>
                             </div>
                         </div>
                     </div>
-                @empty
-                     <!-- Ultra Pro Mock Cards -->
-                     @for($i = 0; $i < 5; $i++)
-                        <div class="group bg-white rounded-xl overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 border border-gray-100 flex flex-col h-full cursor-pointer">
-                            <div class="relative aspect-[4/3] overflow-hidden bg-gray-200">
-                                <img src="https://source.unsplash.com/random/400x300?business,tech&sig={{ $i }}" class="w-full h-full object-cover opacity-95 group-hover:scale-105 transition-transform duration-700">
-                            </div>
-                            <div class="p-4 flex-1 flex flex-col">
-                                <div class="flex items-center justify-between mb-3">
-                                    <div class="flex items-center">
-                                        <div class="h-6 w-6 rounded-full bg-gray-300"></div>
-                                        <div class="ml-2 h-3 w-16 bg-gray-200 rounded"></div>
-                                    </div>
-                                    <div class="h-4 w-10 bg-gray-100 rounded"></div>
-                                </div>
-                                <div class="space-y-2 mb-4">
-                                    <div class="h-4 w-full bg-gray-100 rounded"></div>
-                                    <div class="h-4 w-2/3 bg-gray-100 rounded"></div>
-                                </div>
-                                <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
-                                    <div class="h-3 w-12 bg-gray-100 rounded"></div>
-                                    <div class="h-5 w-10 bg-gray-200 rounded"></div>
-                                </div>
-                            </div>
-                        </div>
-                     @endfor
-                @endforelse
-            </div>
-        </div>
-
-        <!-- Section: Popular Services (Visual Grid) -->
-        <div class="mb-12">
-             <h2 class="text-2xl font-bold text-gray-900 mb-8 tracking-tight">Popular professional services</h2>
-             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-                 @foreach($popularSubcategories as $subcategory)
-                 <a href="{{ route('customer.gigs.by.subcategory', $subcategory->slug) }}" class="group relative rounded-xl overflow-hidden aspect-[3/4] shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                     @if($subcategory->image)
-                        <img src="{{ asset('storage/' . $subcategory->image) }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ $subcategory->name }}">
-                     @else
-                        <img src="https://source.unsplash.com/random/500x700?{{ urlencode($subcategory->name) }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ $subcategory->name }}">
-                     @endif
-                     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
-                     <div class="absolute top-4 left-4 right-4">
-                        <p class="text-white font-bold text-lg leading-tight">{{ $subcategory->name }}</p>
-                        <p class="text-gray-300 text-xs mt-1">Hire Pros</p>
-                     </div>
-                 </a>
-                 @endforeach
-             </div>
-        </div>
-
-    </main>
-    
-    <!-- Ultra Professional Footer -->
-    <footer class="bg-white border-t border-gray-200 mt-auto">
-        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                <div class="col-span-1 md:col-span-1">
-                    <a href="{{ url('/') }}" class="flex items-center gap-2 mb-4">
-                         <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white font-bold text-lg">f</div>
-                         <span class="text-xl font-bold text-gray-900 tracking-tight font-display">findlancer</span>
-                    </a>
-                    <p class="text-gray-500 text-sm leading-relaxed">
-                        Find the perfect freelance services for your business. Connect with talent, get work done.
-                    </p>
-                </div>
-                <div>
-                    <h4 class="font-bold text-gray-900 mb-4">Categories</h4>
-                    <ul class="space-y-2 text-sm text-gray-500">
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Graphics & Design</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Digital Marketing</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Writing & Translation</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Video & Animation</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold text-gray-900 mb-4">About</h4>
-                    <ul class="space-y-2 text-sm text-gray-500">
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Careers</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Press & News</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Partnerships</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Privacy Policy</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold text-gray-900 mb-4">Support</h4>
-                    <ul class="space-y-2 text-sm text-gray-500">
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Help & Support</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Trust & Safety</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Selling on Findlancer</a></li>
-                        <li><a href="#" class="hover:text-primary-600 transition-colors">Buying on Findlancer</a></li>
-                    </ul>
-                </div>
+                @endforeach
             </div>
             
-            <div class="border-t border-gray-100 pt-8 flex flex-col md:flex-row items-center justify-between">
-                <span class="text-gray-400 text-sm">© {{ date('Y') }} Findlancer International Ltd. All rights reserved.</span>
-                <div class="flex space-x-6 mt-4 md:mt-0">
-                    <a href="#" class="text-gray-400 hover:text-gray-900 transition-colors"><span class="sr-only">Facebook</span><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" /></svg></a>
-                    <a href="#" class="text-gray-400 hover:text-gray-900 transition-colors"><span class="sr-only">Twitter</span><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg></a>
-                    <a href="#" class="text-gray-400 hover:text-gray-900 transition-colors"><span class="sr-only">LinkedIn</span><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" clip-rule="evenodd" /></svg></a>
-                </div>
+            <div class="mt-8">
+                {{ $gigs->links() }}
             </div>
-        </div>
-    </footer>
+        @else
+            <div class="text-center py-20 bg-white rounded-xl border border-gray-100">
+                <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900">No gigs found</h3>
+                <p class="text-gray-500 mt-1">There are no active gigs in this category yet.</p>
+            </div>
+        @endif
+        
+    </main>
+
 </body>
 </html>

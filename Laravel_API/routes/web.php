@@ -29,6 +29,7 @@ Route::prefix('customer')->name('customer.')->group(function () {
 
     Route::middleware('auth:web')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Customer\DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/gigs/subcategory/{slug}', [\App\Http\Controllers\Customer\DashboardController::class, 'gigsBySubcategory'])->name('gigs.by.subcategory');
     });
 });
 
