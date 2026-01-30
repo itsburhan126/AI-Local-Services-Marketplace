@@ -211,14 +211,14 @@
     </nav>
 
     <!-- Secondary Navigation (Categories with Icons) -->
-    <div class="border-t border-gray-100 bg-white hidden md:block relative z-40 shadow-sm" x-data="{ activeCategory: null }">
+    <div class="border-t border-gray-100 bg-white hidden md:block relative z-40 shadow-sm" x-data="{ activeCategory: null, timeout: null }">
         <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
                 <div class="flex w-full gap-4 overflow-x-auto scrollbar-hide md:justify-between">
                     @foreach($categories as $category)
                         <div class="group relative px-3 py-3.5 border-b-[3px] border-transparent hover:border-emerald-500 transition-all duration-300 cursor-pointer"
-                             @mouseenter="activeCategory = {{ $category->id }}"
-                             @mouseleave="activeCategory = null">
+                             @mouseenter="clearTimeout(timeout); activeCategory = {{ $category->id }}"
+                             @mouseleave="timeout = setTimeout(() => activeCategory = null, 300)">
                             <a href="#" class="text-[15px] font-semibold text-gray-600 group-hover:text-emerald-600 whitespace-nowrap transition-colors block tracking-wide">
                                 {{ $category->name }}
                             </a>
@@ -231,8 +231,8 @@
         <!-- Mega Menu Dropdown -->
         <div class="absolute left-0 w-full bg-white shadow-[0_15px_50px_-10px_rgba(0,0,0,0.15)] border-t border-gray-50"
              x-show="activeCategory"
-             @mouseenter="activeCategory = activeCategory"
-             @mouseleave="activeCategory = null"
+             @mouseenter="clearTimeout(timeout)"
+             @mouseleave="timeout = setTimeout(() => activeCategory = null, 300)"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 translate-y-2"
              x-transition:enter-end="opacity-100 translate-y-0"
