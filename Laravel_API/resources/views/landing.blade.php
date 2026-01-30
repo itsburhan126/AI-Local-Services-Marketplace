@@ -10,6 +10,7 @@
         
         <!-- Styles -->
         <script src="https://cdn.tailwindcss.com"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
         <script>
             tailwind.config = {
                 theme: {
@@ -71,7 +72,7 @@
                 </a>
 
                 <!-- Option 2: Customer -->
-                <a href="#" class="group relative bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-emerald-200 transform hover:-translate-y-1">
+                <a href="{{ route('hire.pro') }}" class="group relative bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-emerald-200 transform hover:-translate-y-1">
                     <div class="absolute inset-0 bg-gradient-to-br from-emerald-50 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div class="p-10 relative z-10 flex flex-col h-full items-center text-center">
                         <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6 text-emerald-600 group-hover:scale-110 transition-transform duration-300">

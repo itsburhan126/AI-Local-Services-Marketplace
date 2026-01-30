@@ -8,14 +8,38 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 Route::get('/', function () {
     if (Auth::guard('web')->check()) {
-        return redirect()->route('provider.freelancer.dashboard');
+        $user = Auth::guard('web')->user();
+        if ($user->role === 'provider' && $user->service_rule === 'freelancer') {
+            return redirect()->route('provider.freelancer.dashboard');
+        }
+        if ($user->role === 'user') {
+            return redirect()->route('customer.dashboard');
+        }
+        // Fallback or other roles
     }
     return view('landing');
 })->name('landing');
 
+Route::prefix('customer')->name('customer.')->group(function () {
+    Route::get('/register', [\App\Http\Controllers\Customer\AuthController::class, 'showRegisterForm'])->name('register');
+    Route::post('/register', [\App\Http\Controllers\Customer\AuthController::class, 'register'])->name('register.submit');
+    Route::get('/login', [\App\Http\Controllers\Customer\AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [\App\Http\Controllers\Customer\AuthController::class, 'login'])->name('login.submit');
+    Route::post('/logout', [\App\Http\Controllers\Customer\AuthController::class, 'logout'])->name('logout');
+
+    Route::middleware('auth:web')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\Customer\DashboardController::class, 'index'])->name('dashboard');
+    });
+});
+
+
 Route::get('/join-as-pro', function () {
     return view('join-selection');
 })->name('join.pro');
+
+Route::get('/hire-a-pro', function () {
+    return view('hire-selection');
+})->name('hire.pro');
 
 Route::prefix('freelancer')->name('provider.freelancer.')->group(function () {
     Route::get('/register', function () {
