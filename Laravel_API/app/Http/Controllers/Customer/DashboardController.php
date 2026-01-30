@@ -35,6 +35,13 @@ class DashboardController extends Controller
             ->take(8)
             ->get();
 
+        // Fetch popular subcategories
+        $popularSubcategories = Category::whereNotNull('parent_id')
+            ->where('is_active', true)
+            ->inRandomOrder()
+            ->limit(6)
+            ->get();
+
         return view('Customer.dashboard', compact('categories', 'subcategories', 'popularSubcategories', 'recommendedGigs'));
     }
 
