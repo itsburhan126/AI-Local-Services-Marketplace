@@ -340,187 +340,323 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
         
-        <!-- Hero Section: Ultra Modern Dark Theme -->
-        <div class="relative rounded-2xl overflow-hidden bg-[#0d0d0d] text-white shadow-2xl mb-12 min-h-[300px] flex items-center">
-            <!-- Background Effects -->
-            <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-900/30 rounded-full blur-[100px] -mr-32 -mt-32"></div>
-            <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-900/20 rounded-full blur-[80px] -ml-20 -mb-20"></div>
-            
-            <div class="relative z-10 w-full px-8 md:px-12 py-10 flex flex-col md:flex-row items-center justify-between">
-                <div class="max-w-2xl">
-                    <span class="inline-block py-1 px-3 rounded-full bg-white/10 border border-white/10 text-xs font-semibold tracking-wide uppercase mb-4 text-primary-300">
-                        Professional Dashboard
-                    </span>
-                    <h1 class="text-3xl md:text-5xl font-bold mb-4 font-sans tracking-tight leading-tight">
-                        Good afternoon, <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">{{ Auth::user()->name }}</span>
-                    </h1>
-                    <p class="text-gray-400 text-lg mb-8 max-w-lg leading-relaxed">
-                        Track your orders, manage projects, and find the best talent for your next big idea.
-                    </p>
-                    <div class="flex flex-wrap gap-4">
-                        <button class="bg-white text-black px-8 py-3.5 rounded-xl font-bold hover:bg-gray-100 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 flex items-center">
-                            Post a Request
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Right Side Stats/Widgets (Glassmorphism) -->
-                <div class="hidden lg:flex gap-6 mt-8 md:mt-0">
-                    <!-- Stat Card 1 -->
-                    <div class="w-48 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors cursor-pointer">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="p-2 bg-blue-500/20 rounded-lg text-blue-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                </svg>
-                            </div>
-                            <span class="text-xs text-gray-400">Active</span>
+        <!-- Banners Section -->
+        @if(isset($banners) && $banners->count() > 0)
+            <div class="relative w-full rounded-2xl overflow-hidden shadow-2xl" x-data="{ activeSlide: 0, slides: {{ $banners->count() }}, timer: null }" x-init="timer = setInterval(() => { activeSlide = activeSlide === slides - 1 ? 0 : activeSlide + 1 }, 5000); $watch('activeSlide', () => { clearInterval(timer); timer = setInterval(() => { activeSlide = activeSlide === slides - 1 ? 0 : activeSlide + 1 }, 5000) })">
+                <div class="relative h-[200px] md:h-[350px]">
+                    @foreach($banners as $index => $banner)
+                        <div x-show="activeSlide === {{ $index }}" 
+                             x-transition:enter="transition transform duration-700 ease-out" 
+                             x-transition:enter-start="opacity-0 scale-95" 
+                             x-transition:enter-end="opacity-100 scale-100" 
+                             x-transition:leave="transition transform duration-700 ease-in" 
+                             x-transition:leave-start="opacity-100 scale-100" 
+                             x-transition:leave-end="opacity-0 scale-95"
+                             class="absolute inset-0 w-full h-full">
+                            <img src="{{ asset('storage/' . $banner->image) }}" class="w-full h-full object-cover" alt="Banner">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         </div>
-                        <div class="text-2xl font-bold">0</div>
-                        <div class="text-xs text-gray-500 mt-1">Orders in progress</div>
-                    </div>
-                    
-                    <!-- Stat Card 2 -->
-                    <div class="w-48 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors cursor-pointer">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="p-2 bg-green-500/20 rounded-lg text-green-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                                </svg>
-                            </div>
-                            <span class="text-xs text-gray-400">Wallet</span>
-                        </div>
-                        <div class="text-2xl font-bold">$0.00</div>
-                        <div class="text-xs text-gray-500 mt-1">Available balance</div>
+                    @endforeach
+                    <!-- Indicators -->
+                    <div class="absolute bottom-5 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+                        @foreach($banners as $index => $banner)
+                            <button @click="activeSlide = {{ $index }}" :class="{'bg-white w-8': activeSlide === {{ $index }}, 'bg-white/50 w-2': activeSlide !== {{ $index }}}" class="h-2 rounded-full transition-all duration-300"></button>
+                        @endforeach
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Section: Recommended Gigs -->
-        <div class="mb-16">
-            <div class="flex items-center justify-between mb-8">
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Recommended for you</h2>
-                    <p class="text-sm text-gray-500 mt-1">Handpicked services based on your interests</p>
+        @else
+            <!-- Default Hero Section (Fallback) -->
+            <div class="relative rounded-2xl overflow-hidden bg-[#0d0d0d] text-white shadow-2xl min-h-[300px] flex items-center">
+                <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-900/30 rounded-full blur-[100px] -mr-32 -mt-32"></div>
+                <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-900/20 rounded-full blur-[80px] -ml-20 -mb-20"></div>
+                
+                <div class="relative z-10 w-full px-8 md:px-12 py-10 flex flex-col md:flex-row items-center justify-between">
+                    <div class="max-w-2xl">
+                        <span class="inline-block py-1 px-3 rounded-full bg-white/10 border border-white/10 text-xs font-semibold tracking-wide uppercase mb-4 text-emerald-300">
+                            Professional Dashboard
+                        </span>
+                        <h1 class="text-3xl md:text-5xl font-bold mb-4 font-sans tracking-tight leading-tight">
+                            Find the perfect <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200">freelance services</span>
+                        </h1>
+                        <p class="text-gray-400 text-lg mb-8 max-w-lg leading-relaxed">
+                            Search for any service, any time, right here.
+                        </p>
+                    </div>
                 </div>
-                <a href="#" class="group flex items-center text-sm font-bold text-gray-900 hover:text-primary-600 transition-colors">
-                    View All
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                </a>
             </div>
+        @endif
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-                @forelse($recommendedGigs as $gig)
-                    <div class="group bg-white rounded-xl overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 border border-gray-100 flex flex-col h-full cursor-pointer relative">
-                        <!-- Wishlist Button -->
-                        <button class="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/90 backdrop-blur-sm text-gray-400 hover:text-red-500 hover:bg-white transition-all shadow-sm opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
-                        </button>
-
-                        <!-- Thumbnail -->
-                        <div class="relative aspect-[4/3] overflow-hidden bg-gray-100">
-                            @if($gig->thumbnail_image)
-                                <img src="{{ asset('storage/' . $gig->thumbnail_image) }}" alt="{{ $gig->title }}" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+        <!-- Categories (Circular Icons) -->
+        <div>
+            <div class="flex items-center justify-between mb-6 px-2">
+                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Categories</h2>
+                <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full transition-colors">View All</a>
+            </div>
+            <div class="flex gap-8 overflow-x-auto pb-6 scrollbar-hide px-2">
+                @foreach($categories as $category)
+                    <a href="#" class="flex flex-col items-center gap-3 min-w-[80px] group cursor-pointer">
+                        <div class="w-[72px] h-[72px] rounded-2xl bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100 flex items-center justify-center group-hover:shadow-[0_8px_25px_rgba(16,185,129,0.15)] group-hover:border-emerald-500/30 group-hover:-translate-y-1 transition-all duration-300">
+                            @if($category->image)
+                                <img src="{{ asset('storage/' . $category->image) }}" class="w-8 h-8 object-contain" alt="">
                             @else
-                                <div class="w-full h-full flex items-center justify-center bg-gray-50 text-gray-300">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-700 group-hover:text-emerald-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                                </svg>
                             @endif
                         </div>
-
-                        <!-- Content -->
-                        <div class="p-4 flex-1 flex flex-col">
-                            <!-- Seller Info -->
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="flex items-center">
-                                    <img class="h-6 w-6 rounded-full object-cover ring-2 ring-white" src="{{ $gig->provider->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($gig->provider->name).'&background=random' }}" alt="">
-                                    <span class="ml-2 text-xs font-bold text-gray-900 truncate max-w-[100px]">{{ $gig->provider->name }}</span>
-                                </div>
-                                <span class="text-[10px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{{ $gig->provider->seller_level ?? 'Level 1' }}</span>
-                            </div>
-
-                            <!-- Title -->
-                            <h3 class="text-sm font-medium text-gray-800 hover:text-primary-600 transition-colors line-clamp-2 mb-2 leading-relaxed h-[40px]">
-                                {{ $gig->title }}
-                            </h3>
-
-                            <!-- Rating -->
-                            <div class="flex items-center text-xs mb-4">
-                                <svg class="h-4 w-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <span class="font-bold text-gray-900 ml-1">5.0</span>
-                                <span class="text-gray-400 ml-1">(42 reviews)</span>
-                            </div>
-
-                            <!-- Footer -->
-                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
-                                <div class="text-xs text-gray-400 font-medium">Starting at</div>
-                                <div class="text-lg font-bold text-gray-900">${{ $gig->packages->first()->price ?? '25' }}</div>
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                     <!-- Ultra Pro Mock Cards -->
-                     @for($i = 0; $i < 5; $i++)
-                        <div class="group bg-white rounded-xl overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 border border-gray-100 flex flex-col h-full cursor-pointer">
-                            <div class="relative aspect-[4/3] overflow-hidden bg-gray-200">
-                                <img src="https://source.unsplash.com/random/400x300?business,tech&sig={{ $i }}" class="w-full h-full object-cover opacity-95 group-hover:scale-105 transition-transform duration-700">
-                            </div>
-                            <div class="p-4 flex-1 flex flex-col">
-                                <div class="flex items-center justify-between mb-3">
-                                    <div class="flex items-center">
-                                        <div class="h-6 w-6 rounded-full bg-gray-300"></div>
-                                        <div class="ml-2 h-3 w-16 bg-gray-200 rounded"></div>
-                                    </div>
-                                    <div class="h-4 w-10 bg-gray-100 rounded"></div>
-                                </div>
-                                <div class="space-y-2 mb-4">
-                                    <div class="h-4 w-full bg-gray-100 rounded"></div>
-                                    <div class="h-4 w-2/3 bg-gray-100 rounded"></div>
-                                </div>
-                                <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
-                                    <div class="h-3 w-12 bg-gray-100 rounded"></div>
-                                    <div class="h-5 w-10 bg-gray-200 rounded"></div>
-                                </div>
-                            </div>
-                        </div>
-                     @endfor
-                @endforelse
+                        <span class="text-xs font-bold text-gray-600 group-hover:text-emerald-700 text-center transition-colors">{{ $category->name }}</span>
+                    </a>
+                @endforeach
             </div>
         </div>
 
-        <!-- Section: Popular Services (Visual Grid) -->
-        <div class="mb-12">
-             <h2 class="text-2xl font-bold text-gray-900 mb-8 tracking-tight">Popular professional services</h2>
-             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-                 @foreach($popularSubcategories as $subcategory)
-                 <a href="{{ route('customer.gigs.by.subcategory', $subcategory->slug) }}" class="group relative rounded-xl overflow-hidden aspect-[3/4] shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                     @if($subcategory->image)
-                        <img src="{{ asset('storage/' . $subcategory->image) }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ $subcategory->name }}">
-                     @else
-                        <img src="https://source.unsplash.com/random/500x700?{{ urlencode($subcategory->name) }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ $subcategory->name }}">
-                     @endif
-                     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
-                     <div class="absolute top-4 left-4 right-4">
-                        <p class="text-white font-bold text-lg leading-tight">{{ $subcategory->name }}</p>
-                        <p class="text-gray-300 text-xs mt-1">Hire Pros</p>
+        <!-- Popular Freelancers (Gigs) -->
+        <div>
+            <div class="flex items-center justify-between mb-6 px-2">
+                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Popular Freelancers</h2>
+                <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full transition-colors">View All</a>
+            </div>
+            <div class="flex gap-6 overflow-x-auto pb-8 scrollbar-hide px-2 -mx-2">
+                @foreach($popularGigs as $gig)
+                    @include('Customer.components.gig-card-horizontal', ['gig' => $gig])
+                @endforeach
+                @if($popularGigs->isEmpty())
+                     <div class="w-full text-center py-10 text-gray-400">No popular gigs found.</div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Recently Viewed -->
+        @if(isset($recentlyViewed) && $recentlyViewed->count() > 0)
+        <div>
+            <div class="flex items-center justify-between mb-6 px-2">
+                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Recently Viewed</h2>
+                <a href="#" class="text-sm font-semibold text-gray-500 hover:text-gray-900 bg-gray-50 px-3 py-1.5 rounded-full transition-colors">History</a>
+            </div>
+            <div class="flex gap-6 overflow-x-auto pb-8 scrollbar-hide px-2 -mx-2">
+                @foreach($recentlyViewed as $gig)
+                    @include('Customer.components.gig-card-horizontal', ['gig' => $gig])
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        <!-- Single Promotional Banner -->
+        @if(isset($singleBanner))
+        <div class="relative rounded-2xl overflow-hidden shadow-xl group cursor-pointer h-[250px] md:h-[300px]">
+            <img src="{{ $singleBanner['image'] }}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="{{ $singleBanner['title'] }}">
+            <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent flex flex-col justify-center p-8 md:p-12">
+                <span class="inline-block py-1 px-3 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-4 w-fit backdrop-blur-sm">
+                    Recommended
+                </span>
+                <h3 class="text-3xl md:text-4xl font-bold text-white mb-2 font-display max-w-lg leading-tight">{{ $singleBanner['title'] }}</h3>
+                <p class="text-gray-300 text-lg mb-8 max-w-md">{{ $singleBanner['subtitle'] }}</p>
+                <button class="bg-white text-gray-900 font-bold py-3 px-8 rounded-xl hover:bg-emerald-50 transition-colors shadow-lg w-fit flex items-center gap-2 group/btn">
+                    Explore Now
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        @endif
+
+        <!-- Left/Right Banners -->
+        @if(isset($promotionalBanners) && count($promotionalBanners) >= 2)
+        <div class="grid md:grid-cols-2 gap-6">
+            @foreach($promotionalBanners as $banner)
+            <div class="relative rounded-2xl overflow-hidden shadow-lg group cursor-pointer h-[200px]">
+                <img src="{{ $banner['image'] }}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="{{ $banner['title'] }}">
+                <div class="absolute inset-0 bg-black/50 hover:bg-black/40 transition-colors flex flex-col justify-center p-8">
+                    <h3 class="text-2xl font-bold text-white mb-1">{{ $banner['title'] }}</h3>
+                    <p class="text-gray-200 font-medium">{{ $banner['subtitle'] }}</p>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        @endif
+
+        <!-- Recently Saved -->
+        @if(isset($recentlySaved) && $recentlySaved->count() > 0)
+        <div>
+            <div class="flex items-center justify-between mb-6 px-2">
+                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Recently Saved</h2>
+                <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full transition-colors">See All</a>
+            </div>
+            <div class="flex gap-6 overflow-x-auto pb-8 scrollbar-hide px-2 -mx-2">
+                @foreach($recentlySaved as $gig)
+                    @include('Customer.components.gig-card-horizontal', ['gig' => $gig])
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        <!-- Spark Interest Section -->
+        @if(isset($interests) && count($interests) > 0)
+        <div>
+            <div class="flex items-center justify-between mb-6 px-2">
+                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">What sparks your interest?</h2>
+                <a href="#" class="text-sm font-semibold text-gray-500 hover:text-gray-900 underline transition-colors">See All</a>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 px-2">
+                @foreach($interests as $interest)
+                <div class="group bg-white rounded-xl border border-gray-100 p-4 hover:border-emerald-500 hover:shadow-md transition-all duration-200 cursor-pointer flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gray-50 group-hover:bg-emerald-50 flex items-center justify-center text-gray-500 group-hover:text-emerald-600 transition-colors">
+                        <!-- Icon Placeholder - In real app use dynamic icons -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <span class="font-semibold text-gray-700 group-hover:text-gray-900 text-sm">{{ $interest['name'] }}</span>
+                    <div class="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        <!-- Referral Card -->
+        <div class="px-2">
+            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-8 md:p-10 relative overflow-hidden shadow-xl text-white">
+                 <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                 <div class="absolute bottom-0 left-0 w-48 h-48 bg-black/20 rounded-full blur-2xl -ml-10 -mb-10"></div>
+                 
+                 <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                     <div class="max-w-xl">
+                         <h3 class="text-2xl md:text-3xl font-bold mb-3 font-display">Invite Friends & Get up to $100</h3>
+                         <p class="text-indigo-100 text-lg mb-6">Introduce your friends to the easiest way to get things done.</p>
+                         <button class="bg-white text-indigo-600 font-bold py-3 px-6 rounded-xl hover:bg-indigo-50 transition-colors shadow-lg">
+                             Invite Friends
+                         </button>
                      </div>
-                 </a>
-                 @endforeach
-             </div>
+                     <div class="hidden md:block">
+                         <img src="https://cdni.iconscout.com/illustration/premium/thumb/refer-a-friend-illustration-download-in-svg-png-gif-file-formats--referral-program-marketing-business-pack-illustrations-3665319.png" alt="Referral" class="w-64 h-auto drop-shadow-2xl">
+                     </div>
+                 </div>
+            </div>
+        </div>
+
+        <!-- Testimonials -->
+        @if(isset($testimonials) && count($testimonials) > 0)
+        <div>
+            <div class="flex items-center justify-between mb-6 px-2">
+                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">What People Say</h2>
+            </div>
+            <div class="flex gap-6 overflow-x-auto pb-8 scrollbar-hide px-2 -mx-2">
+                @foreach($testimonials as $testimonial)
+                <div class="min-w-[300px] w-[300px] bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-center gap-3 mb-4">
+                        <img src="{{ $testimonial['image'] }}" alt="{{ $testimonial['name'] }}" class="w-10 h-10 rounded-full">
+                        <div>
+                            <h4 class="font-bold text-gray-900 text-sm">{{ $testimonial['name'] }}</h4>
+                            <p class="text-xs text-gray-500">{{ $testimonial['role'] }}</p>
+                        </div>
+                    </div>
+                    <div class="flex text-yellow-400 mb-3 text-sm">
+                        @for($i = 0; $i < 5; $i++)
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 {{ $i < $testimonial['rating'] ? 'fill-current' : 'text-gray-300' }}" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                        @endfor
+                    </div>
+                    <p class="text-gray-600 text-sm leading-relaxed italic">"{{ $testimonial['content'] }}"</p>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        <!-- Trust & Safety Section -->
+        <div class="bg-emerald-50/50 rounded-2xl p-8 md:p-12 border border-emerald-100">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6 font-display">Trust & Safety</h2>
+                    <div class="space-y-6">
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-emerald-600 shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 text-lg">Verified Freelancers</h3>
+                                <p class="text-gray-500 leading-relaxed">Every freelancer on our platform is verified to ensure high-quality service delivery.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-emerald-600 shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 text-lg">Secure Payments</h3>
+                                <p class="text-gray-500 leading-relaxed">Your payment is held securely and only released when you approve the work.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-emerald-600 shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 text-lg">24/7 Support</h3>
+                                <p class="text-gray-500 leading-relaxed">Our dedicated support team is here to help you around the clock.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="rounded-2xl shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-500" alt="Trust and Safety">
+                    <div class="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-xl max-w-xs animate-bounce" style="animation-duration: 3s;">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="flex -space-x-2">
+                                <img class="w-8 h-8 rounded-full border-2 border-white" src="https://i.pravatar.cc/100?img=1" alt="">
+                                <img class="w-8 h-8 rounded-full border-2 border-white" src="https://i.pravatar.cc/100?img=2" alt="">
+                                <img class="w-8 h-8 rounded-full border-2 border-white" src="https://i.pravatar.cc/100?img=3" alt="">
+                            </div>
+                            <span class="text-sm font-bold text-gray-900">10k+ Happy Clients</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Join our community of satisfied customers.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inspired by your history -->
+        @if(isset($inspiredByHistory) && $inspiredByHistory->count() > 0)
+        <div>
+            <div class="flex items-center justify-between mb-6 px-2">
+                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Inspired by your history</h2>
+                <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full transition-colors">View All</a>
+            </div>
+            <div class="flex gap-6 overflow-x-auto pb-8 scrollbar-hide px-2 -mx-2">
+                @foreach($inspiredByHistory as $gig)
+                     @include('Customer.components.gig-card-horizontal', ['gig' => $gig])
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        <!-- New Gigs -->
+        <div>
+            <div class="flex items-center justify-between mb-6 px-2">
+                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">New Gigs</h2>
+                <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full transition-colors">View All</a>
+            </div>
+            <div class="flex gap-6 overflow-x-auto pb-8 scrollbar-hide px-2 -mx-2">
+                @foreach($newGigs as $gig)
+                     @include('Customer.components.gig-card-horizontal', ['gig' => $gig])
+                @endforeach
+            </div>
         </div>
 
     </main>
