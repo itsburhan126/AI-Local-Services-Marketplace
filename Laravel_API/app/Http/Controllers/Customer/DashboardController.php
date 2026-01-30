@@ -34,7 +34,7 @@ class DashboardController extends Controller
                 $query->orderBy('price', 'asc');
             }])
             ->where('is_active', true)
-            ->where('status', 'published')
+            ->whereIn('status', ['published', 'approved'])
             ->inRandomOrder()
             ->take(8)
             ->get();
@@ -44,7 +44,7 @@ class DashboardController extends Controller
                 $query->orderBy('price', 'asc');
             }])
             ->where('is_active', true)
-            ->where('status', 'published')
+            ->whereIn('status', ['published', 'approved'])
             ->orderBy('view_count', 'desc')
             ->take(8)
             ->get();
@@ -54,7 +54,7 @@ class DashboardController extends Controller
                 $query->orderBy('price', 'asc');
             }])
             ->where('is_active', true)
-            ->where('status', 'published')
+            ->whereIn('status', ['published', 'approved'])
             ->latest()
             ->take(8)
             ->get();
