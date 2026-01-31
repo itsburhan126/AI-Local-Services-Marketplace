@@ -29,6 +29,7 @@ Route::prefix('customer')->name('customer.')->group(function () {
 
     Route::middleware('auth:web')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Customer\DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/gigs', [\App\Http\Controllers\Customer\GigController::class, 'index'])->name('gigs.index');
         Route::get('/gigs/subcategory/{slug}', [\App\Http\Controllers\Customer\DashboardController::class, 'gigsBySubcategory'])->name('gigs.by.subcategory');
         Route::get('/gigs/{slug}', [\App\Http\Controllers\Customer\GigController::class, 'show'])->name('gigs.show');
         Route::get('/gigs/{slug}/checkout', [\App\Http\Controllers\Customer\GigController::class, 'checkout'])->name('gigs.checkout');

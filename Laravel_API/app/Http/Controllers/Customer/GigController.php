@@ -16,6 +16,27 @@ use Illuminate\Support\Facades\DB;
 
 class GigController extends Controller
 {
+    public function index(Request $request)
+    {
+        $query = Gig::with(['provider', 'packages', 'reviews'])
+            ->where('is_active', true)
+            ->whereIn('status', ['published', 'approved']);
+
+        if ($request->has('category')) {
+            $query->where('category_id', $request->category);
+        }
+
+        if ($request->has('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        $gigs = $query->latest()->paginate(12);
+        
+        $categories = Category::whereNull('parent_id')->get();
+
+        return view('Customer.gigs.index', compact('gigs', 'categories'));
+    }
+
     public function show($slug)
     {
         // Fetch categories for navigation

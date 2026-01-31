@@ -22,7 +22,7 @@
                     fontFamily: {
                         sans: ['Montserrat', 'sans-serif'],
                         body: ['Inter', 'sans-serif'],
-                        display: ['Macondo', 'cursive'],
+                        display: ['Montserrat', 'sans-serif'],
                     },
                     colors: {
                         primary: {
@@ -490,7 +490,7 @@
                             <span class="font-mono font-bold">05:23:12</span>
                         </div>
                     </div>
-                    <a href="#" class="text-sm font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 transition-colors">
+                    <a href="{{ route('gigs.index') }}" class="text-sm font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 transition-colors">
                         View All <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                     </a>
                 </div>
@@ -505,27 +505,53 @@
 
 
         <!-- 4. Popular Services -->
-        <div>
+        <div class="relative group/section" x-data>
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-2xl font-bold text-gray-900 font-display">Popular Services</h2>
-                <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">See All</a>
+                <a href="{{ route('gigs.index') }}" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">See All</a>
             </div>
-            <div class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
+            
+            <button @click="$refs.list.scrollBy({ left: -300, behavior: 'smooth' })" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -ml-4 hidden md:block">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+
+            <div x-ref="list" class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4 scroll-smooth">
                 @foreach($popularGigs as $gig)
                     @include('Customer.components.gig-card', ['gig' => $gig])
                 @endforeach
             </div>
+
+            <button @click="$refs.list.scrollBy({ left: 300, behavior: 'smooth' })" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -mr-4 hidden md:block">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
         </div>
 
         <!-- 5. Recently Viewed (New) -->
         @if($recentlyViewed->count() > 0)
-            <div>
+            <div class="relative group/section" x-data>
                 <h2 class="text-2xl font-bold text-gray-900 mb-6 font-display">Recently Viewed</h2>
-                <div class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
+                
+                <button @click="$refs.list.scrollBy({ left: -300, behavior: 'smooth' })" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -ml-4 hidden md:block">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+
+                <div x-ref="list" class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4 scroll-smooth">
                     @foreach($recentlyViewed as $gig)
                         @include('Customer.components.gig-card', ['gig' => $gig])
                     @endforeach
                 </div>
+
+                <button @click="$refs.list.scrollBy({ left: 300, behavior: 'smooth' })" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -mr-4 hidden md:block">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
             </div>
         @endif
 
@@ -570,20 +596,36 @@
 
         <!-- 8. Recently Saved (New) -->
         @if($recentlySaved->count() > 0)
-            <div>
+            <div class="relative group/section" x-data>
                 <h2 class="text-2xl font-bold text-gray-900 mb-6 font-display">Recently Saved</h2>
-                <div class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
+                
+                <button @click="$refs.list.scrollBy({ left: -300, behavior: 'smooth' })" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -ml-4 hidden md:block">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+
+                <div x-ref="list" class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4 scroll-smooth">
                     @foreach($recentlySaved as $gig)
                         @include('Customer.components.gig-card', ['gig' => $gig])
                     @endforeach
                 </div>
+
+                <button @click="$refs.list.scrollBy({ left: 300, behavior: 'smooth' })" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -mr-4 hidden md:block">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
             </div>
         @endif
 
         <!-- 9. What Sparks Your Interest (New) -->
         @if($interestsGigs->count() > 0)
             <div>
-                <h2 class="text-2xl font-bold text-gray-900 mb-6 font-display">What Sparks Your Interest</h2>
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900 font-display">What Sparks Your Interest</h2>
+                    <a href="{{ route('gigs.index') }}" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">See All</a>
+                </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     @foreach($interestsGigs as $gig)
                         @include('Customer.components.gig-card', ['gig' => $gig])
@@ -652,24 +694,53 @@
 
         <!-- 13. Inspired by Browsing History (New) -->
         @if($inspiredByHistory->count() > 0)
-            <div>
+            <div class="relative group/section" x-data>
                 <h2 class="text-2xl font-bold text-gray-900 mb-6 font-display">Inspired by your browsing history</h2>
-                <div class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
+                
+                <button @click="$refs.list.scrollBy({ left: -300, behavior: 'smooth' })" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -ml-4 hidden md:block">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+
+                <div x-ref="list" class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4 scroll-smooth">
                     @foreach($inspiredByHistory as $gig)
                         @include('Customer.components.gig-card', ['gig' => $gig])
                     @endforeach
                 </div>
+
+                <button @click="$refs.list.scrollBy({ left: 300, behavior: 'smooth' })" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -mr-4 hidden md:block">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
             </div>
         @endif
 
         <!-- 14. New Gigs (New) -->
-        <div>
-            <h2 class="text-2xl font-bold text-gray-900 mb-6 font-display">New Gigs</h2>
-            <div class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
+        <div class="relative group/section" x-data>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 font-display">New Gigs</h2>
+                <a href="{{ route('gigs.index') }}" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">See All</a>
+            </div>
+            
+            <button @click="$refs.list.scrollBy({ left: -300, behavior: 'smooth' })" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -ml-4 hidden md:block">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+
+            <div x-ref="list" class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4 scroll-smooth">
                 @foreach($newGigs as $gig)
                     @include('Customer.components.gig-card', ['gig' => $gig])
                 @endforeach
             </div>
+
+            <button @click="$refs.list.scrollBy({ left: 300, behavior: 'smooth' })" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -mr-4 hidden md:block">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
         </div>
 
     </main>
