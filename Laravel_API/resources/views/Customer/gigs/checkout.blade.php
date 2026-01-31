@@ -36,7 +36,7 @@
         }
     </script>
 </head>
-<body class="h-full font-body text-slate-600 antialiased" x-data="{ paymentMethod: 'cod' }">
+<body class="h-full font-body text-slate-600 antialiased" x-data="{ paymentMethod: 'paypal' }">
     
     <!-- Navbar (Simplified for checkout) -->
     <nav class="bg-white border-b border-gray-100 sticky top-0 z-50">
@@ -87,13 +87,20 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Delivery Date</label>
-                            <input type="date" name="date" required min="{{ date('Y-m-d') }}"
-                                   class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:border-black transition-colors outline-none">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Delivery Days</label>
+                            <div class="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 font-medium flex items-center gap-2">
+                                <i class="fas fa-clock text-emerald-500"></i>
+                                {{ $selectedPackage->delivery_days }} Days Delivery
+                            </div>
+                            <!-- Hidden date input calculated from today + delivery days -->
+                            @php
+                                $estimatedDate = \Carbon\Carbon::now()->addDays((int)$selectedPackage->delivery_days)->format('Y-m-d');
+                            @endphp
+                            <input type="hidden" name="date" value="{{ $estimatedDate }}">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Preferred Time</label>
-                            <input type="time" name="time" required
+                            <input type="time" name="time" required value="09:00"
                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-black focus:border-black transition-colors outline-none">
                         </div>
                         <div class="md:col-span-2">
@@ -116,23 +123,55 @@
                     </h2>
                     
                     <div class="space-y-4">
+                        <!-- PayPal -->
                         <label class="flex items-center p-4 border rounded-xl cursor-pointer transition-all"
-                               :class="paymentMethod === 'cod' ? 'border-emerald-500 bg-emerald-50/30 ring-1 ring-emerald-500' : 'border-gray-200 hover:border-gray-300'">
-                            <input type="radio" name="payment_method" value="cod" class="w-5 h-5 text-emerald-600 border-gray-300 focus:ring-emerald-500" x-model="paymentMethod">
-                            <div class="ml-4 flex-1">
-                                <span class="block font-bold text-gray-900">Cash on Delivery / Pay Later</span>
-                                <span class="block text-sm text-gray-500">Pay directly to the provider after service completion.</span>
+                               :class="paymentMethod === 'paypal' ? 'border-blue-500 bg-blue-50/30 ring-1 ring-blue-500' : 'border-gray-200 hover:border-gray-300'">
+                            <input type="radio" name="payment_method" value="paypal" class="hidden" x-model="paymentMethod">
+                            <div class="flex-1 flex items-center gap-4">
+                                 <i class="fab fa-paypal text-2xl text-[#003087] w-8 text-center"></i>
+                                 <div>
+                                    <span class="block font-bold text-gray-900">PayPal</span>
+                                    <span class="block text-sm text-gray-500">Pay safely with your PayPal account.</span>
+                                 </div>
                             </div>
-                            <i class="fas fa-money-bill-wave text-gray-400 text-xl"></i>
+                            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
+                                 :class="paymentMethod === 'paypal' ? 'border-blue-500' : 'border-gray-300'">
+                                 <div class="w-2.5 h-2.5 rounded-full bg-blue-500" x-show="paymentMethod === 'paypal'"></div>
+                            </div>
                         </label>
-                        
-                        <label class="flex items-center p-4 border rounded-xl cursor-pointer transition-all opacity-60">
-                            <input type="radio" name="payment_method" value="card" disabled class="w-5 h-5 text-emerald-600 border-gray-300 focus:ring-emerald-500">
-                            <div class="ml-4 flex-1">
-                                <span class="block font-bold text-gray-900">Credit/Debit Card (Coming Soon)</span>
-                                <span class="block text-sm text-gray-500">Secure online payment.</span>
+
+                        <!-- Stripe -->
+                        <label class="flex items-center p-4 border rounded-xl cursor-pointer transition-all"
+                               :class="paymentMethod === 'stripe' ? 'border-indigo-500 bg-indigo-50/30 ring-1 ring-indigo-500' : 'border-gray-200 hover:border-gray-300'">
+                            <input type="radio" name="payment_method" value="stripe" class="hidden" x-model="paymentMethod">
+                            <div class="flex-1 flex items-center gap-4">
+                                 <i class="fab fa-stripe text-3xl text-[#635BFF] w-8 text-center"></i>
+                                 <div>
+                                    <span class="block font-bold text-gray-900">Stripe</span>
+                                    <span class="block text-sm text-gray-500">Pay with credit card via Stripe.</span>
+                                 </div>
                             </div>
-                            <i class="fas fa-credit-card text-gray-400 text-xl"></i>
+                            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
+                                 :class="paymentMethod === 'stripe' ? 'border-indigo-500' : 'border-gray-300'">
+                                 <div class="w-2.5 h-2.5 rounded-full bg-indigo-500" x-show="paymentMethod === 'stripe'"></div>
+                            </div>
+                        </label>
+
+                        <!-- Credit Card -->
+                        <label class="flex items-center p-4 border rounded-xl cursor-pointer transition-all"
+                               :class="paymentMethod === 'card' ? 'border-emerald-500 bg-emerald-50/30 ring-1 ring-emerald-500' : 'border-gray-200 hover:border-gray-300'">
+                            <input type="radio" name="payment_method" value="card" class="hidden" x-model="paymentMethod">
+                            <div class="flex-1 flex items-center gap-4">
+                                 <i class="fas fa-credit-card text-2xl text-emerald-600 w-8 text-center"></i>
+                                 <div>
+                                    <span class="block font-bold text-gray-900">Credit or Debit Card</span>
+                                    <span class="block text-sm text-gray-500">Secure payment with SSL encryption.</span>
+                                 </div>
+                            </div>
+                            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
+                                 :class="paymentMethod === 'card' ? 'border-emerald-500' : 'border-gray-300'">
+                                 <div class="w-2.5 h-2.5 rounded-full bg-emerald-500" x-show="paymentMethod === 'card'"></div>
+                            </div>
                         </label>
                     </div>
                 </div>
@@ -143,9 +182,19 @@
                 <div class="sticky top-28 space-y-6">
                     <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-lg shadow-gray-200/50">
                         <div class="flex items-start gap-4 mb-6 pb-6 border-b border-gray-100">
-                            <!-- Placeholder image if gig has no image -->
-                            <div class="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400">
-                                <i class="fas fa-image text-2xl"></i>
+                            <!-- Gig Image -->
+                            @php
+                                $checkoutImage = 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop';
+                                if (!empty($gig->thumbnail_image)) {
+                                    if (filter_var($gig->thumbnail_image, FILTER_VALIDATE_URL)) {
+                                         $checkoutImage = $gig->thumbnail_image;
+                                    } else {
+                                         $checkoutImage = asset('storage/' . $gig->thumbnail_image);
+                                    }
+                                }
+                            @endphp
+                            <div class="w-20 h-20 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+                                <img src="{{ $checkoutImage }}" alt="{{ $gig->title }}" class="w-full h-full object-cover">
                             </div>
                             <div>
                                 <h3 class="font-bold text-gray-900 line-clamp-2 leading-tight">{{ $gig->title }}</h3>

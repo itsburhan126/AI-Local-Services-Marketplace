@@ -428,14 +428,115 @@
         @yield('content')
     </main>
 
-    <!-- Footer (Simple) -->
-    <footer class="bg-white border-t border-gray-100 py-12 mt-12">
-        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white font-bold">f</div>
-                <span class="font-bold text-xl tracking-tight font-display">findlancer</span>
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-100 pt-16 pb-8 mt-12">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-12">
+                <!-- Categories -->
+                <div>
+                    <h4 class="font-bold text-gray-900 mb-4 text-base">Categories</h4>
+                    <ul class="space-y-3">
+                        @if(isset($categories))
+                            @foreach($categories->take(6) as $category)
+                                <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">{{ $category->name }}</a></li>
+                            @endforeach
+                        @else
+                            <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Graphics & Design</a></li>
+                            <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Digital Marketing</a></li>
+                            <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Writing & Translation</a></li>
+                            <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Video & Animation</a></li>
+                            <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Music & Audio</a></li>
+                            <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Programming & Tech</a></li>
+                        @endif
+                    </ul>
+                </div>
+
+                <!-- For Clients -->
+                <div>
+                    <h4 class="font-bold text-gray-900 mb-4 text-base">For Clients</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">How Findlancer Works</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Customer Success Stories</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Trust & Safety</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Quality Guide</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Findlancer Learn</a></li>
+                    </ul>
+                </div>
+
+                <!-- For Freelancers -->
+                <div>
+                    <h4 class="font-bold text-gray-900 mb-4 text-base">For Freelancers</h4>
+                    <ul class="space-y-3">
+                        <li><a href="{{ route('join.pro') }}" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Become a Findlancer</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Become an Agency</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Community Hub</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Forum</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Events</a></li>
+                    </ul>
+                </div>
+
+                <!-- Business Solutions -->
+                <div>
+                    <h4 class="font-bold text-gray-900 mb-4 text-base">Business Solutions</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Findlancer Pro</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Project Management</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">ClearVoice Content Marketing</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Working Not Working</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Contact Sales</a></li>
+                    </ul>
+                </div>
+
+                <!-- Company -->
+                <div>
+                    <h4 class="font-bold text-gray-900 mb-4 text-base">Company</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">About Findlancer</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Help & Support</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Social Impact</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Careers</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Terms of Service</a></li>
+                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-colors text-sm font-medium">Privacy Policy</a></li>
+                    </ul>
+                </div>
             </div>
-            <p class="text-gray-500 text-sm">© {{ date('Y') }} Findlancer. All rights reserved.</p>
+
+            <!-- Bottom Section -->
+            <div class="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex flex-col md:flex-row items-center gap-6">
+                     <div class="flex items-center gap-2">
+                        <span class="font-bold text-2xl tracking-tight text-gray-900 font-display">findlancer<span class="text-emerald-600">.</span></span>
+                    </div>
+                    <p class="text-gray-400 text-sm">© {{ date('Y') }} Findlancer International Ltd.</p>
+                </div>
+                
+                <div class="flex items-center gap-6">
+                    <!-- Social Icons -->
+                    <div class="flex items-center gap-4">
+                        <a href="#" class="text-gray-400 hover:text-gray-600 transition-colors bg-gray-50 p-2 rounded-full"><i class="fab fa-tiktok text-sm"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-gray-600 transition-colors bg-gray-50 p-2 rounded-full"><i class="fab fa-instagram text-sm"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-gray-600 transition-colors bg-gray-50 p-2 rounded-full"><i class="fab fa-linkedin-in text-sm"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-gray-600 transition-colors bg-gray-50 p-2 rounded-full"><i class="fab fa-facebook-f text-sm"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-gray-600 transition-colors bg-gray-50 p-2 rounded-full"><i class="fab fa-pinterest text-sm"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-gray-600 transition-colors bg-gray-50 p-2 rounded-full"><i class="fab fa-twitter text-sm"></i></a>
+                    </div>
+                    
+                    <!-- Settings -->
+                    <div class="flex items-center gap-4 ml-2">
+                        <button class="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 font-medium text-sm transition-colors">
+                            <i class="fas fa-globe text-gray-400"></i>
+                            <span>English</span>
+                        </button>
+                        <button class="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 font-medium text-sm transition-colors">
+                            <span class="text-gray-400 font-bold">$</span>
+                            <span>USD</span>
+                        </button>
+                        <button class="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-all">
+                            <i class="fas fa-universal-access"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </footer>
     @stack('scripts')
