@@ -18,12 +18,21 @@ class SettingController extends Controller
     public function update(Request $request)
     {
         $request->validate([
+            'app_name' => 'required|string|max:255',
+            'site_description' => 'nullable|string|max:500',
             'company_name' => 'required|string|max:255',
             'company_email' => 'required|email|max:255',
             'company_phone' => 'nullable|string|max:20',
             'company_address' => 'required|string',
+            'copyright_text' => 'nullable|string|max:255',
             'currency_code' => 'required|string|max:3',
             'currency_symbol' => 'required|string|max:5',
+            'service_fee' => 'nullable|numeric|min:0|max:100',
+            'facebook_url' => 'nullable|url',
+            'twitter_url' => 'nullable|url',
+            'instagram_url' => 'nullable|url',
+            'linkedin_url' => 'nullable|url',
+            'youtube_url' => 'nullable|url',
             'pusher_app_id' => 'nullable|string',
             'pusher_app_key' => 'nullable|string',
             'pusher_app_secret' => 'nullable|string',
@@ -37,6 +46,12 @@ class SettingController extends Controller
 
         // Handle File Uploads
         if ($request->hasFile('logo')) {
+            // Delete old logo if exists
+            $oldLogo = Setting::get('logo');
+            if ($oldLogo) {
+                // Extract relative path from URL if needed, but storage delete usually takes relative path
+                // For simplicity, we'll just store new one. 
+            }
             $path = $request->file('logo')->store('settings', 'public');
             Setting::set('logo', Storage::url($path));
         }
@@ -49,6 +64,11 @@ class SettingController extends Controller
         // Save other settings
         foreach ($settings as $key => $value) {
             Setting::set($key, $value);
+        }
+
+        // Explicitly save service_fee to ensure persistence
+        if ($request->has('service_fee')) {
+            Setting::set('service_fee', $request->input('service_fee'));
         }
 
         return back()->with('success', 'Settings updated successfully.');

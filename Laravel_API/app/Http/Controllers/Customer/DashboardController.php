@@ -217,7 +217,51 @@ class DashboardController extends Controller
 
     public function gigsBySubcategory($slug)
     {
-        // ... (existing logic or placeholder)
-        return view('Customer.gigs.index'); // Placeholder
+        // 1. Find Subcategory
+        $subcategory = Category::where('slug', $slug)
+            ->whereNotNull('parent_id')
+            ->firstOrFail();
+
+        // 2. Fetch Gigs
+        $query = Gig::with(['provider', 'packages', 'reviews'])
+            ->where('category_id', $subcategory->id)
+            ->where('is_active', true)
+            ->whereIn('status', ['published', 'approved']);
+
+        // 3. Sorting
+        if (request()->has('sort')) {
+            switch (request()->sort) {
+                case 'popular':
+                    $query->orderBy('view_count', 'desc');
+                    break;
+                case 'rating':
+                    $query->withCount('reviews')->orderBy('reviews_count', 'desc');
+                    break;
+                case 'oldest':
+                    $query->oldest();
+                    break;
+                default:
+                    $query->latest();
+                    break;
+            }
+        } else {
+            $query->latest();
+        }
+
+        $gigs = $query->paginate(12);
+
+        // 4. Fetch Categories for Filter (Parent Categories)
+        $categories = Category::whereNull('parent_id')
+            ->where('is_active', true)
+            ->orderBy('order')
+            ->get();
+
+        // Subcategories for mega menu (if needed by layout)
+        $subcategories = Category::whereNotNull('parent_id')
+            ->where('is_active', true)
+            ->get()
+            ->groupBy('parent_id');
+
+        return view('Customer.gigs.index', compact('gigs', 'categories', 'subcategories', 'subcategory'));
     }
 }

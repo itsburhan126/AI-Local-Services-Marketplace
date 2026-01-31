@@ -27,18 +27,18 @@
                 <!-- Right: Navigation Links -->
                 <div class="hidden md:flex items-center space-x-8">
                     <div class="flex items-center space-x-6">
-                        <a href="#" class="text-sm font-semibold text-gray-500 hover:text-black transition-colors relative group">
+                        <a href="{{ route('customer.gigs.index') }}" class="text-sm font-semibold text-gray-500 hover:text-black transition-colors relative group">
                             Explore
                             <span class="absolute inset-x-0 -bottom-1 h-0.5 bg-black transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
                         </a>
-                        <a href="#" class="text-sm font-semibold text-gray-500 hover:text-black transition-colors relative group">
+                        <a href="{{ route('customer.orders.index') }}" class="text-sm font-semibold text-gray-500 hover:text-black transition-colors relative group">
                             Orders
                             <span class="absolute inset-x-0 -bottom-1 h-0.5 bg-black transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
                         </a>
                         <a href="#" class="text-sm font-bold text-primary-600 hover:text-primary-700 transition-colors">Switch to Selling</a>
                     </div>
                     
-                    @auth
+                    @auth('web')
                     <!-- Icons -->
                     <div class="flex items-center space-x-5 border-l border-gray-200 pl-6">
                         <button class="text-gray-400 hover:text-gray-900 transition-colors relative">
@@ -47,11 +47,11 @@
                             </svg>
                             <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
                         </button>
-                        <button class="text-gray-400 hover:text-gray-900 transition-colors">
+                        <a href="{{ route('customer.chat.index') }}" class="text-gray-400 hover:text-gray-900 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
-                        </button>
+                        </a>
                     </div>
 
                     <!-- Profile Dropdown -->
@@ -59,7 +59,7 @@
                         <button @click="open = !open" type="button" class="flex items-center gap-2 focus:outline-none group">
                             <div class="relative">
                                 <div class="h-10 w-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-700 font-bold text-sm border border-gray-200 shadow-sm group-hover:shadow-md transition-all">
-                                    {{ substr(Auth::user()->name, 0, 1) }}
+                                    {{ substr(Auth::guard('web')->user()->name, 0, 1) }}
                                 </div>
                                 <div class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></div>
                             </div>
@@ -68,12 +68,12 @@
                         <div x-show="open" @click.away="open = false" x-cloak x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100"
                              class="absolute right-0 mt-2 w-64 rounded-xl shadow-xl py-2 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
                             <div class="px-4 py-3 border-b border-gray-50">
-                                <p class="text-sm font-bold text-gray-900">{{ Auth::user()->name }}</p>
-                                <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</p>
+                                <p class="text-sm font-bold text-gray-900">{{ Auth::guard('web')->user()->name }}</p>
+                                <p class="text-xs text-gray-500 truncate">{{ Auth::guard('web')->user()->email }}</p>
                             </div>
                             <div class="py-1">
+                                <a href="{{ route('customer.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Dashboard</a>
                                 <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Profile</a>
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Post a Request</a>
                                 <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Settings</a>
                             </div>
                             <div class="border-t border-gray-50 py-1">
@@ -222,10 +222,10 @@
             <div class="relative group/nav">
                 <!-- Left Arrow -->
                 <button @click="$refs.scrollContainer.scrollBy({ left: -320, behavior: 'smooth' })" 
-                        class="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.1)] rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/nav:opacity-100 focus:opacity-100 border border-gray-100 -ml-4"
+                        class="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1.5 bg-white shadow-md rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all border border-gray-200 -ml-3"
                         aria-label="Scroll left">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
                 </button>
 
@@ -250,10 +250,10 @@
 
                 <!-- Right Arrow -->
                 <button @click="$refs.scrollContainer.scrollBy({ left: 320, behavior: 'smooth' })" 
-                        class="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.1)] rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/nav:opacity-100 focus:opacity-100 border border-gray-100 -mr-4"
+                        class="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1.5 bg-white shadow-md rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all border border-gray-200 -mr-3"
                         aria-label="Scroll right">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                 </button>
             </div>

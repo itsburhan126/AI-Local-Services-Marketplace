@@ -23,6 +23,23 @@ Route::get('/', function () {
     return view('landing');
 })->name('landing');
 
+// Public Static Pages
+Route::get('/how-it-works', [\App\Http\Controllers\PageController::class, 'howItWorks'])->name('how-it-works');
+Route::get('/success-stories', function () {
+    $stories = \App\Models\SuccessStory::where('is_active', true)->latest()->get();
+    return view('pages.success-stories', compact('stories'));
+})->name('success-stories');
+Route::view('/trust-and-safety', 'pages.trust-and-safety')->name('trust-and-safety');
+Route::get('/quality-guide', function () {
+    $guidelines = \App\Models\QualityGuideline::where('is_active', true)->orderBy('sort_order')->get();
+    return view('pages.quality-guide', compact('guidelines'));
+})->name('quality-guide');
+Route::get('/guides', [\App\Http\Controllers\GuideController::class, 'index'])->name('guides');
+Route::get('/guides/{slug}', [\App\Http\Controllers\GuideController::class, 'show'])->name('guides.show');
+
+// Dynamic Pages
+Route::get('/page/{slug}', [\App\Http\Controllers\PageController::class, 'show'])->name('page.show');
+
 Route::prefix('customer')->name('customer.')->group(function () {
     Route::get('/', function () {
         if (Auth::guard('web')->check()) {
@@ -46,6 +63,8 @@ Route::prefix('customer')->name('customer.')->group(function () {
     Route::middleware('auth:web')->group(function () {
         Route::get('/gigs/order/{order_id}/success', [\App\Http\Controllers\Customer\GigController::class, 'orderSuccess'])->name('gigs.order.success');
         Route::get('/gigs/order/{order_id}/details', [\App\Http\Controllers\Customer\GigController::class, 'orderDetails'])->name('gigs.order.details');
+        Route::get('/orders', [\App\Http\Controllers\Customer\GigController::class, 'orders'])->name('orders.index');
+        Route::get('/gigs/order/{order_id}/invoice', [\App\Http\Controllers\Customer\GigController::class, 'invoice'])->name('gigs.order.invoice');
         
         Route::get('/dashboard', [\App\Http\Controllers\Customer\DashboardController::class, 'index'])->name('dashboard');
         
@@ -142,7 +161,8 @@ Route::get('login', function() {
     return redirect()->route('admin.login');
 })->name('login');
 
-// Public Page Route
+
+
 Route::get('/page/{slug}', [\App\Http\Controllers\PageController::class, 'show'])->name('page.show');
 
 // Admin Routes
@@ -273,6 +293,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('countries', \App\Http\Controllers\Admin\CountryController::class);
         Route::resource('languages', \App\Http\Controllers\Admin\LanguageController::class);
         Route::resource('skills', \App\Http\Controllers\Admin\SkillController::class);
+        
+        // Guides Management
+        Route::resource('guides', \App\Http\Controllers\Admin\GuideController::class);
+        Route::resource('success-stories', \App\Http\Controllers\Admin\SuccessStoryController::class);
+        Route::resource('quality-guidelines', \App\Http\Controllers\Admin\QualityGuidelineController::class);
+
+        // How It Works Steps
+        Route::resource('how-it-works-steps', \App\Http\Controllers\Admin\HowItWorksStepController::class);
 
         // Interest Management (New Ultra Feature)
         Route::post('interests/reorder', [\App\Http\Controllers\Admin\InterestController::class, 'reorder'])->name('interests.reorder');

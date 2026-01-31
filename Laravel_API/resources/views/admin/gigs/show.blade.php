@@ -122,7 +122,7 @@
                             <tr>
                                 <td class="px-4 py-3 font-bold text-slate-700 capitalize">{{ $package->type }}</td>
                                 <td class="px-4 py-3 text-indigo-600 font-bold">${{ number_format($package->price, 2) }}</td>
-                                <td class="px-4 py-3 text-slate-600">{{ $package->delivery_time }} Days</td>
+                                <td class="px-4 py-3 text-slate-600">{{ $package->delivery_days }} Days</td>
                                 <td class="px-4 py-3 text-slate-600">{{ $package->revisions }}</td>
                                 <td class="px-4 py-3 text-slate-500 text-xs">
                                     @php

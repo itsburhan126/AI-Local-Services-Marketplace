@@ -20,7 +20,8 @@
                         </div>
 
                         <div class="relative w-36 h-36 mx-auto mb-6">
-                            <img src="{{ $user->avatar ? asset('storage/' . $user->avatar) : ($user->providerProfile && $user->providerProfile->logo ? asset('storage/' . $user->providerProfile->logo) : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=0D8ABC&color=fff&size=128') }}" 
+                            <img src="{{ $user->profile_photo_url }}" 
+                                 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=f3f4f6&color=374151&size=256&bold=true&font-size=0.4&uppercase=true';"
                                  alt="{{ $user->name }}" 
                                  class="w-full h-full rounded-full object-cover border-[6px] border-white shadow-xl group-hover:scale-105 transition-transform duration-300">
                             
@@ -49,12 +50,12 @@
                             </div>
                         </div>
 
-                        <button class="w-full bg-black text-white font-bold py-3.5 rounded-xl hover:bg-gray-800 transition-all duration-300 mb-8 shadow-lg shadow-black/5 hover:shadow-black/20 flex items-center justify-center gap-2 group/btn">
+                        <a href="{{ route('customer.chat.index', ['user_id' => $user->id]) }}" class="w-full bg-black text-white font-bold py-3.5 rounded-xl hover:bg-gray-800 transition-all duration-300 mb-8 shadow-lg shadow-black/5 hover:shadow-black/20 flex items-center justify-center gap-2 group/btn">
                             <span>Contact Me</span>
                             <svg class="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>
-                        </button>
+                        </a>
 
                         <!-- Stats -->
                         <div class="border-t border-gray-100 pt-6 space-y-4">
@@ -188,7 +189,8 @@
                                 <div class="bg-white rounded-2xl p-8 border border-gray-100 shadow-soft hover:shadow-md transition-all duration-300">
                                     <div class="flex gap-5">
                                         <div class="flex-shrink-0">
-                                            <img src="{{ $review->user && $review->user->avatar ? asset('storage/' . $review->user->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($review->user->name ?? 'User') . '&background=random' }}" 
+                                            <img src="{{ $review->user ? $review->user->profile_photo_url : 'https://ui-avatars.com/api/?name=User&background=random' }}" 
+                                                 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($review->user->name ?? 'User') }}&background=random';"
                                                  class="w-14 h-14 rounded-full border-2 border-white shadow-md object-cover" alt="">
                                         </div>
                                         <div class="flex-1">
@@ -236,7 +238,8 @@
                                     <div class="bg-white rounded-2xl p-8 border border-gray-100 shadow-soft hover:shadow-md transition-all duration-300">
                                         <div class="flex gap-5">
                                             <div class="flex-shrink-0">
-                                                <img src="{{ $review->user && $review->user->avatar ? asset('storage/' . $review->user->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($review->user->name ?? 'User') . '&background=random' }}" 
+                                                <img src="{{ $review->user ? $review->user->profile_photo_url : 'https://ui-avatars.com/api/?name=User&background=random' }}" 
+                                                     onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($review->user->name ?? 'User') }}&background=random';"
                                                      class="w-14 h-14 rounded-full border-2 border-white shadow-md object-cover" alt="">
                                             </div>
                                             <div class="flex-1">

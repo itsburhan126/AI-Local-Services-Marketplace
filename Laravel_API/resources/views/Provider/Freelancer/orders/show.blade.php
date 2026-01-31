@@ -161,10 +161,10 @@
                                     <span class="font-bold text-slate-900 text-lg">${{ number_format($order->package->price ?? 0, 2) }}</span>
                                 </div>
                                 <ul class="space-y-2">
-                                    @if(isset($order->package->delivery_time))
+                                    @if(isset($order->package->delivery_days))
                                         <li class="flex items-center gap-3 text-sm text-slate-600">
                                             <i class="far fa-clock text-primary-500 w-5"></i>
-                                            {{ $order->package->delivery_time }} Days Delivery
+                                            {{ $order->package->delivery_days }} Days Delivery
                                         </li>
                                     @endif
                                     @if(isset($order->package->revisions))
@@ -207,7 +207,7 @@
         <div class="space-y-6">
             
             <!-- Countdown / Delivery Time -->
-            @if($order->scheduled_at || ($order->package && $order->package->delivery_time))
+            @if($order->scheduled_at || ($order->package && $order->package->delivery_days))
             <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl shadow-lg shadow-slate-200 p-6 text-white relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-24 h-24 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-xl"></div>
                 <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">Time Left to Deliver</h3>
@@ -215,12 +215,12 @@
                     @if($order->scheduled_at)
                          {{ $order->scheduled_at->diffForHumans(null, true) }}
                     @else
-                         {{ $order->package->delivery_time }} Days
+                         {{ $order->package->delivery_days }} Days
                     @endif
                 </div>
                 <div class="flex items-center gap-2 text-xs text-slate-300 bg-white/10 px-3 py-1.5 rounded-lg w-fit">
                     <i class="far fa-calendar"></i>
-                    Due: {{ $order->scheduled_at ? $order->scheduled_at->format('M d, Y') : \Carbon\Carbon::parse($order->created_at)->addDays($order->package->delivery_time ?? 3)->format('M d, Y') }}
+                    Due: {{ $order->scheduled_at ? $order->scheduled_at->format('M d, Y') : \Carbon\Carbon::parse($order->created_at)->addDays($order->package->delivery_days ?? 3)->format('M d, Y') }}
                 </div>
             </div>
             @endif

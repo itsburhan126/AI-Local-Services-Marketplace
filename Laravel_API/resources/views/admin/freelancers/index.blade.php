@@ -20,6 +20,15 @@
             <a href="{{ route('admin.skills.index') }}" class="bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-indigo-600 px-4 py-2 rounded-xl shadow-sm flex items-center gap-2 text-sm font-bold transition-all">
                 <i class="fas fa-tools"></i> Skills
             </a>
+            <a href="{{ route('admin.guides.index') }}" class="bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-indigo-600 px-4 py-2 rounded-xl shadow-sm flex items-center gap-2 text-sm font-bold transition-all">
+                <i class="fas fa-book"></i> Guides
+            </a>
+            <a href="{{ route('admin.success-stories.index') }}" class="bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-indigo-600 px-4 py-2 rounded-xl shadow-sm flex items-center gap-2 text-sm font-bold transition-all">
+                <i class="fas fa-star"></i> Stories
+            </a>
+            <a href="{{ route('admin.quality-guidelines.index') }}" class="bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-indigo-600 px-4 py-2 rounded-xl shadow-sm flex items-center gap-2 text-sm font-bold transition-all">
+                <i class="fas fa-check-circle"></i> Quality
+            </a>
            
         </div>
     </div>
@@ -163,6 +172,28 @@
                 <div>
                     <h4 class="font-bold text-slate-700 text-sm group-hover:text-indigo-600 transition-colors">Delivery Settings</h4>
                     <p class="text-xs text-slate-400">Payment & Pending</p>
+                </div>
+            </div>
+        </a>
+        <a href="{{ route('admin.guides.index') }}" class="group bg-white p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-md transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-700 text-sm group-hover:text-indigo-600 transition-colors">Guides</h4>
+                    <p class="text-xs text-slate-400">Manage Content</p>
+                </div>
+            </div>
+        </a>
+        <a href="{{ route('admin.how-it-works-steps.index') }}" class="group bg-white p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-md transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-violet-50 text-violet-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-list-ol"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-700 text-sm group-hover:text-indigo-600 transition-colors">How It Works</h4>
+                    <p class="text-xs text-slate-400">Manage Steps</p>
                 </div>
             </div>
         </a>

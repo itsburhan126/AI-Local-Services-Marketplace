@@ -8,6 +8,7 @@ use App\Models\Setting;
 use App\Models\Category;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +25,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Paginator::useTailwind();
+
         // View Composer for Customer Header
         View::composer('layouts.partials.header', function ($view) {
             $categories = Category::whereNull('parent_id')
@@ -39,6 +42,15 @@ class AppServiceProvider extends ServiceProvider
 
             $view->with('categories', $categories)
                  ->with('subcategories', $subcategories);
+        });
+
+        // View Composer for Footer
+        View::composer('layouts.partials.footer', function ($view) {
+            $footerCategories = Category::where('is_shown_in_footer', true)
+                ->where('is_active', true)
+                ->limit(8)
+                ->get();
+            $view->with('footerCategories', $footerCategories);
         });
 
         try {

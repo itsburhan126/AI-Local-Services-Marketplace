@@ -115,4 +115,22 @@ class User extends Authenticatable
         }
         return $value;
     }
+
+    public function getProfilePhotoUrlAttribute()
+    {
+        // 1. Check direct avatar
+        if ($this->avatar) {
+             return $this->avatar; // Accessor above already handles asset() path
+        }
+
+        // 2. Check provider profile logo
+        if ($this->relationLoaded('providerProfile') && $this->providerProfile && $this->providerProfile->logo) {
+             return asset('storage/' . $this->providerProfile->logo);
+        }
+        
+        // 3. Fallback to Professional UI Avatar
+        $name = urlencode($this->name);
+        // Using a neutral, professional color scheme (gray/blue)
+        return "https://ui-avatars.com/api/?name={$name}&background=f3f4f6&color=374151&size=256&bold=true&font-size=0.4&uppercase=true";
+    }
 }

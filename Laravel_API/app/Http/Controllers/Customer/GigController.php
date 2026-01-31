@@ -56,6 +56,32 @@ class GigController extends Controller
         return view('Customer.gigs.index', compact('gigs', 'categories'));
     }
 
+    public function orders(Request $request)
+    {
+        $query = GigOrder::with(['gig.provider', 'package'])
+            ->where('user_id', Auth::id());
+
+        // Filter by status
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->whereHas('gig', function($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%");
+                })
+                ->orWhere('id', 'like', "%{$search}%");
+            });
+        }
+
+        $orders = $query->latest()->paginate(10)->withQueryString();
+
+        return view('Customer.gigs.orders', compact('orders'));
+    }
+
     public function show($slug)
     {
         // Fetch categories for navigation
@@ -114,8 +140,10 @@ class GigController extends Controller
         }
 
         $gateways = \App\Models\PaymentGateway::where('is_active', true)->get();
+        $serviceFeePercentage = \App\Models\Setting::get('service_fee', 0);
+        $serviceFee = round(($selectedPackage->price * $serviceFeePercentage) / 100, 2);
 
-        return view('Customer.gigs.checkout', compact('gig', 'selectedPackage', 'gateways'));
+        return view('Customer.gigs.checkout', compact('gig', 'selectedPackage', 'gateways', 'serviceFee', 'serviceFeePercentage'));
     }
 
     public function storeOrder(Request $request)
@@ -147,11 +175,13 @@ class GigController extends Controller
             }
 
             $price = $package->price;
-            $totalAmount = $price; // Add extras logic if needed
+            $serviceFeePercentage = \App\Models\Setting::get('service_fee', 0);
+            $serviceFee = ($price * $serviceFeePercentage) / 100;
+            $totalAmount = $price + $serviceFee;
 
             $commissionRate = 0.10; 
-            $commissionAmount = $totalAmount * $commissionRate;
-            $providerAmount = $totalAmount - $commissionAmount;
+            $commissionAmount = $price * $commissionRate;
+            $providerAmount = $price - $commissionAmount;
 
             $scheduledAt = date('Y-m-d H:i:s', strtotime("$request->date $request->time"));
 
@@ -163,6 +193,7 @@ class GigController extends Controller
                 'status' => 'pending',
                 'scheduled_at' => $scheduledAt,
                 'total_amount' => $totalAmount,
+                'service_fee' => $serviceFee,
                 'commission_amount' => $commissionAmount,
                 'provider_amount' => $providerAmount,
                 'payment_status' => 'pending',
@@ -270,5 +301,23 @@ class GigController extends Controller
             ->groupBy('parent_id');
 
         return view('Customer.gigs.order-details', compact('order', 'categories', 'subcategories'));
+    }
+
+    public function invoice($orderId)
+    {
+        $order = GigOrder::with(['gig', 'package', 'provider', 'user'])->find($orderId);
+
+        if (!$order) {
+            abort(404, 'Order not found');
+        }
+
+        if ($order->user_id != Auth::id()) {
+            abort(403, 'Unauthorized access to this order');
+        }
+
+        $invoiceService = new \App\Services\InvoiceService();
+        $invoiceData = $invoiceService->generateInvoiceData($order);
+
+        return view('Customer.gigs.invoice', compact('order', 'invoiceData'));
     }
 }

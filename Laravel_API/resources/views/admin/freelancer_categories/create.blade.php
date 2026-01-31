@@ -72,6 +72,15 @@
                 @error('image') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
 
+            <!-- Show in Footer -->
+            <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <div class="relative inline-block w-12 h-6 transition duration-200 ease-in-out">
+                    <input type="checkbox" name="is_shown_in_footer" id="is_shown_in_footer" value="1" {{ old('is_shown_in_footer') ? 'checked' : '' }} class="peer absolute w-0 h-0 opacity-0">
+                    <label for="is_shown_in_footer" class="block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer peer-checked:bg-indigo-600 transition-colors duration-200 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all after:duration-200 peer-checked:after:translate-x-6 peer-checked:after:border-white"></label>
+                </div>
+                <label for="is_shown_in_footer" class="text-sm font-semibold text-gray-700 cursor-pointer select-none">Show in Footer</label>
+            </div>
+
             <div class="pt-4">
                 <button type="submit" class="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-0.5">
                     Create Freelancer Category

@@ -49,6 +49,7 @@ class FreelancerCategoryController extends Controller
         $data = $request->all();
         $data['type'] = 'freelancer';
         $data['slug'] = Str::slug($request->name);
+        $data['is_shown_in_footer'] = $request->has('is_shown_in_footer') ? 1 : 0;
         
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('categories', 'public');
@@ -90,6 +91,7 @@ class FreelancerCategoryController extends Controller
 
         $data = $request->all();
         $data['slug'] = Str::slug($request->name);
+        $data['is_shown_in_footer'] = $request->has('is_shown_in_footer') ? 1 : 0;
         
         if ($request->hasFile('image')) {
             if ($category->image) {

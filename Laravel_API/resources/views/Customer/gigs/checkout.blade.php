@@ -177,19 +177,19 @@
                                 <span class="font-bold text-gray-900">${{ number_format($selectedPackage->price, 2) }}</span>
                             </div>
                             <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">Service Fee</span>
-                                <span class="font-bold text-gray-900">$0.00</span>
+                                <span class="text-gray-600">Service Fee ({{ $serviceFeePercentage }}%)</span>
+                                <span class="font-bold text-gray-900">${{ number_format($serviceFee, 2) }}</span>
                             </div>
                             <div class="border-t border-gray-100 pt-3 flex justify-between items-center">
                                 <span class="font-bold text-gray-900">Total</span>
-                                <span class="text-3xl font-extrabold text-gray-900 tracking-tight">${{ number_format($selectedPackage->price, 2) }}</span>
+                                <span class="text-3xl font-extrabold text-gray-900 tracking-tight">${{ number_format($selectedPackage->price + $serviceFee, 2) }}</span>
                             </div>
                         </div>
 
                         <ul class="space-y-3 mb-8 text-sm text-gray-600">
                             <li class="flex items-center gap-2">
                                 <i class="fas fa-clock text-emerald-500 w-5"></i> 
-                                <span>{{ $selectedPackage->delivery_time }} Days Delivery</span>
+                                <span>{{ $selectedPackage->delivery_days }} Days Delivery</span>
                             </li>
                             <li class="flex items-center gap-2">
                                 <i class="fas fa-sync-alt text-emerald-500 w-5"></i> 

@@ -18,6 +18,7 @@ class Category extends Model
         'type',
         'commission_rate',
         'is_active',
+        'is_shown_in_footer',
         'order',
     ];
 

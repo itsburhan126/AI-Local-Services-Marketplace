@@ -18,6 +18,7 @@ class GigOrder extends Model
         'status',
         'scheduled_at',
         'total_amount',
+        'service_fee',
         'commission_amount',
         'provider_amount',
         'payment_status',

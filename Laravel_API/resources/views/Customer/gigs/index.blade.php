@@ -16,6 +16,9 @@
                     <span class="truncate">
                         @php
                             $currentCat = $categories->firstWhere('id', request('category'));
+                            if (!$currentCat && isset($subcategory)) {
+                                $currentCat = $subcategory;
+                            }
                         @endphp
                         {{ $currentCat ? $currentCat->name : 'All Categories' }}
                     </span>

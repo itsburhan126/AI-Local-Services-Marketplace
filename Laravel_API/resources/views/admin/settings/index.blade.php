@@ -14,6 +14,107 @@
         <form action="{{ route('admin.settings.update') }}" method="POST">
             @csrf
             
+            <!-- Site Configuration Section -->
+            <div class="glass-panel p-8 rounded-2xl mb-8">
+                <div class="flex items-center mb-6">
+                    <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xl mr-4">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Site Configuration</h2>
+                        <p class="text-gray-500 text-sm">General settings for your website identity.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- App Name -->
+                    <div class="space-y-2">
+                        <label for="app_name" class="text-sm font-semibold text-gray-700">Site Name</label>
+                        <input type="text" name="app_name" id="app_name" 
+                            value="{{ $settings['app_name'] ?? config('app.name') }}"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none"
+                            placeholder="e.g. Findlancer">
+                    </div>
+
+                    <!-- Copyright Text -->
+                    <div class="space-y-2">
+                        <label for="copyright_text" class="text-sm font-semibold text-gray-700">Copyright Text</label>
+                        <input type="text" name="copyright_text" id="copyright_text" 
+                            value="{{ $settings['copyright_text'] ?? '' }}"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none"
+                            placeholder="e.g. © 2024 Findlancer International Ltd.">
+                    </div>
+
+                    <!-- Site Description -->
+                    <div class="col-span-1 md:col-span-2 space-y-2">
+                        <label for="site_description" class="text-sm font-semibold text-gray-700">Site Description</label>
+                        <textarea name="site_description" id="site_description" rows="3"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none"
+                            placeholder="Brief description of your site for SEO and footer...">{{ $settings['site_description'] ?? '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media Section -->
+            <div class="glass-panel p-8 rounded-2xl mb-8">
+                <div class="flex items-center mb-6">
+                    <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xl mr-4">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Social Media Links</h2>
+                        <p class="text-gray-500 text-sm">Connect your social media profiles.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Facebook -->
+                    <div class="space-y-2">
+                        <label for="facebook_url" class="text-sm font-semibold text-gray-700">Facebook URL</label>
+                        <input type="url" name="facebook_url" id="facebook_url" 
+                            value="{{ $settings['facebook_url'] ?? '' }}"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none"
+                            placeholder="https://facebook.com/yourpage">
+                    </div>
+
+                    <!-- Twitter -->
+                    <div class="space-y-2">
+                        <label for="twitter_url" class="text-sm font-semibold text-gray-700">Twitter URL</label>
+                        <input type="url" name="twitter_url" id="twitter_url" 
+                            value="{{ $settings['twitter_url'] ?? '' }}"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none"
+                            placeholder="https://twitter.com/yourhandle">
+                    </div>
+
+                    <!-- Instagram -->
+                    <div class="space-y-2">
+                        <label for="instagram_url" class="text-sm font-semibold text-gray-700">Instagram URL</label>
+                        <input type="url" name="instagram_url" id="instagram_url" 
+                            value="{{ $settings['instagram_url'] ?? '' }}"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none"
+                            placeholder="https://instagram.com/yourprofile">
+                    </div>
+
+                    <!-- LinkedIn -->
+                    <div class="space-y-2">
+                        <label for="linkedin_url" class="text-sm font-semibold text-gray-700">LinkedIn URL</label>
+                        <input type="url" name="linkedin_url" id="linkedin_url" 
+                            value="{{ $settings['linkedin_url'] ?? '' }}"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none"
+                            placeholder="https://linkedin.com/company/yourpage">
+                    </div>
+
+                    <!-- YouTube -->
+                    <div class="space-y-2">
+                        <label for="youtube_url" class="text-sm font-semibold text-gray-700">YouTube URL</label>
+                        <input type="url" name="youtube_url" id="youtube_url" 
+                            value="{{ $settings['youtube_url'] ?? '' }}"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none"
+                            placeholder="https://youtube.com/c/yourchannel">
+                    </div>
+                </div>
+            </div>
+
             <!-- Company Details Section -->
             <div class="glass-panel p-8 rounded-2xl mb-8">
                 <div class="flex items-center mb-6">
@@ -93,6 +194,19 @@
                             value="{{ $settings['currency_code'] ?? 'USD' }}"
                             class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none"
                             placeholder="e.g. USD">
+                    </div>
+
+                    <!-- Service Fee -->
+                    <div class="col-span-1 md:col-span-2 space-y-2">
+                        <label for="service_fee" class="text-sm font-semibold text-gray-700">Service Fee (%)</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-3.5 text-gray-500 font-bold">%</span>
+                            <input type="number" step="0.01" min="0" max="100" name="service_fee" id="service_fee" 
+                                value="{{ $settings['service_fee'] ?? '0.00' }}"
+                                class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none"
+                                placeholder="5.00">
+                        </div>
+                        <p class="text-xs text-gray-500">This percentage will be added to the total amount paid by the buyer.</p>
                     </div>
                 </div>
             </div>

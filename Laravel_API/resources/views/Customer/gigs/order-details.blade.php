@@ -41,10 +41,10 @@
                     </div>
                 </div>
                 <div class="flex gap-3">
-                    <button onclick="window.print()" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all">
+                    <a href="{{ route('customer.gigs.order.invoice', $order->id) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all">
                         <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                         Print Invoice
-                    </button>
+                    </a>
                     @if($order->status === 'completed')
                     <a href="#" class="inline-flex items-center px-4 py-2 bg-emerald-600 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
@@ -158,7 +158,7 @@
                                 <div class="flex flex-wrap gap-4 mb-4 text-sm text-gray-600">
                                     <span class="flex items-center">
                                         <svg class="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                        {{ $order->package->delivery_time }} Days Delivery
+                                        {{ $order->package->delivery_days }} Days Delivery
                                     </span>
                                     <span class="flex items-center">
                                         <svg class="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
@@ -238,7 +238,10 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Service Provider</h3>
                     <div class="flex items-center gap-4 mb-6">
-                        <img src="{{ $order->provider->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($order->provider->name).'&background=10b981&color=fff' }}" alt="{{ $order->provider->name }}" class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm">
+                        <img src="{{ $order->provider->profile_photo_url ? asset('storage/' . $order->provider->profile_photo_url) : 'https://ui-avatars.com/api/?name='.urlencode($order->provider->name).'&background=10b981&color=fff' }}" 
+                             alt="{{ $order->provider->name }}" 
+                             class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm"
+                             onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($order->provider->name) }}&background=10b981&color=fff'">
                         <div>
                             <h4 class="font-bold text-gray-900 text-lg">{{ $order->provider->name }}</h4>
                             <div class="flex items-center text-sm text-gray-500">
@@ -247,7 +250,7 @@
                             </div>
                         </div>
                     </div>
-                    <a href="{{ route('customer.chat.index') }}" class="block w-full text-center py-2.5 bg-gray-900 text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200">
+                    <a href="{{ route('customer.chat.index', ['user_id' => $order->provider->id]) }}" class="block w-full text-center py-2.5 bg-gray-900 text-white rounded-xl font-bold text-sm hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200">
                         Message Provider
                     </a>
                 </div>
@@ -260,11 +263,15 @@
                     <div class="p-6 space-y-4">
                         <div class="flex justify-between text-sm text-gray-600">
                             <span>Package Price</span>
-                            <span class="font-medium text-gray-900">{{ $currency_symbol ?? '$' }}{{ number_format($order->total_amount, 2) }}</span>
+                            <span class="font-medium text-gray-900">{{ $currency_symbol ?? '$' }}{{ number_format($order->total_amount - $order->service_fee, 2) }}</span>
                         </div>
+                        @php
+                            $packagePrice = $order->total_amount - $order->service_fee;
+                            $feePercentage = $packagePrice > 0 ? ($order->service_fee / $packagePrice) * 100 : 0;
+                        @endphp
                         <div class="flex justify-between text-sm text-gray-600">
-                            <span>Service Fee</span>
-                            <span class="font-medium text-gray-900">{{ $currency_symbol ?? '$' }}0.00</span>
+                            <span>Service Fee @if($feePercentage > 0) ({{ number_format($feePercentage, 2) }}%) @endif</span>
+                            <span class="font-medium text-gray-900">{{ $currency_symbol ?? '$' }}{{ number_format($order->service_fee, 2) }}</span>
                         </div>
                         
                         <div class="pt-4 border-t border-gray-100 flex justify-between items-end">
@@ -294,7 +301,7 @@
                 <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-6 text-white shadow-xl">
                     <h4 class="font-bold text-lg mb-2">Need Help?</h4>
                     <p class="text-indigo-100 text-sm mb-4 leading-relaxed">If you have any issues with this order, please contact our support team immediately.</p>
-                    <button class="w-full py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-sm font-bold transition-colors">
+                    <button onclick="showComingSoonToast()" class="w-full py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-sm font-bold transition-colors">
                         Contact Support
                     </button>
                 </div>
@@ -303,4 +310,36 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    function showComingSoonToast() {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = 'toast bg-white border-l-4 border-blue-500 shadow-premium rounded-r-lg p-4 flex items-center gap-3 min-w-[300px] transform translate-x-full animate-slide-in';
+        toast.innerHTML = `
+            <div class="text-blue-500">
+                <i class="fas fa-info-circle text-xl"></i>
+            </div>
+            <div>
+                <h4 class="font-semibold text-gray-800">Coming Soon</h4>
+                <p class="text-sm text-gray-600">This feature is under development.</p>
+            </div>
+            <button onclick="this.parentElement.remove()" class="ml-auto text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        container.appendChild(toast);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            toast.classList.replace('animate-slide-in', 'animate-slide-out');
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    }
+</script>
+@endpush
 @endsection
