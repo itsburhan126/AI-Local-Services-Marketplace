@@ -113,7 +113,9 @@ class GigController extends Controller
             $selectedPackage = $gig->packages->first();
         }
 
-        return view('Customer.gigs.checkout', compact('gig', 'selectedPackage'));
+        $gateways = \App\Models\PaymentGateway::where('is_active', true)->get();
+
+        return view('Customer.gigs.checkout', compact('gig', 'selectedPackage', 'gateways'));
     }
 
     public function storeOrder(Request $request)
@@ -125,6 +127,13 @@ class GigController extends Controller
             'time' => 'required',
             'notes' => 'nullable|string',
             'address' => 'nullable|string',
+            'payment_method' => [
+                'required',
+                'string',
+                \Illuminate\Validation\Rule::exists('payment_gateways', 'name')->where(function ($query) {
+                    $query->where('is_active', true);
+                }),
+            ],
         ]);
 
         try {
@@ -157,7 +166,7 @@ class GigController extends Controller
                 'commission_amount' => $commissionAmount,
                 'provider_amount' => $providerAmount,
                 'payment_status' => 'pending',
-                'payment_method' => $request->payment_method ?? 'cod',
+                'payment_method' => $request->payment_method,
                 'address' => $request->address,
                 'notes' => $request->notes,
             ]);
@@ -187,11 +196,79 @@ class GigController extends Controller
 
             DB::commit();
 
-            return redirect()->route('customer.dashboard')->with('success', 'Order placed successfully!');
+            if (in_array($request->payment_method, ['paypal', 'stripe', 'card'])) {
+                return redirect()->route('customer.payment.pay', ['order_id' => $gigOrder->id]);
+            }
+
+            return redirect()->route('customer.gigs.order.success', ['order_id' => $gigOrder->id]);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Something went wrong: ' . $e->getMessage());
         }
+    }
+
+    public function orderSuccess($orderId)
+    {
+        $order = GigOrder::with(['gig.category'])->find($orderId);
+
+        if (!$order) {
+            abort(404, 'Order not found');
+        }
+
+        if ($order->user_id != Auth::id()) {
+            abort(403, 'Unauthorized access to this order');
+        }
+
+        // Fetch categories for navigation
+        $categories = Category::whereNull('parent_id')
+            ->where('is_active', true)
+            ->orderBy('order')
+            ->limit(10)
+            ->get();
+
+        $subcategories = Category::whereNotNull('parent_id')
+            ->where('is_active', true)
+            ->get()
+            ->groupBy('parent_id');
+
+        // Fetch Related Gigs
+        $relatedGigs = Gig::with(['provider', 'packages', 'reviews'])
+            ->where('category_id', $order->gig->category_id)
+            ->where('id', '!=', $order->gig_id)
+            ->where('is_active', true)
+            ->whereIn('status', ['published', 'approved'])
+            ->inRandomOrder()
+            ->take(8)
+            ->get();
+        
+        return view('Customer.gigs.order-success', compact('order', 'categories', 'subcategories', 'relatedGigs'));
+    }
+
+    public function orderDetails($orderId)
+    {
+        $order = GigOrder::with(['gig', 'package', 'provider'])->find($orderId);
+
+        if (!$order) {
+            abort(404, 'Order not found');
+        }
+
+        if ($order->user_id != Auth::id()) {
+            abort(403, 'Unauthorized access to this order');
+        }
+
+        // Fetch categories for navigation
+        $categories = Category::whereNull('parent_id')
+            ->where('is_active', true)
+            ->orderBy('order')
+            ->limit(10)
+            ->get();
+
+        $subcategories = Category::whereNotNull('parent_id')
+            ->where('is_active', true)
+            ->get()
+            ->groupBy('parent_id');
+
+        return view('Customer.gigs.order-details', compact('order', 'categories', 'subcategories'));
     }
 }

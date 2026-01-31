@@ -98,6 +98,11 @@ class User extends Authenticatable
         return $this->hasMany(FreelancerPortfolio::class);
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'provider_id');
+    }
+
     public function favorites()
     {
         return $this->hasMany(Favorite::class);

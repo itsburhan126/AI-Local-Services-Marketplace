@@ -280,6 +280,11 @@
                     <span>AI Settings</span>
                 </a>
 
+                <a href="{{ route('admin.payment-gateways.index') }}" class="nav-item flex items-center px-4 py-3.5 text-sm font-medium rounded-xl group {{ request()->routeIs('admin.payment-gateways.*') ? 'nav-item-active' : 'text-slate-400' }}">
+                    <i class="fas fa-credit-card w-6 text-lg {{ request()->routeIs('admin.payment-gateways.*') ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300' }}"></i>
+                    <span>Payment Gateways</span>
+                </a>
+
                 @if(Auth::guard('admin')->user()->hasPermission('manage_staff'))
                 <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-8 mb-4">Access Control</p>
 

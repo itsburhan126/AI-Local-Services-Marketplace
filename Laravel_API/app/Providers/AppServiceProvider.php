@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 
 use App\Models\Setting;
+use App\Models\Category;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Schema;
 
@@ -23,6 +24,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // View Composer for Customer Header
+        View::composer('layouts.partials.header', function ($view) {
+            $categories = Category::whereNull('parent_id')
+                ->where('is_active', true)
+                ->orderBy('order')
+                ->limit(10)
+                ->get();
+
+            $subcategories = Category::whereNotNull('parent_id')
+                ->where('is_active', true)
+                ->get()
+                ->groupBy('parent_id');
+
+            $view->with('categories', $categories)
+                 ->with('subcategories', $subcategories);
+        });
+
         try {
             if (Schema::hasTable('settings')) {
                 // Global View Shares

@@ -44,11 +44,20 @@ Route::prefix('customer')->name('customer.')->group(function () {
     Route::get('/seller/profile/{slug}', [\App\Http\Controllers\Customer\SellerController::class, 'show'])->name('seller.profile');
 
     Route::middleware('auth:web')->group(function () {
+        Route::get('/gigs/order/{order_id}/success', [\App\Http\Controllers\Customer\GigController::class, 'orderSuccess'])->name('gigs.order.success');
+        Route::get('/gigs/order/{order_id}/details', [\App\Http\Controllers\Customer\GigController::class, 'orderDetails'])->name('gigs.order.details');
+        
         Route::get('/dashboard', [\App\Http\Controllers\Customer\DashboardController::class, 'index'])->name('dashboard');
         
         Route::get('/gigs/{slug}/checkout', [\App\Http\Controllers\Customer\GigController::class, 'checkout'])->name('gigs.checkout');
         Route::post('/gigs/order', [\App\Http\Controllers\Customer\GigController::class, 'storeOrder'])->name('gigs.order.store');
         
+        // Payment Routes
+        Route::get('/payment/{order_id}/pay', [\App\Http\Controllers\Customer\PaymentController::class, 'pay'])->name('payment.pay');
+        Route::get('/payment/{order_id}/paypal/callback', [\App\Http\Controllers\Customer\PaymentController::class, 'paypalCallback'])->name('payment.paypal.callback');
+        Route::get('/payment/{order_id}/stripe/callback', [\App\Http\Controllers\Customer\PaymentController::class, 'stripeCallback'])->name('payment.stripe.callback');
+        Route::get('/payment/{order_id}/cancel', [\App\Http\Controllers\Customer\PaymentController::class, 'cancel'])->name('payment.cancel');
+
         // Chat Routes
         Route::get('/chat', [\App\Http\Controllers\Customer\ChatController::class, 'index'])->name('chat.index');
         Route::post('/chat/send', [\App\Http\Controllers\Customer\ChatController::class, 'store'])->name('chat.store');
@@ -157,6 +166,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         
         Route::resource('payout-methods', PayoutMethodController::class);
+        Route::resource('payment-gateways', \App\Http\Controllers\Admin\PaymentGatewayController::class)->only(['index', 'edit', 'update']);
         
     
         

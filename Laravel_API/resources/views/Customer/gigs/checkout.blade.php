@@ -1,60 +1,33 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-slate-50">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Checkout - {{ $gig->title }} | {{ config('app.name') }}</title>
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Styles -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                        body: ['"Inter"', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: {
-                            50: '#ecfdf5',
-                            500: '#10b981', 
-                            600: '#059669', 
-                            900: '#064e3b', 
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-</head>
-<body class="h-full font-body text-slate-600 antialiased" x-data="{ paymentMethod: 'paypal' }">
-    
-    <!-- Navbar (Simplified for checkout) -->
-    <nav class="bg-white border-b border-gray-100 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <a href="{{ url('/') }}" class="flex items-center gap-2">
-                <div class="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white font-bold text-xl">f</div>
-                <span class="text-2xl font-bold text-gray-900 tracking-tight">findlancer</span>
-            </a>
-            <div class="flex items-center gap-2 text-sm font-medium text-gray-500">
-                <i class="fas fa-lock text-emerald-500"></i> 
-                <span>Secure Checkout</span>
-            </div>
-        </div>
-    </nav>
+@extends('layouts.customer')
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+@section('title', 'Checkout - ' . $gig->title)
+
+@section('content')
+<div x-data="{ paymentMethod: '{{ $gateways->first()->name ?? '' }}', isLoading: false }">
+    
+    <!-- Loading Overlay -->
+    <div x-show="isLoading" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-[100] bg-white/90 backdrop-blur-sm flex items-center justify-center">
+        <div class="text-center">
+            <div class="relative w-24 h-24 mx-auto mb-8">
+                <div class="absolute inset-0 border-4 border-gray-100 rounded-full"></div>
+                <div class="absolute inset-0 border-4 border-emerald-500 rounded-full border-t-transparent animate-spin"></div>
+                <i class="fas fa-lock absolute inset-0 flex items-center justify-center text-emerald-500 text-2xl animate-pulse"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2 font-display">Processing Secure Payment</h2>
+            <p class="text-gray-500 animate-pulse">Please wait while we redirect you...</p>
+        </div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">Checkout</h1>
+            <h1 class="text-3xl font-bold text-gray-900 font-display">Checkout</h1>
             <p class="text-gray-500 mt-2">Complete your order details below.</p>
         </div>
 
@@ -71,7 +44,7 @@
             </div>
         @endif
 
-        <form action="{{ route('customer.gigs.order.store') }}" method="POST" class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <form action="{{ route('customer.gigs.order.store') }}" method="POST" class="grid grid-cols-1 lg:grid-cols-12 gap-12" @submit="isLoading = true">
             @csrf
             <input type="hidden" name="gig_id" value="{{ $gig->id }}">
             <input type="hidden" name="gig_package_id" value="{{ $selectedPackage->id }}">
@@ -81,7 +54,7 @@
                 
                 <!-- Order Details -->
                 <div class="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-                    <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2 font-display">
                         <i class="fas fa-clipboard-list text-emerald-500"></i> Order Requirements
                     </h2>
                     
@@ -118,61 +91,55 @@
 
                 <!-- Payment Method -->
                 <div class="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-                    <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2 font-display">
                         <i class="fas fa-wallet text-emerald-500"></i> Payment Method
                     </h2>
                     
                     <div class="space-y-4">
-                        <!-- PayPal -->
-                        <label class="flex items-center p-4 border rounded-xl cursor-pointer transition-all"
-                               :class="paymentMethod === 'paypal' ? 'border-blue-500 bg-blue-50/30 ring-1 ring-blue-500' : 'border-gray-200 hover:border-gray-300'">
-                            <input type="radio" name="payment_method" value="paypal" class="hidden" x-model="paymentMethod">
-                            <div class="flex-1 flex items-center gap-4">
-                                 <i class="fab fa-paypal text-2xl text-[#003087] w-8 text-center"></i>
-                                 <div>
-                                    <span class="block font-bold text-gray-900">PayPal</span>
-                                    <span class="block text-sm text-gray-500">Pay safely with your PayPal account.</span>
-                                 </div>
+                        @if($gateways->isEmpty())
+                            <div class="p-4 rounded-xl border border-yellow-200 bg-yellow-50 text-yellow-800">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span class="font-bold">No Payment Methods Available</span>
+                                </div>
+                                <p class="text-sm mt-1">Please contact support or try again later.</p>
                             </div>
-                            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
-                                 :class="paymentMethod === 'paypal' ? 'border-blue-500' : 'border-gray-300'">
-                                 <div class="w-2.5 h-2.5 rounded-full bg-blue-500" x-show="paymentMethod === 'paypal'"></div>
-                            </div>
-                        </label>
-
-                        <!-- Stripe -->
-                        <label class="flex items-center p-4 border rounded-xl cursor-pointer transition-all"
-                               :class="paymentMethod === 'stripe' ? 'border-indigo-500 bg-indigo-50/30 ring-1 ring-indigo-500' : 'border-gray-200 hover:border-gray-300'">
-                            <input type="radio" name="payment_method" value="stripe" class="hidden" x-model="paymentMethod">
-                            <div class="flex-1 flex items-center gap-4">
-                                 <i class="fab fa-stripe text-3xl text-[#635BFF] w-8 text-center"></i>
-                                 <div>
-                                    <span class="block font-bold text-gray-900">Stripe</span>
-                                    <span class="block text-sm text-gray-500">Pay with credit card via Stripe.</span>
-                                 </div>
-                            </div>
-                            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
-                                 :class="paymentMethod === 'stripe' ? 'border-indigo-500' : 'border-gray-300'">
-                                 <div class="w-2.5 h-2.5 rounded-full bg-indigo-500" x-show="paymentMethod === 'stripe'"></div>
-                            </div>
-                        </label>
-
-                        <!-- Credit Card -->
-                        <label class="flex items-center p-4 border rounded-xl cursor-pointer transition-all"
-                               :class="paymentMethod === 'card' ? 'border-emerald-500 bg-emerald-50/30 ring-1 ring-emerald-500' : 'border-gray-200 hover:border-gray-300'">
-                            <input type="radio" name="payment_method" value="card" class="hidden" x-model="paymentMethod">
-                            <div class="flex-1 flex items-center gap-4">
-                                 <i class="fas fa-credit-card text-2xl text-emerald-600 w-8 text-center"></i>
-                                 <div>
-                                    <span class="block font-bold text-gray-900">Credit or Debit Card</span>
-                                    <span class="block text-sm text-gray-500">Secure payment with SSL encryption.</span>
-                                 </div>
-                            </div>
-                            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
-                                 :class="paymentMethod === 'card' ? 'border-emerald-500' : 'border-gray-300'">
-                                 <div class="w-2.5 h-2.5 rounded-full bg-emerald-500" x-show="paymentMethod === 'card'"></div>
-                            </div>
-                        </label>
+                        @else
+                            @foreach($gateways as $gateway)
+                                <label class="flex items-center p-4 border rounded-xl cursor-pointer transition-all"
+                                       :class="paymentMethod === '{{ $gateway->name }}' ? '{{ $gateway->name === 'paypal' ? 'border-blue-500 bg-blue-50/30 ring-1 ring-blue-500' : ($gateway->name === 'stripe' ? 'border-indigo-500 bg-indigo-50/30 ring-1 ring-indigo-500' : 'border-emerald-500 bg-emerald-50/30 ring-1 ring-emerald-500') }}' : 'border-gray-200 hover:border-gray-300'">
+                                    <input type="radio" name="payment_method" value="{{ $gateway->name }}" class="hidden" x-model="paymentMethod">
+                                    <div class="flex-1 flex items-center gap-4">
+                                        @if($gateway->name === 'paypal')
+                                            <i class="fab fa-paypal text-2xl text-[#003087] w-8 text-center"></i>
+                                        @elseif($gateway->name === 'stripe')
+                                            <i class="fab fa-stripe text-3xl text-[#635BFF] w-8 text-center"></i>
+                                        @else
+                                            <i class="fas fa-credit-card text-2xl text-emerald-600 w-8 text-center"></i>
+                                        @endif
+                                        
+                                        <div>
+                                            <span class="block font-bold text-gray-900">{{ $gateway->title }}</span>
+                                            <span class="block text-sm text-gray-500">
+                                                @if($gateway->name === 'paypal')
+                                                    Pay safely with your PayPal account.
+                                                @elseif($gateway->name === 'stripe')
+                                                    Pay with credit card via Stripe.
+                                                @else
+                                                    Secure payment with SSL encryption.
+                                                @endif
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
+                                         :class="paymentMethod === '{{ $gateway->name }}' ? '{{ $gateway->name === 'paypal' ? 'border-blue-500' : ($gateway->name === 'stripe' ? 'border-indigo-500' : 'border-emerald-500') }}' : 'border-gray-300'">
+                                         <div class="w-2.5 h-2.5 rounded-full" 
+                                              :class="'{{ $gateway->name === 'paypal' ? 'bg-blue-500' : ($gateway->name === 'stripe' ? 'bg-indigo-500' : 'bg-emerald-500') }}'"
+                                              x-show="paymentMethod === '{{ $gateway->name }}'"></div>
+                                    </div>
+                                </label>
+                            @endforeach
+                        @endif
                     </div>
                 </div>
             </div>
@@ -243,6 +210,6 @@
                 </div>
             </div>
         </form>
-    </main>
-</body>
-</html>
+    </div>
+</div>
+@endsection

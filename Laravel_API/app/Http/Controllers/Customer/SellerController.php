@@ -30,11 +30,11 @@ class SellerController extends Controller
         }
 
         // 2. Load relationships
-        $user->load(['providerProfile', 'gigs' => function($q) {
+        $user->load(['providerProfile', 'reviews.user', 'gigs' => function($q) {
             $q->where('is_active', true)
               ->whereIn('status', ['published', 'approved'])
               ->with('reviews'); // eager load reviews for rating calc
-        }, 'reviews.user']); // Reviews ON the provider (if any) or aggregate from gigs
+        }]);
 
         // 3. Aggregate stats
         $totalReviews = $user->gigs->sum(function($gig) {
