@@ -232,24 +232,26 @@
                 this.scrollPos = this.$refs.scrollContainer.scrollLeft;
                 this.$refs.scrollContainer.classList.add('cursor-grabbing');
                 this.$refs.scrollContainer.classList.remove('cursor-grab');
+                this.$refs.scrollContainer.style.scrollBehavior = 'auto';
             },
             stop() {
                 this.isDown = false;
                 this.$refs.scrollContainer.classList.remove('cursor-grabbing');
                 this.$refs.scrollContainer.classList.add('cursor-grab');
+                this.$refs.scrollContainer.style.scrollBehavior = 'smooth';
             },
             move(e) {
                 if (!this.isDown) return;
                 e.preventDefault();
                 const x = e.pageX - this.$refs.scrollContainer.offsetLeft;
-                const walk = (x - this.startX) * 2;
+                const walk = (x - this.startX) * 1.5;
                 this.$refs.scrollContainer.scrollLeft = this.scrollPos - walk;
             }
          }">
         <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
             <div class="relative group/nav">
                 <!-- Left Arrow -->
-                <button @click="$refs.scrollContainer.scrollBy({ left: -300, behavior: 'smooth' })" 
+                <button @click="$refs.scrollContainer.scrollBy({ left: -320, behavior: 'smooth' })" 
                         class="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.1)] rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/nav:opacity-100 focus:opacity-100 border border-gray-100 -ml-4"
                         aria-label="Scroll left">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -263,7 +265,8 @@
                      @mouseleave="stop"
                      @mouseup="stop"
                      @mousemove="move"
-                     class="flex w-full gap-8 overflow-x-auto scrollbar-hide items-center px-2 cursor-grab">
+                     class="flex w-full gap-8 overflow-x-auto scrollbar-hide items-center px-2 cursor-grab"
+                     style="scroll-behavior: smooth;">
                     @foreach($categories as $category)
                         <div class="group relative px-1 py-3.5 border-b-[3px] border-transparent hover:border-emerald-500 transition-all duration-300 cursor-pointer flex-shrink-0"
                              @mouseenter="clearTimeout(timeout); activeCategory = {{ $category->id }}"
@@ -276,7 +279,7 @@
                 </div>
 
                 <!-- Right Arrow -->
-                <button @click="$refs.scrollContainer.scrollBy({ left: 300, behavior: 'smooth' })" 
+                <button @click="$refs.scrollContainer.scrollBy({ left: 320, behavior: 'smooth' })" 
                         class="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.1)] rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/nav:opacity-100 focus:opacity-100 border border-gray-100 -mr-4"
                         aria-label="Scroll right">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
