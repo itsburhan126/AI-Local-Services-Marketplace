@@ -154,3 +154,4 @@ class GigController extends Controller
             return back()->with('error', 'Something went wrong: ' . $e->getMessage());
         }
     }
+}
