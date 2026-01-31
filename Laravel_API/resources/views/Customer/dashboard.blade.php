@@ -603,7 +603,7 @@
                  @mouseleave="stop"
                  @mouseup="stop"
                  @mousemove="move"
-                 class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4 scroll-smooth">
+                 class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
                 @foreach($popularGigs as $gig)
                     @include('Customer.components.gig-card', ['gig' => $gig])
                 @endforeach
@@ -632,7 +632,7 @@
                      @mouseleave="stop"
                      @mouseup="stop"
                      @mousemove="move"
-                     class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4 scroll-smooth">
+                     class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
                     @foreach($recentlyViewed as $gig)
                         @include('Customer.components.gig-card', ['gig' => $gig])
                     @endforeach
