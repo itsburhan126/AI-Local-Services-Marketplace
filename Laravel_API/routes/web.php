@@ -9,32 +9,45 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 Route::get('/', function () {
     if (Auth::guard('web')->check()) {
         $user = Auth::guard('web')->user();
+        
+        // Redirect Provider (Freelancer) to their dashboard
         if ($user->role === 'provider' && $user->service_rule === 'freelancer') {
             return redirect()->route('provider.freelancer.dashboard');
         }
+        
+        // Redirect Customer to their dashboard
         if ($user->role === 'user') {
             return redirect()->route('customer.dashboard');
         }
-        // Fallback or other roles
     }
     return view('landing');
 })->name('landing');
 
 Route::prefix('customer')->name('customer.')->group(function () {
+    Route::get('/', function () {
+        if (Auth::guard('web')->check()) {
+            return redirect()->route('customer.dashboard');
+        }
+        return redirect()->route('customer.login');
+    });
+
     Route::get('/register', [\App\Http\Controllers\Customer\AuthController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [\App\Http\Controllers\Customer\AuthController::class, 'register'])->name('register.submit');
     Route::get('/login', [\App\Http\Controllers\Customer\AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [\App\Http\Controllers\Customer\AuthController::class, 'login'])->name('login.submit');
     Route::post('/logout', [\App\Http\Controllers\Customer\AuthController::class, 'logout'])->name('logout');
 
+    // Public Gig & Seller Routes
+    Route::get('/gigs', [\App\Http\Controllers\Customer\GigController::class, 'index'])->name('gigs.index');
+    Route::get('/gigs/subcategory/{slug}', [\App\Http\Controllers\Customer\DashboardController::class, 'gigsBySubcategory'])->name('gigs.by.subcategory');
+    Route::get('/gigs/{slug}', [\App\Http\Controllers\Customer\GigController::class, 'show'])->name('gigs.show');
+    Route::get('/seller/profile/{slug}', [\App\Http\Controllers\Customer\SellerController::class, 'show'])->name('seller.profile');
+
     Route::middleware('auth:web')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Customer\DashboardController::class, 'index'])->name('dashboard');
-        Route::get('/gigs', [\App\Http\Controllers\Customer\GigController::class, 'index'])->name('gigs.index');
-        Route::get('/gigs/subcategory/{slug}', [\App\Http\Controllers\Customer\DashboardController::class, 'gigsBySubcategory'])->name('gigs.by.subcategory');
-        Route::get('/gigs/{slug}', [\App\Http\Controllers\Customer\GigController::class, 'show'])->name('gigs.show');
+        
         Route::get('/gigs/{slug}/checkout', [\App\Http\Controllers\Customer\GigController::class, 'checkout'])->name('gigs.checkout');
         Route::post('/gigs/order', [\App\Http\Controllers\Customer\GigController::class, 'storeOrder'])->name('gigs.order.store');
-        Route::get('/seller/profile/{slug}', [\App\Http\Controllers\Customer\SellerController::class, 'show'])->name('seller.profile');
         
         // Chat Routes
         Route::get('/chat', [\App\Http\Controllers\Customer\ChatController::class, 'index'])->name('chat.index');

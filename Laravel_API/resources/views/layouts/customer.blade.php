@@ -148,6 +148,7 @@
                         <a href="#" class="text-sm font-bold text-primary-600 hover:text-primary-700 transition-colors">Switch to Selling</a>
                     </div>
                     
+                    @auth
                     <!-- Icons -->
                     <div class="flex items-center space-x-5 border-l border-gray-200 pl-6">
                         <button class="text-gray-400 hover:text-gray-900 transition-colors relative">
@@ -193,6 +194,13 @@
                             </div>
                         </div>
                     </div>
+                    @else
+                    <!-- Guest Actions -->
+                    <div class="flex items-center space-x-4 border-l border-gray-200 pl-6">
+                        <a href="{{ route('customer.login') }}" class="text-sm font-medium text-gray-700 hover:text-emerald-600 transition-colors">Sign In</a>
+                        <a href="{{ route('customer.register') }}" class="text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg transition-colors shadow-sm hover:shadow-md">Join</a>
+                    </div>
+                    @endauth
                 </div>
 
                 <!-- Mobile Menu Button -->
@@ -261,6 +269,7 @@
                 </div>
                 
                 <div class="border-t border-gray-100 p-6">
+                    @auth
                     <div class="flex items-center gap-3">
                         <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">
                             {{ substr(Auth::user()->name, 0, 1) }}
@@ -273,6 +282,16 @@
                             </form>
                         </div>
                     </div>
+                    @else
+                    <div class="flex flex-col gap-3">
+                        <a href="{{ route('customer.login') }}" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                            Sign In
+                        </a>
+                        <p class="text-center text-sm text-gray-500">
+                            New here? <a href="{{ route('customer.register') }}" class="font-medium text-emerald-600 hover:text-emerald-500">Create an account</a>
+                        </p>
+                    </div>
+                    @endauth
                 </div>
             </div>
         </div>

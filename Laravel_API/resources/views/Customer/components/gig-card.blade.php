@@ -1,9 +1,9 @@
-<div class="min-w-[280px] w-[280px] bg-white rounded-2xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 group cursor-pointer flex flex-col h-full relative overflow-hidden">
+<div class="{{ $cardWidth ?? 'w-full' }} bg-white rounded-2xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 group cursor-pointer flex flex-col h-full relative overflow-hidden">
     <!-- Main Link (Covers entire card) -->
     <a href="{{ route('customer.gigs.show', $gig->slug ?? '#') }}" class="absolute inset-0 z-10" aria-label="View {{ $gig->title }}"></a>
 
     <!-- Image -->
-    <div class="relative h-[160px] overflow-hidden">
+    <div class="relative h-[200px] overflow-hidden">
         @php
             $cardImage = 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800&auto=format&fit=crop';
             $thumb = $gig->thumbnail_image ?? $gig->image; // Try thumbnail first, then image

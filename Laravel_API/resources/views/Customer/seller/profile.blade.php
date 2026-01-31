@@ -81,6 +81,7 @@
                     </div>
                     
                     <!-- Profile Dropdown -->
+                    @auth
                     <div class="relative" x-data="{ open: false }">
                         <button @click="open = !open" type="button" class="flex items-center gap-2 focus:outline-none group">
                             <div class="relative">
@@ -108,6 +109,12 @@
                             </div>
                         </div>
                     </div>
+                    @else
+                    <div class="flex items-center space-x-4 border-l border-gray-200 pl-6">
+                        <a href="{{ route('customer.login') }}" class="text-sm font-medium text-gray-700 hover:text-emerald-600 transition-colors">Sign In</a>
+                        <a href="{{ route('customer.register') }}" class="text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg transition-colors shadow-sm hover:shadow-md">Join</a>
+                    </div>
+                    @endauth
                 </div>
             </div>
         </div>

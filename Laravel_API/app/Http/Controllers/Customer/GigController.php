@@ -30,7 +30,26 @@ class GigController extends Controller
             $query->where('title', 'like', '%' . $request->search . '%');
         }
 
-        $gigs = $query->latest()->paginate(12);
+        if ($request->has('sort')) {
+            switch ($request->sort) {
+                case 'popular':
+                    $query->orderBy('view_count', 'desc');
+                    break;
+                case 'rating':
+                    $query->withCount('reviews')->orderBy('reviews_count', 'desc');
+                    break;
+                case 'oldest':
+                    $query->oldest();
+                    break;
+                default:
+                    $query->latest();
+                    break;
+            }
+        } else {
+            $query->latest();
+        }
+
+        $gigs = $query->paginate(12);
         
         $categories = Category::whereNull('parent_id')->get();
 

@@ -18,38 +18,45 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('carousel', () => ({
+                scrollContainer: null,
                 init() {
-                    this.scrollContainer = this.$refs.list || this.$refs.scrollContainer;
-                    this.scrollContainer.classList.add('cursor-grab');
-                    this.scrollContainer.style.scrollBehavior = 'smooth';
+                    this.scrollContainer = this.$refs.list;
+                    if (this.scrollContainer) {
+                        this.scrollContainer.classList.add('cursor-grab');
+                        this.scrollContainer.style.scrollBehavior = 'smooth';
+                    }
                 },
                 scrollLeft() {
-                    this.scrollContainer.scrollBy({ left: -320, behavior: 'smooth' });
+                    if (this.scrollContainer) {
+                        this.scrollContainer.scrollBy({ left: -340, behavior: 'smooth' });
+                    }
                 },
                 scrollRight() {
-                    this.scrollContainer.scrollBy({ left: 320, behavior: 'smooth' });
+                    if (this.scrollContainer) {
+                        this.scrollContainer.scrollBy({ left: 340, behavior: 'smooth' });
+                    }
                 },
                 isDown: false,
                 startX: 0,
                 scrollPos: 0,
                 start(e) {
+                    if (!this.scrollContainer) return;
                     this.isDown = true;
                     this.startX = e.pageX - this.scrollContainer.offsetLeft;
                     this.scrollPos = this.scrollContainer.scrollLeft;
                     this.scrollContainer.classList.add('cursor-grabbing');
                     this.scrollContainer.classList.remove('cursor-grab');
-                    // Disable smooth scrolling during drag for instant feedback
                     this.scrollContainer.style.scrollBehavior = 'auto';
                 },
                 stop() {
+                    if (!this.scrollContainer) return;
                     this.isDown = false;
                     this.scrollContainer.classList.remove('cursor-grabbing');
                     this.scrollContainer.classList.add('cursor-grab');
-                    // Re-enable smooth scrolling for buttons
                     this.scrollContainer.style.scrollBehavior = 'smooth';
                 },
                 move(e) {
-                    if (!this.isDown) return;
+                    if (!this.isDown || !this.scrollContainer) return;
                     e.preventDefault();
                     const x = e.pageX - this.scrollContainer.offsetLeft;
                     const walk = (x - this.startX) * 1.5;
@@ -568,7 +575,7 @@
                             <span class="font-mono font-bold">05:23:12</span>
                         </div>
                     </div>
-                    <a href="{{ route('gigs.index') }}" class="text-sm font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 transition-colors">
+                    <a href="{{ route('customer.gigs.index') }}" class="text-sm font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 transition-colors">
                         View All <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                     </a>
                 </div>
@@ -579,50 +586,22 @@
                      @mousemove="move"
                      class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
                     @foreach($flashSaleGigs as $gig)
-                        @include('Customer.components.gig-card', ['gig' => $gig])
+                        @include('Customer.components.gig-card', ['gig' => $gig, 'cardWidth' => 'min-w-[340px] w-[340px]'])
                     @endforeach
                 </div>
             </div>
         @endif
 
-        <!-- 4. Popular Services -->
-        <div class="relative group/section" x-data="carousel">
+        <!-- 4. Popular Gigs -->
+        <div class="group/section" x-data="carousel">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-gray-900 font-display">Popular Services</h2>
-                <a href="{{ route('gigs.index') }}" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">See All</a>
+                <h2 class="text-2xl font-bold text-gray-900 font-display">Popular Gigs</h2>
+                <a href="{{ route('customer.gigs.index', ['sort' => 'popular']) }}" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">See All</a>
             </div>
             
-            <button @click="scrollLeft" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -ml-4 hidden md:block">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-                </svg>
-            </button>
-
-            <div x-ref="list" 
-                 @mousedown="start"
-                 @mouseleave="stop"
-                 @mouseup="stop"
-                 @mousemove="move"
-                 class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
-                @foreach($popularGigs as $gig)
-                    @include('Customer.components.gig-card', ['gig' => $gig])
-                @endforeach
-            </div>
-
-            <button @click="scrollRight" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -mr-4 hidden md:block">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-                </svg>
-            </button>
-        </div>
-
-        <!-- 5. Recently Viewed (New) -->
-        @if($recentlyViewed->count() > 0)
-            <div class="relative group/section" x-data="carousel">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6 font-display">Recently Viewed</h2>
-                
-                <button @click="scrollLeft" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -ml-4 hidden md:block">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="relative">
+                <button @click="scrollLeft" class="absolute left-0 top-1/2 -translate-y-1/2 z-30 p-3 bg-white shadow-xl rounded-full text-gray-700 hover:text-emerald-600 hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -ml-5 hidden md:flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
                     </svg>
                 </button>
@@ -633,16 +612,48 @@
                      @mouseup="stop"
                      @mousemove="move"
                      class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
-                    @foreach($recentlyViewed as $gig)
-                        @include('Customer.components.gig-card', ['gig' => $gig])
+                    @foreach($popularGigs as $gig)
+                        @include('Customer.components.gig-card', ['gig' => $gig, 'cardWidth' => 'min-w-[340px] w-[340px]'])
                     @endforeach
                 </div>
 
-                <button @click="scrollRight" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -mr-4 hidden md:block">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button @click="scrollRight" class="absolute right-0 top-1/2 -translate-y-1/2 z-30 p-3 bg-white shadow-xl rounded-full text-gray-700 hover:text-emerald-600 hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -mr-5 hidden md:flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                     </svg>
                 </button>
+            </div>
+        </div>
+
+        <!-- 5. Recently Viewed (New) -->
+        @if($recentlyViewed->count() > 0)
+            <div class="group/section" x-data="carousel">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6 font-display">Recently Viewed</h2>
+                
+                <div class="relative">
+                    <button @click="scrollLeft" class="absolute left-0 top-1/2 -translate-y-1/2 z-30 p-3 bg-white shadow-xl rounded-full text-gray-700 hover:text-emerald-600 hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -ml-5 hidden md:flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+
+                    <div x-ref="list" 
+                     @mousedown="start"
+                     @mouseleave="stop"
+                     @mouseup="stop"
+                     @mousemove="move"
+                     class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
+                    @foreach($recentlyViewed as $gig)
+                        @include('Customer.components.gig-card', ['gig' => $gig, 'cardWidth' => 'min-w-[340px] w-[340px]'])
+                    @endforeach
+                </div>
+
+                    <button @click="scrollRight" class="absolute right-0 top-1/2 -translate-y-1/2 z-30 p-3 bg-white shadow-xl rounded-full text-gray-700 hover:text-emerald-600 hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -mr-5 hidden md:flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         @endif
 
@@ -687,31 +698,33 @@
 
         <!-- 8. Recently Saved (New) -->
         @if($recentlySaved->count() > 0)
-            <div class="relative group/section" x-data="carousel">
+            <div class="group/section" x-data="carousel">
                 <h2 class="text-2xl font-bold text-gray-900 mb-6 font-display">Recently Saved</h2>
                 
-                <button @click="scrollLeft" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -ml-4 hidden md:block">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-                    </svg>
-                </button>
+                <div class="relative">
+                    <button @click="scrollLeft" class="absolute left-0 top-1/2 -translate-y-1/2 z-30 p-3 bg-white shadow-xl rounded-full text-gray-700 hover:text-emerald-600 hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -ml-5 hidden md:flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
 
-                <div x-ref="list" 
+                    <div x-ref="list" 
                      @mousedown="start"
                      @mouseleave="stop"
                      @mouseup="stop"
                      @mousemove="move"
                      class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
                     @foreach($recentlySaved as $gig)
-                        @include('Customer.components.gig-card', ['gig' => $gig])
+                        @include('Customer.components.gig-card', ['gig' => $gig, 'cardWidth' => 'min-w-[340px] w-[340px]'])
                     @endforeach
                 </div>
 
-                <button @click="scrollRight" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -mr-4 hidden md:block">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-                    </svg>
-                </button>
+                    <button @click="scrollRight" class="absolute right-0 top-1/2 -translate-y-1/2 z-30 p-3 bg-white shadow-xl rounded-full text-gray-700 hover:text-emerald-600 hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -mr-5 hidden md:flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         @endif
 
@@ -720,7 +733,7 @@
             <div>
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-2xl font-bold text-gray-900 font-display">What Sparks Your Interest</h2>
-                    <a href="{{ route('gigs.index') }}" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">See All</a>
+                    <a href="{{ route('customer.gigs.index') }}" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">See All</a>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     @foreach($interestsGigs as $gig)
@@ -790,11 +803,46 @@
 
         <!-- 13. Inspired by Browsing History (New) -->
         @if($inspiredByHistory->count() > 0)
-            <div class="relative group/section" x-data="carousel">
+            <div class="group/section" x-data="carousel">
                 <h2 class="text-2xl font-bold text-gray-900 mb-6 font-display">Inspired by your browsing history</h2>
                 
-                <button @click="scrollLeft" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -ml-4 hidden md:block">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="relative">
+                    <button @click="scrollLeft" class="absolute left-0 top-1/2 -translate-y-1/2 z-30 p-3 bg-white shadow-xl rounded-full text-gray-700 hover:text-emerald-600 hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -ml-5 hidden md:flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+
+                    <div x-ref="list" 
+                     @mousedown="start"
+                     @mouseleave="stop"
+                     @mouseup="stop"
+                     @mousemove="move"
+                     class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
+                    @foreach($inspiredByHistory as $gig)
+                        @include('Customer.components.gig-card', ['gig' => $gig, 'cardWidth' => 'min-w-[340px] w-[340px]'])
+                    @endforeach
+                </div>
+
+                    <button @click="scrollRight" class="absolute right-0 top-1/2 -translate-y-1/2 z-30 p-3 bg-white shadow-xl rounded-full text-gray-700 hover:text-emerald-600 hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -mr-5 hidden md:flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        @endif
+
+        <!-- 14. New Gigs (New) -->
+        <div class="group/section" x-data="carousel">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 font-display">New Gigs</h2>
+                <a href="{{ route('customer.gigs.index', ['sort' => 'newest']) }}" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">See All</a>
+            </div>
+            
+            <div class="relative">
+                <button @click="scrollLeft" class="absolute left-0 top-1/2 -translate-y-1/2 z-30 p-3 bg-white shadow-xl rounded-full text-gray-700 hover:text-emerald-600 hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -ml-5 hidden md:flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
                     </svg>
                 </button>
@@ -805,48 +853,17 @@
                      @mouseup="stop"
                      @mousemove="move"
                      class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
-                    @foreach($inspiredByHistory as $gig)
-                        @include('Customer.components.gig-card', ['gig' => $gig])
+                    @foreach($newGigs as $gig)
+                        @include('Customer.components.gig-card', ['gig' => $gig, 'cardWidth' => 'min-w-[340px] w-[340px]'])
                     @endforeach
                 </div>
 
-                <button @click="scrollRight" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -mr-4 hidden md:block">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button @click="scrollRight" class="absolute right-0 top-1/2 -translate-y-1/2 z-30 p-3 bg-white shadow-xl rounded-full text-gray-700 hover:text-emerald-600 hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -mr-5 hidden md:flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                     </svg>
                 </button>
             </div>
-        @endif
-
-        <!-- 14. New Gigs (New) -->
-        <div class="relative group/section" x-data="carousel">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-gray-900 font-display">New Gigs</h2>
-                <a href="{{ route('gigs.index') }}" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">See All</a>
-            </div>
-            
-            <button @click="scrollLeft" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -ml-4 hidden md:block">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-                </svg>
-            </button>
-
-            <div x-ref="list" 
-                 @mousedown="start"
-                 @mouseleave="stop"
-                 @mouseup="stop"
-                 @mousemove="move"
-                 class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
-                @foreach($newGigs as $gig)
-                    @include('Customer.components.gig-card', ['gig' => $gig])
-                @endforeach
-            </div>
-
-            <button @click="scrollRight" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-lg rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -mr-4 hidden md:block">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-                </svg>
-            </button>
         </div>
 
     </main>
