@@ -280,12 +280,53 @@
 
     <!-- Secondary Navigation (Categories with Icons) -->
     @if(isset($categories))
-    <div class="border-t border-gray-100 bg-white hidden md:block relative z-40 shadow-sm" x-data="{ activeCategory: null, timeout: null }">
+    <div class="border-t border-gray-100 bg-white hidden md:block relative z-40 shadow-sm" 
+         x-data="{ 
+            activeCategory: null, 
+            timeout: null,
+            isDown: false,
+            startX: 0,
+            scrollPos: 0,
+            start(e) {
+                this.isDown = true;
+                this.startX = e.pageX - this.$refs.scrollContainer.offsetLeft;
+                this.scrollPos = this.$refs.scrollContainer.scrollLeft;
+                this.$refs.scrollContainer.classList.add('cursor-grabbing');
+                this.$refs.scrollContainer.classList.remove('cursor-grab');
+            },
+            stop() {
+                this.isDown = false;
+                this.$refs.scrollContainer.classList.remove('cursor-grabbing');
+                this.$refs.scrollContainer.classList.add('cursor-grab');
+            },
+            move(e) {
+                if (!this.isDown) return;
+                e.preventDefault();
+                const x = e.pageX - this.$refs.scrollContainer.offsetLeft;
+                const walk = (x - this.startX) * 2;
+                this.$refs.scrollContainer.scrollLeft = this.scrollPos - walk;
+            }
+         }">
         <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between">
-                <div class="flex w-full gap-4 overflow-x-auto scrollbar-hide md:justify-between">
+            <div class="relative group/nav">
+                <!-- Left Arrow -->
+                <button @click="$refs.scrollContainer.scrollBy({ left: -300, behavior: 'smooth' })" 
+                        class="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.1)] rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/nav:opacity-100 focus:opacity-100 border border-gray-100 -ml-4"
+                        aria-label="Scroll left">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+
+                <!-- Categories Scroll Container -->
+                <div x-ref="scrollContainer" 
+                     @mousedown="start"
+                     @mouseleave="stop"
+                     @mouseup="stop"
+                     @mousemove="move"
+                     class="flex w-full gap-8 overflow-x-auto scrollbar-hide items-center px-2 cursor-grab">
                     @foreach($categories as $category)
-                        <div class="group relative px-3 py-3.5 border-b-[3px] border-transparent hover:border-emerald-500 transition-all duration-300 cursor-pointer"
+                        <div class="group relative px-1 py-3.5 border-b-[3px] border-transparent hover:border-emerald-500 transition-all duration-300 cursor-pointer flex-shrink-0"
                              @mouseenter="clearTimeout(timeout); activeCategory = {{ $category->id }}"
                              @mouseleave="timeout = setTimeout(() => activeCategory = null, 300)">
                             <a href="#" class="text-[15px] font-semibold text-gray-600 group-hover:text-emerald-600 whitespace-nowrap transition-colors block tracking-wide">
@@ -294,6 +335,15 @@
                         </div>
                     @endforeach
                 </div>
+
+                <!-- Right Arrow -->
+                <button @click="$refs.scrollContainer.scrollBy({ left: 300, behavior: 'smooth' })" 
+                        class="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.1)] rounded-full text-gray-600 hover:text-black hover:scale-110 transition-all opacity-0 group-hover/nav:opacity-100 focus:opacity-100 border border-gray-100 -mr-4"
+                        aria-label="Scroll right">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
             </div>
         </div>
 
