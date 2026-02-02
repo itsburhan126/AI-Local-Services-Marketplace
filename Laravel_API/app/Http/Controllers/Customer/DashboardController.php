@@ -10,6 +10,9 @@ use App\Models\Banner;
 use App\Models\FreelancerBanner;
 use App\Models\Review;
 use App\Models\RecentlyViewedGig;
+use App\Models\Interest;
+use App\Models\Testimonial;
+use App\Models\TrustSafetyItem;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -123,22 +126,17 @@ class DashboardController extends Controller
                 ->filter();
         }
 
-        // 7. What Sparks Your Interest (Based on user interests or random categories)
-        // If user has interests, show gigs from those categories
-        $interestsGigs = collect();
-        // Placeholder logic for interests:
-        // if ($user && $user->interests->count() > 0) { ... }
-        // Fallback to random high rated gigs
-        $interestsGigs = Gig::with(['provider', 'packages' => function($query) {
-                $query->orderBy('price', 'asc');
-            }])
+        // 7. What Sparks Your Interest
+        // Fetch Top Level Categories (Freelancer Categories)
+        $interests = Category::whereNull('parent_id')
             ->where('is_active', true)
-            ->whereIn('status', ['published', 'approved'])
-            ->inRandomOrder()
-            ->take(8)
+            ->orderBy('order', 'asc')
+            ->limit(10)
             ->get();
-
-
+        
+        // Note: We are using Categories as "Interests" for display.
+        // The toggle functionality will handle mapping Category -> Interest.
+        
         // 8. Inspired by Browsing History (New)
         // Logic: Get category of last viewed gig, show more from that category
         $inspiredByHistory = collect();
@@ -174,27 +172,15 @@ class DashboardController extends Controller
             ->limit(6)
             ->get();
             
-        // Testimonials (Mock for now, or fetch from Reviews if needed)
-        $testimonials = [
-            [
-                'name' => 'Sarah Jenkins',
-                'role' => 'Small Business Owner',
-                'image' => 'https://randomuser.me/api/portraits/women/44.jpg',
-                'text' => 'Found an amazing graphic designer in minutes. The quality of work was outstanding!'
-            ],
-            [
-                'name' => 'Michael Chen',
-                'role' => 'Tech Startup Founder',
-                'image' => 'https://randomuser.me/api/portraits/men/32.jpg',
-                'text' => 'This platform made it so easy to find local developers for our MVP. Highly recommended.'
-            ],
-            [
-                'name' => 'Jessica Williams',
-                'role' => 'Marketing Director',
-                'image' => 'https://randomuser.me/api/portraits/women/68.jpg',
-                'text' => 'The best place to find reliable freelancers. Trust and Safety features gave me peace of mind.'
-            ]
-        ];
+        // Testimonials
+        $testimonials = Testimonial::where('is_active', true)
+            ->orderBy('order')
+            ->get();
+
+        // Trust & Safety
+        $trustSafetyItems = TrustSafetyItem::where('is_active', true)
+            ->orderBy('order')
+            ->get();
 
         return view('Customer.dashboard', compact(
             'categories', 
@@ -209,10 +195,88 @@ class DashboardController extends Controller
             'popularSubcategories',
             'recentlyViewed',
             'recentlySaved',
-            'interestsGigs',
+            'interests',
             'inspiredByHistory',
-            'testimonials'
+            'testimonials',
+            'trustSafetyItems'
         ));
+    }
+
+    public function toggleInterest(Request $request)
+    {
+        $user = Auth::guard('web')->user();
+        if (!$user) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 401);
+        }
+
+        // Check if we received a category_id (from new UI) or interest_id (legacy)
+        if ($request->has('category_id')) {
+            $categoryId = $request->category_id;
+            $category = Category::find($categoryId);
+            
+            if (!$category) {
+                return response()->json(['status' => 'error', 'message' => 'Category not found'], 404);
+            }
+
+            // Find or Create Interest for this category
+            $interest = Interest::firstOrCreate(
+                ['category_id' => $category->id],
+                [
+                    'name' => $category->name,
+                    'slug' => $category->slug,
+                    'icon' => $category->image, // Fallback to category image
+                    'is_active' => true
+                ]
+            );
+            $interestId = $interest->id;
+
+        } else {
+            $request->validate([
+                'interest_id' => 'required|exists:interests,id',
+            ]);
+            $interestId = $request->interest_id;
+        }
+
+        $relation = $user->interests();
+        $exists = $relation->where('interest_id', $interestId)->exists();
+
+        if ($exists) {
+            $relation->detach($interestId);
+            $action = 'removed';
+        } else {
+            $relation->attach($interestId);
+            $action = 'added';
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'action' => $action
+        ]);
+    }
+
+    public function allInterests()
+    {
+        // Fetch all top-level categories as interests
+        $interests = Category::whereNull('parent_id')
+            ->where('is_active', true)
+            ->orderBy('order', 'asc')
+            ->get();
+
+        // Pass categories and subcategories for layout dependencies (sidebar/header)
+        $categories = $interests; 
+        $subcategories = Category::whereNotNull('parent_id')
+            ->where('is_active', true)
+            ->get()
+            ->groupBy('parent_id');
+
+        // Get user's current interest category IDs
+        $userInterestCategoryIds = [];
+        if (Auth::guard('web')->check()) {
+            $user = Auth::guard('web')->user();
+            $userInterestCategoryIds = $user->interests()->pluck('category_id')->toArray();
+        }
+
+        return view('Customer.interests.index', compact('interests', 'categories', 'subcategories', 'userInterestCategoryIds'));
     }
 
     public function gigsBySubcategory($slug)

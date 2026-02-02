@@ -44,13 +44,9 @@
                     <tr class="hover:bg-slate-50/80 transition-colors group">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold border border-slate-200 shadow-sm overflow-hidden">
-                                    @if($user->avatar)
-                                        <img src="{{ $user->avatar }}" alt="{{ $user->name }}" class="h-full w-full object-cover">
-                                    @else
-                                        {{ substr($user->name, 0, 1) }}
-                                    @endif
-                                </div>
+                                <img src="{{ $user->profile_photo_url }}" 
+                                     alt="{{ $user->name }}"
+                                     class="h-10 w-10 rounded-full border border-slate-200 shadow-sm object-cover">
                                 <div>
                                     <h3 class="text-sm font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors">{{ $user->name }}</h3>
                                     <p class="text-xs text-slate-500">{{ $user->email }}</p>

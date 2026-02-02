@@ -130,7 +130,11 @@
                                 </div>
                             </td>
                             <td class="py-3">
-                                <div class="text-sm text-gray-600">{{ $booking->user->name ?? 'Guest' }}</div>
+                                <div class="flex items-center gap-2">
+                                    <img src="{{ $booking->user ? $booking->user->profile_photo_url : 'https://ui-avatars.com/api/?name=Guest&background=4F46E5&color=ffffff&rounded=true&bold=true' }}" 
+                                         class="w-8 h-8 rounded-full object-cover shadow-sm border border-gray-100">
+                                    <div class="text-sm font-medium text-gray-700">{{ $booking->user->name ?? 'Guest' }}</div>
+                                </div>
                             </td>
                             <td class="py-3">
                                 <span class="px-2 py-1 rounded-full text-xs font-medium 

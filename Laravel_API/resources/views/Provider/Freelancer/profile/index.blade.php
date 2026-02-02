@@ -33,7 +33,7 @@
                     <!-- Avatar -->
                     <div class="relative shrink-0">
                         <div class="w-32 h-32 rounded-full bg-slate-100 border-4 border-white shadow-md overflow-hidden">
-                             <img src="{{ $user->avatar }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                             <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
                         </div>
                         <div class="absolute bottom-2 right-2 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
                     </div>
@@ -141,6 +141,93 @@
                         </div>
                     </form>
                 </template>
+            </div>
+
+            <!-- KYC Verification Section -->
+            <div class="bg-white rounded-xl border border-slate-200 p-8 shadow-sm" id="kyc-section">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Identity Verification</h2>
+                        <p class="text-slate-500 text-sm mt-1">Verify your identity to build trust and unlock more features.</p>
+                    </div>
+                    @if($user->kyc_status === 'verified')
+                        <span class="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-sm font-bold flex items-center gap-2">
+                            <i class="fas fa-check-circle"></i> Verified
+                        </span>
+                    @elseif($user->kyc_status === 'pending')
+                        <span class="px-4 py-2 bg-amber-100 text-amber-700 rounded-full text-sm font-bold flex items-center gap-2">
+                            <i class="fas fa-clock"></i> Pending Approval
+                        </span>
+                    @else
+                        <span class="px-4 py-2 bg-slate-100 text-slate-700 rounded-full text-sm font-bold flex items-center gap-2">
+                            <i class="fas fa-shield-alt"></i> Not Verified
+                        </span>
+                    @endif
+                </div>
+
+                @if(!$user->kyc_status || $user->kyc_status === 'rejected')
+                    @if($user->kyc_status === 'rejected')
+                        <div class="bg-red-50 text-red-600 p-4 rounded-xl mb-6 flex items-start gap-3">
+                            <i class="fas fa-exclamation-circle mt-1"></i>
+                            <div>
+                                <p class="font-bold">Verification Rejected</p>
+                                <p class="text-sm">Your previous attempt was rejected. Please ensure your documents are clear and valid.</p>
+                            </div>
+                        </div>
+                    @endif
+
+                    <form action="{{ route('provider.freelancer.kyc.submit') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                        @csrf
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-2">Document Type</label>
+                                <select name="document_type" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all">
+                                    <option value="passport">Passport</option>
+                                    <option value="national_id">National ID Card</option>
+                                    <option value="driving_license">Driving License</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-2">Phone Number</label>
+                                <input type="tel" name="phone" value="{{ old('phone', $user->phone) }}" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" placeholder="+1 234 567 8900">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:bg-slate-50 transition-colors cursor-pointer relative group/upload">
+                                <input type="file" name="document_front" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" accept="image/*" required onchange="this.nextElementSibling.classList.add('hidden'); this.nextElementSibling.nextElementSibling.classList.remove('hidden'); this.nextElementSibling.nextElementSibling.querySelector('img').src = window.URL.createObjectURL(this.files[0])">
+                                <div class="pointer-events-none group-hover/upload:scale-105 transition-transform">
+                                    <i class="fas fa-id-card text-4xl text-slate-300 mb-3"></i>
+                                    <p class="font-bold text-slate-700">Front Side</p>
+                                    <p class="text-xs text-slate-400 mt-1">Upload clear image</p>
+                                </div>
+                                <div class="hidden pointer-events-none absolute inset-0 p-2">
+                                    <img src="" class="w-full h-full object-contain rounded-lg">
+                                </div>
+                            </div>
+
+                            <div class="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:bg-slate-50 transition-colors cursor-pointer relative group/upload">
+                                <input type="file" name="document_back" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" accept="image/*" onchange="this.nextElementSibling.classList.add('hidden'); this.nextElementSibling.nextElementSibling.classList.remove('hidden'); this.nextElementSibling.nextElementSibling.querySelector('img').src = window.URL.createObjectURL(this.files[0])">
+                                <div class="pointer-events-none group-hover/upload:scale-105 transition-transform">
+                                    <i class="fas fa-id-card text-4xl text-slate-300 mb-3"></i>
+                                    <p class="font-bold text-slate-700">Back Side</p>
+                                    <p class="text-xs text-slate-400 mt-1">Upload clear image (Optional)</p>
+                                </div>
+                                <div class="hidden pointer-events-none absolute inset-0 p-2">
+                                    <img src="" class="w-full h-full object-contain rounded-lg">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button type="submit" class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 transform hover:-translate-y-0.5 flex items-center gap-2">
+                                <i class="fas fa-paper-plane"></i> Submit for Verification
+                            </button>
+                        </div>
+                    </form>
+                @endif
             </div>
 
             <!-- 3. Portfolio Section -->

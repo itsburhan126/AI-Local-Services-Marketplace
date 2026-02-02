@@ -2,69 +2,84 @@
 
 namespace Database\Seeders;
 
-use App\Models\HowItWorksStep;
 use Illuminate\Database\Seeder;
+use App\Models\HowItWorksStep;
 
 class HowItWorksSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
+        // Clear existing data
+        HowItWorksStep::truncate();
+
         // Client Steps
         $clientSteps = [
             [
-                'title' => 'Find a Service',
-                'description' => 'Browse through thousands of services or search for exactly what you need. Filter by price, rating, and more.',
+                'title' => 'Browse Services',
+                'description' => 'Explore our marketplace to find the perfect service for your needs. Filter by category, price, and reviews.',
                 'icon' => 'fas fa-search',
-                'step_order' => 1,
             ],
             [
-                'title' => 'Hire a Pro',
-                'description' => 'Check reviews, compare packages, and chat with freelancers. Hire the best match for your project.',
-                'icon' => 'fas fa-handshake',
-                'step_order' => 2,
+                'title' => 'Choose an Expert',
+                'description' => 'Review portfolios, read client feedback, and select a freelancer who matches your project requirements.',
+                'icon' => 'fas fa-user-check',
             ],
             [
-                'title' => 'Work Together',
-                'description' => 'Communicate clearly, share files, and track progress directly through our secure platform.',
-                'icon' => 'fas fa-tasks',
-                'step_order' => 3,
+                'title' => 'Secure Payment',
+                'description' => 'Pay securely through our platform. Funds are held in escrow until you are 100% satisfied with the work.',
+                'icon' => 'fas fa-shield-alt',
             ],
             [
-                'title' => 'Approve & Pay',
-                'description' => 'Review the final work. Payment is only released to the freelancer once you approve the delivery.',
+                'title' => 'Get Work Done',
+                'description' => 'Collaborate with your freelancer, track progress, and receive high-quality work on time.',
                 'icon' => 'fas fa-check-circle',
-                'step_order' => 4,
             ],
         ];
 
-        foreach ($clientSteps as $step) {
-            HowItWorksStep::create(array_merge($step, ['type' => 'client']));
+        foreach ($clientSteps as $index => $step) {
+            HowItWorksStep::create([
+                'type' => 'client',
+                'title' => $step['title'],
+                'description' => $step['description'],
+                'icon' => $step['icon'],
+                'step_order' => $index + 1,
+                'is_active' => true,
+            ]);
         }
 
         // Freelancer Steps
         $freelancerSteps = [
             [
-                'title' => 'Create a Gig',
-                'description' => 'Sign up for free, set up your Gig, and offer your work to our global audience.',
-                'icon' => 'fas fa-box-open',
-                'step_order' => 1,
+                'title' => 'Create Your Profile',
+                'description' => 'Showcase your skills, experience, and portfolio. Highlight what makes you unique to attract clients.',
+                'icon' => 'fas fa-id-card',
+            ],
+            [
+                'title' => 'Find Opportunities',
+                'description' => 'Search for jobs that match your expertise. Submit proposals and communicate with potential clients.',
+                'icon' => 'fas fa-briefcase',
             ],
             [
                 'title' => 'Deliver Great Work',
-                'description' => 'Get notified when you get an order and use our system to discuss details with customers.',
-                'icon' => 'fas fa-paper-plane',
-                'step_order' => 2,
+                'description' => 'Complete projects to the client\'s satisfaction. Build your reputation with positive ratings and reviews.',
+                'icon' => 'fas fa-star',
             ],
             [
-                'title' => 'Get Paid',
-                'description' => 'Get paid on time, every time. Payment is transferred to you upon order completion.',
+                'title' => 'Get Paid Securely',
+                'description' => 'Receive payments safely and on time. Withdraw earnings to your preferred payment method.',
                 'icon' => 'fas fa-wallet',
-                'step_order' => 3,
             ],
         ];
 
-        foreach ($freelancerSteps as $step) {
-            HowItWorksStep::create(array_merge($step, ['type' => 'freelancer']));
+        foreach ($freelancerSteps as $index => $step) {
+            HowItWorksStep::create([
+                'type' => 'freelancer',
+                'title' => $step['title'],
+                'description' => $step['description'],
+                'icon' => $step['icon'],
+                'step_order' => $index + 1,
+                'is_active' => true,
+            ]);
         }
     }
 }

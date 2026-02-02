@@ -25,6 +25,9 @@ class User extends Authenticatable
         'password',
         'google_id',
         'avatar',
+        'phone',
+        'kyc_status',
+        'kyc_data',
         'fcm_token',
         'wallet_balance',
         'pending_balance',
@@ -40,6 +43,9 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    protected $appends = ['profile_photo_url'];
+
+
     /**
      * Get the attributes that should be cast.
      *
@@ -50,8 +56,11 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'kyc_data' => 'array',
+            'settings' => 'array',
         ];
     }
+
 
     public function services()
     {
@@ -119,7 +128,7 @@ class User extends Authenticatable
     public function getProfilePhotoUrlAttribute()
     {
         // 1. Check direct avatar
-        if ($this->avatar) {
+        if ($this->avatar && basename($this->avatar) !== 'default.png') {
              return $this->avatar; // Accessor above already handles asset() path
         }
 
@@ -130,7 +139,7 @@ class User extends Authenticatable
         
         // 3. Fallback to Professional UI Avatar
         $name = urlencode($this->name);
-        // Using a neutral, professional color scheme (gray/blue)
-        return "https://ui-avatars.com/api/?name={$name}&background=f3f4f6&color=374151&size=256&bold=true&font-size=0.4&uppercase=true";
+        // Using a professional indigo color scheme
+        return "https://ui-avatars.com/api/?name={$name}&background=4F46E5&color=ffffff&rounded=true&bold=true&font-size=0.33";
     }
 }

@@ -41,4 +41,16 @@ class Admin extends Authenticatable
     {
         return $this->role && $this->role->slug === $roleSlug;
     }
+
+    public function getProfilePhotoUrlAttribute()
+    {
+        if ($this->avatar) {
+            return \Illuminate\Support\Str::startsWith($this->avatar, ['http', 'https']) 
+                ? $this->avatar 
+                : asset('storage/' . $this->avatar);
+        }
+
+        $name = urlencode($this->name ?? 'Admin');
+        return "https://ui-avatars.com/api/?name={$name}&background=4F46E5&color=ffffff&rounded=true&bold=true&font-size=0.33";
+    }
 }

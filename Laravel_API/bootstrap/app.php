@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->redirectGuestsTo(function (\Illuminate\Http\Request $request) {
+            if ($request->is('customer') || $request->is('customer/*')) {
+                return route('customer.login');
+            }
             if ($request->is('freelancer') || $request->is('freelancer/*')) {
                 return route('provider.freelancer.login');
             }

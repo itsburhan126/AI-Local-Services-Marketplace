@@ -29,6 +29,45 @@
         // Gallery
         thumbnailPreview: null,
         galleryPreviews: [],
+        
+        validateStep(currentStep) {
+            const container = document.querySelector(`div[x-show="step === ${currentStep}"]`);
+            if (!container) return;
+            
+            const inputs = container.querySelectorAll('input, select, textarea');
+            let valid = true;
+            
+            for (const input of inputs) {
+                if (!input.checkValidity()) {
+                    // Handle hidden inputs (e.g., in mobile tabs)
+                    if (input.offsetParent === null) {
+                        const name = input.name;
+                        const match = name.match(/packages\[(\d+)\]/);
+                        if (match) {
+                            const index = parseInt(match[1]);
+                            const tiers = ['Basic', 'Standard', 'Premium'];
+                            if (tiers[index]) {
+                                this.activePackageTab = tiers[index];
+                                setTimeout(() => {
+                                    input.reportValidity();
+                                }, 100);
+                                valid = false;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    input.reportValidity();
+                    valid = false;
+                    break;
+                }
+            }
+            
+            if (valid) {
+                this.step = currentStep + 1;
+                window.scrollTo(0, 0);
+            }
+        },
 
         init() {
             this.filteredTags = this.suggestedTags;
@@ -247,7 +286,7 @@
                 </div>
             </div>
             <div class="px-8 py-4 bg-slate-50 border-t border-slate-100 flex justify-end">
-                <button type="button" @click="step = 2" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-primary-500/30">
+                <button type="button" @click="validateStep(1)" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-primary-500/30">
                     Save & Continue <i class="fas fa-arrow-right ml-2"></i>
                 </button>
             </div>
@@ -322,7 +361,7 @@
                                 <label class="block text-xs uppercase font-bold text-slate-500 mb-1.5">Price ($)</label>
                                 <div class="relative">
                                     <span class="absolute left-3 top-2.5 text-slate-400">$</span>
-                                    <input type="number" name="packages[{{ $index }}][price]" placeholder="0" min="5" class="block w-full pl-8 pr-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 text-sm font-bold text-slate-800 bg-white">
+                                    <input type="number" name="packages[{{ $index }}][price]" required placeholder="0" min="5" class="block w-full pl-8 pr-3 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 text-sm font-bold text-slate-800 bg-white">
                                 </div>
                             </div>
                             <div>
@@ -382,7 +421,7 @@
             </div>
             <div class="px-8 py-4 bg-slate-50 border-t border-slate-100 flex justify-between">
                 <button type="button" @click="step = 1" class="text-slate-500 font-medium hover:text-slate-700 px-4 py-2">Back</button>
-                <button type="button" @click="step = 3" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-primary-500/30">
+                <button type="button" @click="validateStep(2)" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-primary-500/30">
                     Save & Continue <i class="fas fa-arrow-right ml-2"></i>
                 </button>
             </div>
@@ -422,7 +461,7 @@
             </div>
             <div class="px-8 py-4 bg-slate-50 border-t border-slate-100 flex justify-between">
                 <button type="button" @click="step = 2" class="text-slate-500 font-medium hover:text-slate-700 px-4 py-2">Back</button>
-                <button type="button" @click="step = 4" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-primary-500/30">
+                <button type="button" @click="validateStep(3)" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-primary-500/30">
                     Save & Continue <i class="fas fa-arrow-right ml-2"></i>
                 </button>
             </div>
@@ -517,6 +556,4 @@
     </form>
 </div>
 
-<!-- Alpine.js for Step Handling -->
-<script src="//unpkg.com/alpinejs" defer></script>
 @endsection

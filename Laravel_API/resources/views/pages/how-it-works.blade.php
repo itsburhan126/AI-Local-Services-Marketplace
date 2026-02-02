@@ -79,7 +79,7 @@
                 <div class="order-1 md:order-2">
                     <div class="relative">
                         <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl transform rotate-3 opacity-10"></div>
-                        <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1471&q=80" alt="Freelancers working" class="relative rounded-3xl shadow-2xl">
+                        <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1471&q=80" alt="Freelancers working" class="relative rounded-3xl shadow-2xl" onerror="this.onerror=null;this.src='https://placehold.co/600x400?text=Freelancers+Working';">
                     </div>
                 </div>
             </div>

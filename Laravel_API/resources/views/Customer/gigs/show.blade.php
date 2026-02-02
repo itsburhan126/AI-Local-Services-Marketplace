@@ -37,24 +37,7 @@
                     <h1 class="text-3xl md:text-4xl font-bold text-gray-900 leading-tight font-display">{{ $gig->title }}</h1>
                     
                     <div class="flex items-center gap-4">
-                        @php
-                            $providerName = $gig->provider ? $gig->provider->name : 'Provider';
-                            $providerImage = 'https://ui-avatars.com/api/?name=' . urlencode($providerName) . '&background=random';
-                            
-                            if ($gig->provider && !empty($gig->provider->image)) {
-                                $pPath = $gig->provider->image;
-                                if (filter_var($pPath, FILTER_VALIDATE_URL)) {
-                                    $pParsed = parse_url($pPath, PHP_URL_PATH);
-                                    $pRelative = preg_replace('/^\/?storage\//', '', ltrim($pParsed, '/'));
-                                    if (\Illuminate\Support\Facades\Storage::disk('public')->exists($pRelative)) {
-                                        $providerImage = $pPath;
-                                    }
-                                } elseif (\Illuminate\Support\Facades\Storage::disk('public')->exists($pPath)) {
-                                    $providerImage = asset('storage/' . $pPath);
-                                }
-                            }
-                        @endphp
-                        <img src="{{ $providerImage }}" 
+                        <img src="{{ $gig->provider ? $gig->provider->profile_photo_url : 'https://ui-avatars.com/api/?name=Provider&background=4F46E5&color=ffffff' }}" 
                              alt="Seller" 
                              class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm ring-2 ring-gray-100">
                         <div>

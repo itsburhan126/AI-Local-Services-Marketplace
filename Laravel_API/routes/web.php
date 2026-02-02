@@ -25,11 +25,25 @@ Route::get('/', function () {
 
 // Public Static Pages
 Route::get('/how-it-works', [\App\Http\Controllers\PageController::class, 'howItWorks'])->name('how-it-works');
-Route::get('/success-stories', function () {
-    $stories = \App\Models\SuccessStory::where('is_active', true)->latest()->get();
+Route::get('/success-stories', function (\Illuminate\Http\Request $request) {
+    $stories = \App\Models\SuccessStory::where('is_active', true)->latest()->paginate(6);
+    
+    if ($request->ajax()) {
+        return view('pages.partials.success-stories-list', compact('stories'))->render();
+    }
+    
     return view('pages.success-stories', compact('stories'));
 })->name('success-stories');
-Route::view('/trust-and-safety', 'pages.trust-and-safety')->name('trust-and-safety');
+
+Route::get('/success-stories/{id}', function ($id) {
+    $story = \App\Models\SuccessStory::where('is_active', true)->findOrFail($id);
+    return view('pages.success-story-show', compact('story'));
+})->name('success-stories.show');
+
+Route::get('/trust-and-safety', function () {
+    $items = \App\Models\TrustSafetyItem::where('is_active', true)->orderBy('order')->get();
+    return view('pages.trust-and-safety', compact('items'));
+})->name('trust-and-safety');
 Route::get('/quality-guide', function () {
     $guidelines = \App\Models\QualityGuideline::where('is_active', true)->orderBy('sort_order')->get();
     return view('pages.quality-guide', compact('guidelines'));
@@ -39,6 +53,38 @@ Route::get('/guides/{slug}', [\App\Http\Controllers\GuideController::class, 'sho
 
 // Dynamic Pages
 Route::get('/page/{slug}', [\App\Http\Controllers\PageController::class, 'show'])->name('page.show');
+
+// Support Routes
+Route::get('/support', [\App\Http\Controllers\SupportController::class, 'index'])->name('support.index');
+Route::post('/support', [\App\Http\Controllers\SupportController::class, 'store'])->name('support.store');
+
+// Community Hub Routes
+Route::prefix('community')->name('community.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\CommunityController::class, 'index'])->name('index');
+    
+    // Forum
+    Route::prefix('forum')->name('forum.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\ForumController::class, 'index'])->name('index');
+        Route::get('/category/{slug}', [\App\Http\Controllers\ForumController::class, 'category'])->name('category');
+        Route::get('/topic/{slug}', [\App\Http\Controllers\ForumController::class, 'show'])->name('show');
+        
+        Route::middleware('auth:web')->group(function () {
+            Route::get('/create', [\App\Http\Controllers\ForumController::class, 'create'])->name('create');
+            Route::post('/store', [\App\Http\Controllers\ForumController::class, 'store'])->name('store');
+            Route::post('/topic/{slug}/reply', [\App\Http\Controllers\ForumController::class, 'reply'])->name('reply');
+        });
+    });
+
+    // Events
+    Route::prefix('events')->name('events.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\EventController::class, 'index'])->name('index');
+        Route::get('/{slug}', [\App\Http\Controllers\EventController::class, 'show'])->name('show');
+        
+        Route::middleware('auth:web')->group(function () {
+            Route::post('/{slug}/attend', [\App\Http\Controllers\EventController::class, 'attend'])->name('attend');
+        });
+    });
+});
 
 Route::prefix('customer')->name('customer.')->group(function () {
     Route::get('/', function () {
@@ -68,6 +114,21 @@ Route::prefix('customer')->name('customer.')->group(function () {
         
         Route::get('/dashboard', [\App\Http\Controllers\Customer\DashboardController::class, 'index'])->name('dashboard');
         
+        Route::get('/interests', [\App\Http\Controllers\Customer\DashboardController::class, 'allInterests'])->name('interests.index');
+        Route::post('/interests/toggle', [\App\Http\Controllers\Customer\DashboardController::class, 'toggleInterest'])->name('interests.toggle');
+
+        // Profile & Settings
+        Route::get('/profile', [\App\Http\Controllers\Customer\ProfileController::class, 'index'])->name('profile');
+        Route::put('/profile', [\App\Http\Controllers\Customer\ProfileController::class, 'update'])->name('profile.update');
+        
+        // Verification / KYC
+        Route::get('/verification', [\App\Http\Controllers\Customer\VerificationController::class, 'index'])->name('verification.index');
+        Route::post('/verification', [\App\Http\Controllers\Customer\VerificationController::class, 'store'])->name('verification.store');
+        
+        Route::get('/settings', [\App\Http\Controllers\Customer\SettingsController::class, 'index'])->name('settings');
+        Route::put('/settings', [\App\Http\Controllers\Customer\SettingsController::class, 'update'])->name('settings.update');
+        Route::delete('/settings', [\App\Http\Controllers\Customer\SettingsController::class, 'destroy'])->name('settings.destroy');
+
         Route::get('/gigs/{slug}/checkout', [\App\Http\Controllers\Customer\GigController::class, 'checkout'])->name('gigs.checkout');
         Route::post('/gigs/order', [\App\Http\Controllers\Customer\GigController::class, 'storeOrder'])->name('gigs.order.store');
         
@@ -110,7 +171,17 @@ Route::prefix('freelancer')->name('provider.freelancer.')->group(function () {
     Route::get('/earnings', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'earnings'])->middleware('auth:web')->name('earnings');
     Route::get('/profile', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'profile'])->middleware('auth:web')->name('profile');
     Route::put('/profile/update', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'updateProfile'])->middleware('auth:web')->name('profile.update');
+    
+    // Settings & KYC
+    Route::get('/settings', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'settings'])->middleware('auth:web')->name('settings');
+    Route::put('/settings/update', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'updateSettings'])->middleware('auth:web')->name('settings.update');
+    Route::post('/kyc/submit', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'submitKyc'])->middleware('auth:web')->name('kyc.submit');
+
     Route::get('/marketing', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'marketing'])->middleware('auth:web')->name('marketing');
+
+    // Verification / KYC
+    Route::get('/verification', [\App\Http\Controllers\Provider\Freelancer\VerificationController::class, 'index'])->middleware('auth:web')->name('verification.index');
+    Route::post('/verification', [\App\Http\Controllers\Provider\Freelancer\VerificationController::class, 'store'])->middleware('auth:web')->name('verification.store');
 
     Route::middleware('auth:web')->group(function () {
         // Gig Routes
@@ -213,8 +284,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('service-types', \App\Http\Controllers\Admin\ServiceTypeController::class);
         Route::resource('services', \App\Http\Controllers\Admin\ServiceController::class);
         
+        // Community Management
+        Route::prefix('community')->name('community.')->group(function () {
+            Route::resource('categories', \App\Http\Controllers\Admin\Community\CategoryController::class);
+            Route::resource('forum', \App\Http\Controllers\Admin\Community\ForumController::class);
+            Route::resource('events', \App\Http\Controllers\Admin\Community\EventController::class);
+        });
+
         // Freelancer Management
         Route::get('freelancers/tags', [\App\Http\Controllers\Admin\Freelancer\FreelancerController::class, 'tags'])->name('freelancers.tags');
+        
+        // KYC Management
+        Route::get('kyc-requests', [\App\Http\Controllers\Admin\KycController::class, 'index'])->name('kyc.index');
+        Route::get('kyc-requests/verified', [\App\Http\Controllers\Admin\KycController::class, 'verified'])->name('kyc.verified');
+        Route::get('kyc-requests/{id}', [\App\Http\Controllers\Admin\KycController::class, 'show'])->name('kyc.show');
+        Route::post('kyc-requests/{id}/approve', [\App\Http\Controllers\Admin\KycController::class, 'approve'])->name('kyc.approve');
+        Route::post('kyc-requests/{id}/reject', [\App\Http\Controllers\Admin\KycController::class, 'reject'])->name('kyc.reject');
+
         Route::post('freelancers/tags', [\App\Http\Controllers\Admin\Freelancer\FreelancerController::class, 'storeTag'])->name('freelancers.tags.store');
         Route::put('freelancers/tags/{id}', [\App\Http\Controllers\Admin\Freelancer\FreelancerController::class, 'updateTag'])->name('freelancers.tags.update');
         Route::delete('freelancers/tags/{id}', [\App\Http\Controllers\Admin\Freelancer\FreelancerController::class, 'destroyTag'])->name('freelancers.tags.destroy');
@@ -259,6 +345,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
         Route::post('settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
 
+        // Static Pages Management
+        Route::get('pages', [\App\Http\Controllers\Admin\PageController::class, 'index'])->name('pages.index');
+        Route::get('pages/{id}/edit', [\App\Http\Controllers\Admin\PageController::class, 'edit'])->name('pages.edit');
+        Route::put('pages/{id}', [\App\Http\Controllers\Admin\PageController::class, 'update'])->name('pages.update');
+
         // Zones
         Route::resource('zones', \App\Http\Controllers\Admin\ZoneController::class);
 
@@ -297,6 +388,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Guides Management
         Route::resource('guides', \App\Http\Controllers\Admin\GuideController::class);
         Route::resource('success-stories', \App\Http\Controllers\Admin\SuccessStoryController::class);
+        
+        // Testimonials
+    Route::post('testimonials/reorder', [\App\Http\Controllers\Admin\TestimonialController::class, 'reorder'])->name('testimonials.reorder');
+    Route::resource('testimonials', \App\Http\Controllers\Admin\TestimonialController::class);
+
+        // Trust & Safety
+        Route::resource('trust-safety', \App\Http\Controllers\Admin\TrustSafetyController::class);
         Route::resource('quality-guidelines', \App\Http\Controllers\Admin\QualityGuidelineController::class);
 
         // How It Works Steps

@@ -238,10 +238,9 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Service Provider</h3>
                     <div class="flex items-center gap-4 mb-6">
-                        <img src="{{ $order->provider->profile_photo_url ? asset('storage/' . $order->provider->profile_photo_url) : 'https://ui-avatars.com/api/?name='.urlencode($order->provider->name).'&background=10b981&color=fff' }}" 
+                        <img src="{{ $order->provider->profile_photo_url }}" 
                              alt="{{ $order->provider->name }}" 
-                             class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm"
-                             onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($order->provider->name) }}&background=10b981&color=fff'">
+                             class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm">
                         <div>
                             <h4 class="font-bold text-gray-900 text-lg">{{ $order->provider->name }}</h4>
                             <div class="flex items-center text-sm text-gray-500">
@@ -301,9 +300,9 @@
                 <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-6 text-white shadow-xl">
                     <h4 class="font-bold text-lg mb-2">Need Help?</h4>
                     <p class="text-indigo-100 text-sm mb-4 leading-relaxed">If you have any issues with this order, please contact our support team immediately.</p>
-                    <button onclick="showComingSoonToast()" class="w-full py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-sm font-bold transition-colors">
+                    <a href="{{ route('support.index') }}" class="block w-full py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-sm font-bold transition-colors text-center">
                         Contact Support
-                    </button>
+                    </a>
                 </div>
 
             </div>

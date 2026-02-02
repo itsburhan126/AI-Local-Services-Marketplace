@@ -10,47 +10,20 @@
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
     
     <!-- Styles -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Instrument Sans', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            200: '#bfdbfe',
-                            300: '#93c5fd',
-                            400: '#60a5fa',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            800: '#1e40af',
-                            900: '#1e3a8a',
-                        }
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.5s ease-out',
-                        'slide-up': 'slideUp 0.5s ease-out',
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0' },
-                            '100%': { opacity: '1' },
-                        },
-                        slideUp: {
-                            '0%': { transform: 'translateY(10px)', opacity: '0' },
-                            '100%': { transform: 'translateY(0)', opacity: '1' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
+        :root {
+            --color-brand-50: #eff6ff;
+            --color-brand-100: #dbeafe;
+            --color-brand-200: #bfdbfe;
+            --color-brand-300: #93c5fd;
+            --color-brand-400: #60a5fa;
+            --color-brand-500: #3b82f6;
+            --color-brand-600: #2563eb;
+            --color-brand-700: #1d4ed8;
+            --color-brand-800: #1e40af;
+            --color-brand-900: #1e3a8a;
+        }
         body { font-family: 'Instrument Sans', sans-serif; }
         .glass-panel {
             background: rgba(255, 255, 255, 0.95);

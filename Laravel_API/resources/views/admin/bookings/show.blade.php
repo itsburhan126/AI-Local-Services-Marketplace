@@ -175,7 +175,7 @@
             <div class="glass-panel rounded-2xl p-6">
                 <h3 class="text-sm font-bold text-gray-400 uppercase mb-4">Assigned Provider</h3>
                 <div class="flex items-center gap-4 mb-4">
-                    <img src="{{ $booking->provider->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode($booking->provider->name) }}" class="w-12 h-12 rounded-full bg-gray-100">
+                    <img src="{{ $booking->provider->profile_photo_url }}" class="w-12 h-12 rounded-full bg-gray-100 object-cover">
                     <div>
                         <h4 class="font-bold text-gray-800">{{ $booking->provider->name }}</h4>
                         <div class="flex items-center gap-1 text-xs text-yellow-500">

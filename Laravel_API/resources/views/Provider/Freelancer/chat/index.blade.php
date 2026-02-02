@@ -33,8 +33,7 @@
                             <a href="{{ route('provider.freelancer.chat.index', ['user_id' => $conversation->id]) }}" class="block p-4 hover:bg-slate-50 transition-all {{ isset($selectedConversation) && $selectedConversation->id === $conversation->id ? 'bg-primary-50 relative z-10 border-r-[3px] border-primary-500' : 'bg-white' }}">
                                 <div class="flex gap-3">
                                     <div class="relative flex-shrink-0">
-                                        <img src="{{ $conversation->avatar ? asset('storage/' . $conversation->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($conversation->name) . '&color=7F9CF5&background=EBF4FF' }}" 
-                                             onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($conversation->name) }}&color=7F9CF5&background=EBF4FF'"
+                                        <img src="{{ $conversation->profile_photo_url }}" 
                                              class="w-12 h-12 rounded-full object-cover border border-slate-200 shadow-sm">
                                         @if($conversation->is_online) 
                                             <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-sm"></span>
@@ -228,8 +227,7 @@
     <div class="hidden xl:flex w-80 border-l border-slate-200 bg-white flex-col shrink-0">
         <div class="p-8 flex flex-col items-center text-center border-b border-slate-100">
             <div class="relative mb-4">
-                <img src="{{ $selectedConversation->avatar ? asset('storage/' . $selectedConversation->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($selectedConversation->name) . '&color=7F9CF5&background=EBF4FF' }}" 
-                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($selectedConversation->name) }}&color=7F9CF5&background=EBF4FF'"
+                <img src="{{ $selectedConversation->profile_photo_url }}" 
                      class="w-24 h-24 rounded-full object-cover border-4 border-slate-50 shadow-sm">
                 <span class="absolute bottom-1 right-1 w-5 h-5 bg-green-500 border-4 border-white rounded-full"></span>
             </div>

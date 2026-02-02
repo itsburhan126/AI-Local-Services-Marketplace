@@ -10,8 +10,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Macondo&family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Styles -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
@@ -67,48 +70,20 @@
         });
     </script>
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Montserrat', 'sans-serif'],
-                        body: ['Inter', 'sans-serif'],
-                        display: ['Montserrat', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: {
-                            50: '#ecfdf5',
-                            100: '#d1fae5',
-                            500: '#10b981', 
-                            600: '#059669', 
-                            700: '#047857', 
-                            900: '#064e3b', 
-                        }
-                    },
-                    boxShadow: {
-                        'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)',
-                        'glow': '0 0 15px rgba(16, 185, 129, 0.3)',
-                        'premium': '0 10px 40px -10px rgba(0,0,0,0.08)',
-                    },
-                    animation: {
-                        'slide-in': 'slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-                        'slide-out': 'slideOut 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-                    },
-                    keyframes: {
-                        slideIn: {
-                            '0%': { transform: 'translateX(100%)', opacity: '0' },
-                            '100%': { transform: 'translateX(0)', opacity: '1' },
-                        },
-                        slideOut: {
-                            '0%': { transform: 'translateX(0)', opacity: '1' },
-                            '100%': { transform: 'translateX(100%)', opacity: '0' },
-                        }
-                    }
-                }
-            }
+    <style>
+        :root {
+            --font-sans: 'Montserrat', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-display: 'Montserrat', sans-serif;
+            
+            --color-primary-50: #ecfdf5;
+            --color-primary-100: #d1fae5;
+            --color-primary-500: #10b981;
+            --color-primary-600: #059669;
+            --color-primary-700: #047857;
+            --color-primary-900: #064e3b;
         }
-    </script>
+    </style>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         [x-cloak] { display: none !important; }

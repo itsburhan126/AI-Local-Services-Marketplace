@@ -197,6 +197,63 @@
                 </div>
             </div>
         </a>
+        <a href="{{ route('admin.testimonials.index') }}" class="group bg-white p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-md transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-quote-right"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-700 text-sm group-hover:text-indigo-600 transition-colors">Testimonials</h4>
+                    <p class="text-xs text-slate-400">Customer reviews</p>
+                </div>
+            </div>
+        </a>
+        <a href="{{ route('admin.trust-safety.index') }}" class="group bg-white p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-md transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-700 text-sm group-hover:text-indigo-600 transition-colors">Trust & Safety</h4>
+                    <p class="text-xs text-slate-400">Safety items</p>
+                </div>
+            </div>
+        </a>
+        
+        <!-- Community Controls -->
+        <a href="{{ route('admin.community.categories.index') }}" class="group bg-white p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-md transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-700 text-sm group-hover:text-indigo-600 transition-colors">Community</h4>
+                    <p class="text-xs text-slate-400">Manage structure</p>
+                </div>
+            </div>
+        </a>
+        <a href="{{ route('admin.community.forum.index') }}" class="group bg-white p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-md transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-700 text-sm group-hover:text-indigo-600 transition-colors">Forum</h4>
+                    <p class="text-xs text-slate-400">Manage discussions</p>
+                </div>
+            </div>
+        </a>
+        <a href="{{ route('admin.community.events.index') }}" class="group bg-white p-4 rounded-xl border border-slate-200 hover:border-indigo-500 hover:shadow-md transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-pink-50 text-pink-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-700 text-sm group-hover:text-indigo-600 transition-colors">Events</h4>
+                    <p class="text-xs text-slate-400">Manage events</p>
+                </div>
+            </div>
+        </a>
     </div>
 
     <!-- Tabs -->
@@ -237,8 +294,7 @@
                     <div class="space-y-4">
                         @foreach($freelancers->take(5) as $freelancer)
                         <div class="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                             <img src="{{ !empty($freelancer->avatar) ? $freelancer->avatar : 'https://ui-avatars.com/api/?name='.urlencode($freelancer->name).'&color=7F9CF5&background=EBF4FF' }}" 
-                                  onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($freelancer->name) }}&color=7F9CF5&background=EBF4FF';"
+                             <img src="{{ $freelancer->profile_photo_url }}" 
                                   class="w-10 h-10 rounded-full object-cover shadow-sm">
                              <div>
                                  <h4 class="font-bold text-slate-800 text-sm">{{ $freelancer->name }}</h4>
@@ -288,8 +344,7 @@
                             <tr class="hover:bg-slate-50/50 transition-colors">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
-                                        <img src="{{ !empty($freelancer->avatar) ? $freelancer->avatar : 'https://ui-avatars.com/api/?name='.urlencode($freelancer->name).'&color=7F9CF5&background=EBF4FF' }}" 
-                                             onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($freelancer->name) }}&color=7F9CF5&background=EBF4FF';"
+                                        <img src="{{ $freelancer->profile_photo_url }}" 
                                              class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm">
                                         <div>
                                             <p class="font-bold text-slate-800 text-sm">{{ $freelancer->name }}</p>
@@ -301,6 +356,17 @@
                                     <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $freelancer->status === 'active' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600' }}">
                                         {{ ucfirst($freelancer->status) }}
                                     </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    @if($freelancer->kyc_status === 'verified')
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-600">Verified</span>
+                                    @elseif($freelancer->kyc_status === 'pending')
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-600">Pending</span>
+                                    @elseif($freelancer->kyc_status === 'rejected')
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-600">Rejected</span>
+                                    @else
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-500">None</span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 text-sm text-slate-500">
                                     {{ $freelancer->created_at->format('M d, Y') }}

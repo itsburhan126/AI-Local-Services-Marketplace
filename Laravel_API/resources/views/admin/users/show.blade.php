@@ -23,7 +23,7 @@
                 
                 <div class="relative">
                     <div class="w-24 h-24 mx-auto rounded-full p-1 bg-white shadow-xl mb-4">
-                        <img src="{{ $user->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=6366f1&color=fff' }}" class="w-full h-full rounded-full object-cover">
+                        <img src="{{ $user->profile_photo_url }}" class="w-full h-full rounded-full object-cover">
                     </div>
                     <h2 class="text-xl font-bold text-gray-800">{{ $user->name }}</h2>
                     <p class="text-indigo-500 font-medium text-sm mb-6">Member since {{ $user->created_at->format('M Y') }}</p>

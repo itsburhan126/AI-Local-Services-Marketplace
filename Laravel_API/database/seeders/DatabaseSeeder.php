@@ -21,8 +21,14 @@ class DatabaseSeeder extends Seeder
             InterestSeeder::class,
             ServiceRuleSeeder::class,
             
-            // Demo/Mock Data (Optional - can be commented out for production)
-            // DemoDataSeeder::class,
+            // Content
+            CommunityPagesSeeder::class,
+            ContentPageDataSeeder::class,
+            CategoryFullDataSeeder::class,
+            DashboardBannerSeeder::class,
+
+            // Demo/Mock Data
+            FreshRealDataSeeder::class,
         ]);
     }
 }

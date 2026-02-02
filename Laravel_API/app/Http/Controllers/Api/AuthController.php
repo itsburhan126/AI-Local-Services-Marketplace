@@ -41,7 +41,7 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
                 'role' => $request->role ?? 'user',
                 'service_rule' => $request->service_rule ?? null,
-                'avatar' => 'default.png',
+                'avatar' => 'https://ui-avatars.com/api/?name=' . urlencode($request->name) . '&background=4F46E5&color=ffffff&rounded=true&bold=true&font-size=0.33',
             ]);
 
             if (($request->role ?? 'user') === 'provider') {

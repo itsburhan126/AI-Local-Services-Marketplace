@@ -58,9 +58,9 @@
                     <div class="relative" x-data="{ open: false }">
                         <button @click="open = !open" type="button" class="flex items-center gap-2 focus:outline-none group">
                             <div class="relative">
-                                <div class="h-10 w-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-700 font-bold text-sm border border-gray-200 shadow-sm group-hover:shadow-md transition-all">
-                                    {{ substr(Auth::guard('web')->user()->name, 0, 1) }}
-                                </div>
+                                <img src="{{ Auth::guard('web')->user()->profile_photo_url }}" 
+                                     alt="{{ Auth::guard('web')->user()->name }}"
+                                     class="h-10 w-10 rounded-full border border-gray-200 shadow-sm group-hover:shadow-md transition-all object-cover">
                                 <div class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></div>
                             </div>
                         </button>
@@ -73,8 +73,8 @@
                             </div>
                             <div class="py-1">
                                 <a href="{{ route('customer.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Dashboard</a>
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Profile</a>
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Settings</a>
+                                <a href="{{ route('customer.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Profile</a>
+                                <a href="{{ route('customer.settings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Settings</a>
                             </div>
                             <div class="border-t border-gray-50 py-1">
                                 <form method="POST" action="{{ route('customer.logout') }}">
@@ -161,9 +161,7 @@
                 <div class="border-t border-gray-100 p-6">
                     @auth
                     <div class="flex items-center gap-3">
-                        <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">
-                            {{ substr(Auth::user()->name, 0, 1) }}
-                        </div>
+                        <img src="{{ Auth::user()->profile_photo_url }}" class="h-10 w-10 rounded-full object-cover border border-gray-200" alt="{{ Auth::user()->name }}">
                         <div>
                             <p class="text-sm font-bold text-gray-900">{{ Auth::user()->name }}</p>
                             <form method="POST" action="{{ route('customer.logout') }}">

@@ -25,6 +25,15 @@ class PageController extends Controller
 
     public function show($slug)
     {
+        if ($slug === 'forum') {
+            return redirect()->route('community.forum.index');
+        }
+        if ($slug === 'events') {
+            return redirect()->route('community.events.index');
+        }
+        if ($slug === 'community-hub') {
+            return redirect()->route('community.index');
+        }
         $page = Page::where('slug', $slug)->where('is_active', true)->firstOrFail();
 
         return view('page', compact('page'));

@@ -43,7 +43,7 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
                 'role' => 'provider',
                 'service_rule' => $serviceRule,
-                'avatar' => 'default.png',
+                'avatar' => 'https://ui-avatars.com/api/?name=' . urlencode($request->name) . '&background=4F46E5&color=ffffff&rounded=true&bold=true&font-size=0.33',
                 'status' => 'active',
             ]);
 

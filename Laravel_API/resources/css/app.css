@@ -6,6 +6,61 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    /* Fonts */
+    --font-sans: var(--font-sans, 'Instrument Sans', ui-sans-serif, system-ui, sans-serif);
+    --font-body: var(--font-body, 'Instrument Sans', ui-sans-serif, system-ui, sans-serif);
+    --font-display: var(--font-display, 'Instrument Sans', ui-sans-serif, system-ui, sans-serif);
+
+    /* Colors */
+    --color-primary-50: var(--color-primary-50, #f0f9ff);
+    --color-primary-100: var(--color-primary-100, #e0f2fe);
+    --color-primary-200: var(--color-primary-200, #bae6fd);
+    --color-primary-300: var(--color-primary-300, #7dd3fc);
+    --color-primary-400: var(--color-primary-400, #38bdf8);
+    --color-primary-500: var(--color-primary-500, #0ea5e9);
+    --color-primary-600: var(--color-primary-600, #0284c7);
+    --color-primary-700: var(--color-primary-700, #0369a1);
+    --color-primary-800: var(--color-primary-800, #075985);
+    --color-primary-900: var(--color-primary-900, #0c4a6e);
+
+    /* Brand Colors */
+    --color-brand-50: var(--color-brand-50, var(--color-primary-50));
+    --color-brand-100: var(--color-brand-100, var(--color-primary-100));
+    --color-brand-200: var(--color-brand-200, var(--color-primary-200));
+    --color-brand-300: var(--color-brand-300, var(--color-primary-300));
+    --color-brand-400: var(--color-brand-400, var(--color-primary-400));
+    --color-brand-500: var(--color-brand-500, var(--color-primary-500));
+    --color-brand-600: var(--color-brand-600, var(--color-primary-600));
+    --color-brand-700: var(--color-brand-700, var(--color-primary-700));
+    --color-brand-800: var(--color-brand-800, var(--color-primary-800));
+    --color-brand-900: var(--color-brand-900, var(--color-primary-900));
+
+    /* Shadows */
+    --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    --shadow-premium: 0 10px 40px -10px rgba(0,0,0,0.08);
+    --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+    --shadow-glow: 0 0 15px rgba(16, 185, 129, 0.3);
+
+    /* Animations */
+    --animate-slide-in: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    --animate-slide-out: slideOut 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    --animate-fade-in: fadeIn 0.5s ease-out;
+    --animate-slide-up: slideUp 0.5s ease-out;
+
+    @keyframes slideIn {
+        0% { transform: translateX(100%); opacity: 0; }
+        100% { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        0% { transform: translateX(0); opacity: 1; }
+        100% { transform: translateX(100%); opacity: 0; }
+    }
+    @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+    @keyframes slideUp {
+        0% { transform: translateY(10px); opacity: 0; }
+        100% { transform: translateY(0); opacity: 1; }
+    }
 }

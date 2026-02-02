@@ -35,14 +35,8 @@
                     <tr class="hover:bg-indigo-50/30 transition-colors duration-200">
                         <td class="px-4 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shadow-sm">
-                                    @if($provider->avatar)
-                                        <img src="{{ $provider->avatar }}" class="w-full h-full object-cover">
-                                    @else
-                                        <div class="w-full h-full flex items-center justify-center bg-indigo-100 text-indigo-500 font-bold">
-                                            {{ substr($provider->name, 0, 1) }}
-                                        </div>
-                                    @endif
+                                <div class="h-10 w-10 flex-shrink-0">
+                                    <img src="{{ $provider->profile_photo_url }}" class="w-full h-full object-cover rounded-full">
                                 </div>
                                 <div>
                                     <p class="font-semibold text-gray-800">{{ $provider->name }}</p>

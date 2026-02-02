@@ -57,7 +57,7 @@
                 <div class="relative ml-2" x-data="{ open: false }">
                     <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 focus:outline-none">
                         <div class="h-8 w-8 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::guard('web')->user()->name ?? 'User') }}&background=0D8ABC&color=fff" alt="Profile" class="h-full w-full object-cover">
+                            <img src="{{ Auth::guard('web')->user()->profile_photo_url }}" alt="Profile" class="h-full w-full object-cover">
                         </div>
                         <span class="hidden md:block h-2.5 w-2.5 bg-green-500 rounded-full border-2 border-white absolute bottom-0 right-0"></span>
                     </button>
@@ -77,8 +77,8 @@
                             <p class="text-sm font-bold text-slate-900 truncate">{{ Auth::guard('web')->user()->name ?? 'User' }}</p>
                         </div>
                         
-                        <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Profile</a>
-                        <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Settings</a>
+                        <a href="{{ route('provider.freelancer.profile') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Profile</a>
+                        <a href="{{ route('provider.freelancer.settings') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Settings</a>
                         <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Billing</a>
                         <div class="border-t border-slate-100 my-1"></div>
                         <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">English <span class="float-right text-slate-400">🌐</span></a>
@@ -170,6 +170,11 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Verification -->
+                <a href="{{ route('provider.freelancer.verification.index') }}" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm {{ request()->routeIs('provider.freelancer.verification.index') ? 'border-primary-500 text-primary-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' }}">
+                    Verification
+                </a>
 
             </nav>
         </div>

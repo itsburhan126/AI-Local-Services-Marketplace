@@ -229,7 +229,7 @@
             <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                 <h3 class="font-bold text-slate-900 mb-4">About the Buyer</h3>
                 <div class="flex items-center gap-4 mb-6">
-                    <img src="{{ $order->user->avatar ? asset('storage/' . $order->user->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($order->user->name) . '&color=7F9CF5&background=EBF4FF' }}" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($order->user->name) }}&color=7F9CF5&background=EBF4FF'" class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm">
+                    <img src="{{ $order->user->profile_photo_url }}" class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm">
                     <div>
                         <h4 class="font-bold text-slate-900">{{ $order->user->name }}</h4>
                         <p class="text-xs text-slate-500">{{ $order->user->country ?? 'Global Member' }}</p>

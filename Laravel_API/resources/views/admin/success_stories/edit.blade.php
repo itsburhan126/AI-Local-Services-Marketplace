@@ -55,7 +55,7 @@
                     <label class="block text-sm font-bold text-slate-700 mb-2">Avatar Image</label>
                     @if($successStory->avatar_path)
                         <div class="mb-2">
-                            <img src="{{ asset('storage/' . $successStory->avatar_path) }}" class="w-16 h-16 rounded-full object-cover">
+                            <img src="{{ asset('storage/' . $successStory->avatar_path) }}" class="w-16 h-16 rounded-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/100x100?text=User';">
                         </div>
                     @endif
                     <input type="file" name="avatar" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
@@ -64,7 +64,7 @@
                     <label class="block text-sm font-bold text-slate-700 mb-2">Hero Image</label>
                     @if($successStory->image_path)
                         <div class="mb-2">
-                            <img src="{{ asset('storage/' . $successStory->image_path) }}" class="w-24 h-16 object-cover rounded-lg">
+                            <img src="{{ asset('storage/' . $successStory->image_path) }}" class="w-24 h-16 object-cover rounded-lg" onerror="this.onerror=null;this.src='https://placehold.co/600x400?text=No+Image';">
                         </div>
                     @endif
                     <input type="file" name="image" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">

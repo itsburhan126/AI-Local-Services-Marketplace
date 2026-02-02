@@ -21,7 +21,6 @@
 
                         <div class="relative w-36 h-36 mx-auto mb-6">
                             <img src="{{ $user->profile_photo_url }}" 
-                                 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=f3f4f6&color=374151&size=256&bold=true&font-size=0.4&uppercase=true';"
                                  alt="{{ $user->name }}" 
                                  class="w-full h-full rounded-full object-cover border-[6px] border-white shadow-xl group-hover:scale-105 transition-transform duration-300">
                             
@@ -189,8 +188,7 @@
                                 <div class="bg-white rounded-2xl p-8 border border-gray-100 shadow-soft hover:shadow-md transition-all duration-300">
                                     <div class="flex gap-5">
                                         <div class="flex-shrink-0">
-                                            <img src="{{ $review->user ? $review->user->profile_photo_url : 'https://ui-avatars.com/api/?name=User&background=random' }}" 
-                                                 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($review->user->name ?? 'User') }}&background=random';"
+                                            <img src="{{ $review->user ? $review->user->profile_photo_url : 'https://ui-avatars.com/api/?name=User&background=4F46E5&color=ffffff' }}" 
                                                  class="w-14 h-14 rounded-full border-2 border-white shadow-md object-cover" alt="">
                                         </div>
                                         <div class="flex-1">

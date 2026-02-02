@@ -21,8 +21,8 @@
             @foreach($users as $user)
             <button onclick="loadChat({{ $user->id }})" class="w-full flex items-center p-4 rounded-xl hover:bg-indigo-50 transition-all group user-item relative" data-id="{{ $user->id }}">
                 <div class="relative">
-                    <img src="{{ $user->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=random' }}" 
-                        class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm">
+                    <img src="{{ $user->profile_photo_url }}" 
+                         class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm">
                     <!-- Online Status Indicator (Optional: Can be real-time via Pusher later) -->
                     <!-- <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span> -->
                 </div>
@@ -290,7 +290,7 @@
                 document.getElementById('chat-header-name').textContent = data.user.name;
                 document.getElementById('chat-header-role').textContent = data.user.role; // Assuming role exists
                 const avatar = document.getElementById('chat-header-avatar');
-                avatar.src = data.user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.user.name)}&background=random`;
+                avatar.src = data.user.profile_photo_url;
                 avatar.classList.remove('hidden');
                 document.getElementById('chat-header-status').classList.remove('hidden');
 

@@ -29,7 +29,7 @@
                     <td class="p-4">
                         <div class="flex items-center gap-3">
                             @if($story->avatar_path)
-                                <img src="{{ asset('storage/' . $story->avatar_path) }}" class="w-10 h-10 rounded-full object-cover">
+                                <img src="{{ asset('storage/' . $story->avatar_path) }}" class="w-10 h-10 rounded-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/100x100?text=User';">
                             @else
                                 <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500">
                                     <i class="fas fa-user"></i>

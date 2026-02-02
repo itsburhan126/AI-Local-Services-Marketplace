@@ -38,23 +38,7 @@
         <div class="flex items-center gap-2 mb-3 relative z-20">
             <a href="{{ route('customer.seller.profile', \Illuminate\Support\Str::slug($gig->provider->name ?? 'provider')) }}" class="flex items-center gap-2 flex-1 group/seller hover:opacity-80 transition-opacity">
                 <div class="relative">
-                    @php
-                        $pName = $gig->provider->name ?? 'Provider';
-                        $pImg = 'https://ui-avatars.com/api/?name=' . urlencode($pName) . '&background=random';
-                        if ($gig->provider && !empty($gig->provider->image)) {
-                            $rawP = $gig->provider->image;
-                            if (filter_var($rawP, FILTER_VALIDATE_URL)) {
-                                $parsedP = parse_url($rawP, PHP_URL_PATH);
-                                $relP = preg_replace('/^\/?storage\//', '', ltrim($parsedP, '/'));
-                                if (\Illuminate\Support\Facades\Storage::disk('public')->exists($relP)) {
-                                    $pImg = $rawP;
-                                }
-                            } elseif (\Illuminate\Support\Facades\Storage::disk('public')->exists($rawP)) {
-                                $pImg = asset('storage/' . $rawP);
-                            }
-                        }
-                    @endphp
-                    <img src="{{ $pImg }}" 
+                    <img src="{{ $gig->provider ? $gig->provider->profile_photo_url : 'https://ui-avatars.com/api/?name=Provider&background=4F46E5&color=ffffff' }}" 
                          alt="Seller" 
                          class="w-6 h-6 rounded-full object-cover border border-gray-100">
                     @if(isset($gig->provider->is_online) && $gig->provider->is_online)

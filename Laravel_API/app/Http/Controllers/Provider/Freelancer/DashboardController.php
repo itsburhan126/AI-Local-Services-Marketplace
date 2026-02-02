@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Provider\Freelancer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Gig;
 use App\Models\GigOrder;
 use App\Models\Message;
@@ -255,5 +257,61 @@ class DashboardController extends Controller
     public function marketing()
     {
         return view('Provider.Freelancer.marketing');
+    }
+
+    public function settings()
+    {
+        $user = Auth::user();
+        return view('Provider.Freelancer.settings.index', compact('user'));
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $user = Auth::user();
+        
+        $request->validate([
+            'current_password' => 'required_with:new_password',
+            'new_password' => 'nullable|min:8|confirmed',
+        ]);
+
+        if ($request->filled('new_password')) {
+            if (!Hash::check($request->current_password, $user->password)) {
+                return back()->withErrors(['current_password' => 'Current password does not match.']);
+            }
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+        }
+
+        return back()->with('success', 'Settings updated successfully.');
+    }
+
+    public function submitKyc(Request $request)
+    {
+        $user = Auth::user();
+        
+        $request->validate([
+            'document_type' => 'required|string',
+            'document_front' => 'required|image|max:4096',
+            'document_back' => 'nullable|image|max:4096',
+        ]);
+
+        $kycData = [
+            'type' => $request->document_type,
+            'submitted_at' => now(),
+        ];
+
+        if ($request->hasFile('document_front')) {
+            $kycData['front'] = $request->file('document_front')->store('kyc-documents', 'public');
+        }
+        
+        if ($request->hasFile('document_back')) {
+            $kycData['back'] = $request->file('document_back')->store('kyc-documents', 'public');
+        }
+
+        $user->kyc_status = 'pending';
+        $user->kyc_data = $kycData;
+        $user->save();
+
+        return back()->with('success', 'KYC verification request submitted successfully.');
     }
 }

@@ -9,29 +9,19 @@
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
         
         <!-- Styles -->
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script>
-            tailwind.config = {
-                theme: {
-                    extend: {
-                        fontFamily: {
-                            sans: ['Instrument Sans', 'sans-serif'],
-                        },
-                        colors: {
-                            primary: '#4F46E5', // Indigo 600
-                            secondary: '#10B981', // Emerald 500
-                        }
-                    }
-                }
-            }
-        </script>
-        <style>
-            body {
-                font-family: 'Instrument Sans', sans-serif;
-            }
-        </style>
-    </head>
-    <body class="bg-gray-50 text-gray-900 flex items-center justify-center min-h-screen">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        :root {
+            --font-sans: 'Instrument Sans', sans-serif;
+            --color-primary-600: #4F46E5; /* Indigo 600 */
+            --color-primary-500: #10B981; /* Emerald 500 */
+        }
+        body {
+            font-family: 'Instrument Sans', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 flex items-center justify-center min-h-screen font-sans">
         <div class="max-w-5xl w-full px-6 py-12">
             
             <!-- Back Link -->

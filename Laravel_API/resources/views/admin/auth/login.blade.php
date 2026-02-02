@@ -4,35 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - {{ \App\Models\Setting::get('app_name', config('app.name')) }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            200: '#c7d2fe',
-                            300: '#a5b4fc',
-                            400: '#818cf8',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
-                            800: '#3730a3',
-                            900: '#312e81',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            /* Override primary with Indigo */
+            --color-primary-50: #eef2ff;
+            --color-primary-100: #e0e7ff;
+            --color-primary-200: #c7d2fe;
+            --color-primary-300: #a5b4fc;
+            --color-primary-400: #818cf8;
+            --color-primary-500: #6366f1;
+            --color-primary-600: #4f46e5;
+            --color-primary-700: #4338ca;
+            --color-primary-800: #3730a3;
+            --color-primary-900: #312e81;
+
+            --font-sans: 'Inter', sans-serif;
+        }
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>

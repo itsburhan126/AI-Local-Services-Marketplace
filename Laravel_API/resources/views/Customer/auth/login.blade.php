@@ -9,26 +9,17 @@
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700|plus-jakarta-sans:400,500,600,700" rel="stylesheet" />
     
     <!-- Styles -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'Instrument Sans', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: '#4F46E5', // Indigo 600
-                        secondary: '#10B981', // Emerald 500
-                        dark: '#1E293B',
-                    }
-                }
-            }
+    <style>
+        :root {
+            --font-sans: 'Plus Jakarta Sans', 'Instrument Sans', sans-serif;
+            --color-primary-600: #4F46E5; /* Indigo 600 */
+            --color-primary-500: #10B981; /* Emerald 500 (mapped to secondary in old config, checking usage) */
         }
-    </script>
+    </style>
 </head>
 <body class="bg-white">
     <div class="flex min-h-screen">

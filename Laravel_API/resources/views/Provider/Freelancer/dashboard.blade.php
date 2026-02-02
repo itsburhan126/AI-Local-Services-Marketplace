@@ -177,13 +177,9 @@
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-4">
                                         <div class="relative">
-                                            @if($order->user && $order->user->avatar)
-                                                <img src="{{ asset('storage/' . $order->user->avatar) }}" alt="{{ $order->user->name }}" class="h-10 w-10 rounded-full object-cover ring-2 ring-white shadow-sm">
-                                            @else
-                                                <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm ring-2 ring-white shadow-sm">
-                                                    {{ strtoupper(substr($order->user->name ?? 'U', 0, 2)) }}
-                                                </div>
-                                            @endif
+                                            <img src="{{ $order->user ? $order->user->profile_photo_url : 'https://ui-avatars.com/api/?name=Guest&background=4F46E5&color=ffffff' }}" 
+                                                 alt="{{ $order->user->name ?? 'Guest' }}" 
+                                                 class="h-10 w-10 rounded-full object-cover ring-2 ring-white shadow-sm">
                                             <span class="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 border-2 border-white rounded-full"></span>
                                         </div>
                                         <div>
@@ -238,13 +234,9 @@
                     <div class="p-4 hover:bg-slate-50 transition-colors cursor-pointer relative group">
                         <a href="{{ route('provider.freelancer.chat.index') }}" class="flex gap-3">
                             <div class="relative">
-                                @if($message->sender && $message->sender->avatar)
-                                    <img src="{{ asset('storage/' . $message->sender->avatar) }}" alt="{{ $message->sender->name }}" class="h-10 w-10 rounded-full object-cover">
-                                @else
-                                    <div class="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-xs">
-                                        {{ strtoupper(substr($message->sender->name ?? 'U', 0, 2)) }}
-                                    </div>
-                                @endif
+                                <img src="{{ $message->sender->profile_photo_url }}" 
+                                     alt="{{ $message->sender->name }}" 
+                                     class="h-10 w-10 rounded-full object-cover">
                                 <span class="absolute bottom-0 right-0 h-2.5 w-2.5 bg-green-500 border-2 border-white rounded-full"></span>
                             </div>
                             <div class="flex-1 min-w-0">

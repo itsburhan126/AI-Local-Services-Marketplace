@@ -18,52 +18,67 @@
     </div>
 
     <!-- Stories Grid -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16" x-data="infiniteScroll()">
         @if($stories->count() > 0)
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            @foreach($stories as $story)
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full">
-                <div class="h-48 bg-gray-200 relative overflow-hidden">
-                    @if($story->image_path)
-                        <img src="{{ asset('storage/' . $story->image_path) }}" alt="{{ $story->name }}" class="w-full h-full object-cover">
-                    @else
-                        <div class="w-full h-full bg-indigo-50 flex items-center justify-center text-indigo-200">
-                            <i class="fas fa-image text-4xl"></i>
-                        </div>
-                    @endif
-                    <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold text-gray-900 shadow-sm">
-                        {{ $story->type }}
-                    </div>
-                </div>
-                <div class="p-8 flex-1 flex flex-col">
-                    <div class="flex items-center gap-4 mb-6">
-                        @if($story->avatar_path)
-                            <img src="{{ asset('storage/' . $story->avatar_path) }}" alt="{{ $story->name }}" class="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover">
-                        @else
-                            <div class="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 border-2 border-white shadow-sm">
-                                <i class="fas fa-user"></i>
-                            </div>
-                        @endif
-                        <div>
-                            <h3 class="font-bold text-gray-900">{{ $story->name }}</h3>
-                            <p class="text-sm text-gray-500">{{ $story->role }}</p>
-                        </div>
-                    </div>
-                    <blockquote class="text-gray-600 italic mb-6 flex-1">
-                        "{{ $story->quote }}"
-                    </blockquote>
-                    <div class="border-t border-gray-100 pt-6 mt-auto">
-                        <div class="flex items-center justify-between text-sm">
-                            <span class="text-gray-500">Service: <strong>{{ $story->service_category }}</strong></span>
-                            @if($story->story_content)
-                                <a href="#" class="text-indigo-600 font-semibold hover:text-indigo-700">Read Story <i class="fas fa-arrow-right ml-1 text-xs"></i></a>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-            @endforeach
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" id="stories-grid">
+            @include('pages.partials.success-stories-list', ['stories' => $stories])
         </div>
+
+        <!-- Infinite Scroll Sentinel & Loading -->
+        <div x-ref="sentinel" class="mt-12 text-center" x-show="hasMore">
+            <div x-show="loading" class="inline-flex items-center gap-2 px-4 py-2 text-indigo-600 bg-indigo-50 rounded-full text-sm font-semibold animate-pulse">
+                <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Loading more stories...
+            </div>
+        </div>
+
+        <script>
+            function infiniteScroll() {
+                return {
+                    page: 1,
+                    hasMore: {{ $stories->hasMorePages() ? 'true' : 'false' }},
+                    loading: false,
+                    init() {
+                        const observer = new IntersectionObserver((entries) => {
+                            if (entries[0].isIntersecting && this.hasMore && !this.loading) {
+                                this.loadMore();
+                            }
+                        }, { rootMargin: '200px' });
+                        
+                        observer.observe(this.$refs.sentinel);
+                    },
+                    loadMore() {
+                        this.loading = true;
+                        this.page++;
+                        
+                        fetch(`{{ route('success-stories') }}?page=${this.page}`, {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        })
+                        .then(response => response.text())
+                        .then(html => {
+                            if (html.trim() === '') {
+                                this.hasMore = false;
+                            } else {
+                                const temp = document.createElement('div');
+                                temp.innerHTML = html;
+                                while (temp.firstElementChild) {
+                                    document.getElementById('stories-grid').appendChild(temp.firstElementChild);
+                                }
+                            }
+                        })
+                        .catch(() => {
+                            this.hasMore = false;
+                        })
+                        .finally(() => {
+                            this.loading = false;
+                        });
+                    }
+                }
+            }
+        </script>
         @else
         <div class="text-center py-20">
             <div class="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-500 mx-auto mb-4">

@@ -32,7 +32,7 @@ class AuthController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'role' => 'user', // Default role for customers
-                'avatar' => 'default.png',
+                'avatar' => 'https://ui-avatars.com/api/?name=' . urlencode($request->name) . '&background=4F46E5&color=ffffff&rounded=true&bold=true&font-size=0.33',
                 'status' => 'active',
             ]);
 

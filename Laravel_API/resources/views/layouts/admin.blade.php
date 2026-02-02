@@ -4,36 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - {{ \App\Models\Setting::get('app_name', config('app.name')) }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            200: '#c7d2fe',
-                            300: '#a5b4fc',
-                            400: '#818cf8',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
-                            800: '#3730a3',
-                            900: '#312e81',
-                        }
-                    },
-                    boxShadow: {
-                        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
-                        'premium': '0 10px 40px -10px rgba(0,0,0,0.08)',
-                    }
-                }
-            }
+    <!-- Styles -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        :root {
+            --font-sans: 'Plus Jakarta Sans', sans-serif;
+            
+            --color-primary-50: #eef2ff;
+            --color-primary-100: #e0e7ff;
+            --color-primary-200: #c7d2fe;
+            --color-primary-300: #a5b4fc;
+            --color-primary-400: #818cf8;
+            --color-primary-500: #6366f1;
+            --color-primary-600: #4f46e5;
+            --color-primary-700: #4338ca;
+            --color-primary-800: #3730a3;
+            --color-primary-900: #312e81;
         }
-    </script>
+    </style>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Chart.js -->
@@ -174,6 +164,11 @@
                     <span>Freelancers</span>
                 </a>
 
+                <a href="{{ route('admin.kyc.index') }}" class="nav-item flex items-center px-4 py-3.5 text-sm font-medium rounded-xl group {{ request()->routeIs('admin.kyc.*') ? 'nav-item-active' : 'text-slate-400' }}">
+                    <i class="fas fa-id-card w-6 text-lg {{ request()->routeIs('admin.kyc.*') ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300' }}"></i>
+                    <span>KYC Requests</span>
+                </a>
+
                 <a href="{{ route('admin.service-types.index') }}" class="nav-item flex items-center px-4 py-3.5 text-sm font-medium rounded-xl group {{ request()->routeIs('admin.service-types.*') ? 'nav-item-active' : 'text-slate-400' }}">
                     <i class="fas fa-tags w-6 text-lg {{ request()->routeIs('admin.service-types.*') ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300' }}"></i>
                     <span>Service Types</span>
@@ -217,6 +212,8 @@
                     <i class="fas fa-wallet w-6 text-lg {{ request()->routeIs('admin.payout-methods.*') ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300' }}"></i>
                     <span>Payout Methods</span>
                 </a>
+
+
 
                 <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-8 mb-4">Marketing & Tools</p>
                 
@@ -268,6 +265,13 @@
                     <span>Languages</span>
                 </a>
 
+                <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-8 mb-4">Content Management</p>
+
+                <a href="{{ route('admin.pages.index') }}" class="nav-item flex items-center px-4 py-3.5 text-sm font-medium rounded-xl group {{ request()->routeIs('admin.pages.*') ? 'nav-item-active' : 'text-slate-400' }}">
+                    <i class="fas fa-file-alt w-6 text-lg {{ request()->routeIs('admin.pages.*') ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300' }}"></i>
+                    <span>Static Pages</span>
+                </a>
+
                 <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-8 mb-4">System</p>
 
                 <a href="{{ route('admin.settings.index') }}" class="nav-item flex items-center px-4 py-3.5 text-sm font-medium rounded-xl group {{ request()->routeIs('admin.settings.*') ? 'nav-item-active' : 'text-slate-400' }}">
@@ -303,9 +307,9 @@
             <!-- User Profile (Bottom) -->
             <div class="p-6 border-t border-white/10 bg-black/20 backdrop-blur-md">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg shadow-lg border-2 border-white/10">
-                        {{ substr(Auth::guard('admin')->user()->name ?? 'A', 0, 1) }}
-                    </div>
+                    <img src="{{ Auth::guard('admin')->user()->profile_photo_url }}" 
+                         alt="{{ Auth::guard('admin')->user()->name ?? 'Admin' }}"
+                         class="w-12 h-12 rounded-full shadow-lg border-2 border-white/10 object-cover">
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-bold text-white truncate">{{ Auth::guard('admin')->user()->name ?? 'Administrator' }}</p>
                         <p class="text-[11px] text-slate-400 truncate">{{ Auth::guard('admin')->user()->email ?? '' }}</p>
