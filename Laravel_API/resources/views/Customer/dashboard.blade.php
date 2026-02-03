@@ -188,48 +188,69 @@
         @endif
 
         <!-- Single Promotional Banner (New) -->
+        @php
+            // Fallback: If controller didn't pass it, try to fetch it directly
+            if (!isset($singleBanner) || !$singleBanner) {
+                $singleBanner = \App\Models\Banner::where('type', 'promo_large')->where('status', 1)->first();
+            }
+        @endphp
+
         @if(isset($singleBanner) && $singleBanner)
-            <div class="relative w-full rounded-[2.5rem] overflow-hidden shadow-2xl my-12 group block">
+            <div class="relative w-full rounded-3xl overflow-hidden shadow-2xl my-16 group block bg-gray-900 border border-gray-800/50 min-h-[300px] md:min-h-[400px]">
                  @php
                     $img = !empty($singleBanner->image_path) ? $singleBanner->image_path : $singleBanner->image;
-                    $src = \Illuminate\Support\Str::startsWith($img, ['http://', 'https://']) ? $img : asset('storage/' . $img);
+                    
+                    // Handle full URL vs relative path
+                    if (\Illuminate\Support\Str::startsWith($img, ['http://', 'https://'])) {
+                        $src = $img;
+                    } else {
+                        // Ensure we strip any existing 'storage/' prefix to avoid duplication
+                        $cleanPath = \Illuminate\Support\Str::replaceFirst('storage/', '', $img);
+                        
+                        // Use relative path to avoid IP mismatch issues in local environment
+                        $src = '/storage/' . $cleanPath;
+                    }
                 @endphp
                 
-                <a href="{{ $singleBanner->link ?? '#' }}" class="block relative h-[300px] md:h-[400px]">
+                <a href="{{ $singleBanner->link ?? '#' }}" class="block relative h-full min-h-[300px] md:min-h-[400px]">
                     <!-- Background Image -->
-                    <div class="absolute inset-0 bg-gray-900">
+                    <div class="absolute inset-0 bg-gray-900 overflow-hidden rounded-3xl">
                         <img src="{{ $src }}" 
                              alt="{{ $singleBanner->title ?? 'Promotion' }}" 
-                             class="w-full h-full object-cover opacity-90 transform group-hover:scale-105 transition-transform duration-1000 ease-out">
+                             onerror="this.onerror=null;this.src='https://via.placeholder.com/1200x400?text=Promo+Image';"
+                             class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-in-out">
                     </div>
                     
                     <!-- Gradient Overlay -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-900/40 to-transparent"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-gray-900/95 via-gray-900/70 to-transparent opacity-90"></div>
                     
                     <!-- Content Container -->
-                    <div class="absolute inset-0 flex items-center px-8 md:px-16">
-                        <div class="max-w-2xl transform transition-all duration-700 ease-out">
+                    <div class="absolute inset-0 flex items-center px-8 md:px-16 lg:px-24">
+                        <div class="max-w-2xl transform transition-all duration-700 ease-out translate-y-0 group-hover:-translate-y-1">
                             
                             <!-- Badge/Tag -->
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-xs font-bold uppercase tracking-wider mb-6">
-                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 text-emerald-300 text-xs font-bold uppercase tracking-widest mb-6 shadow-lg shadow-emerald-900/20">
+                                <span class="relative flex h-2 w-2">
+                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                </span>
                                 Featured Offer
                             </div>
 
                             @if($singleBanner->title)
-                                <h3 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 font-display leading-tight drop-shadow-lg">
+                                <h3 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 font-display leading-tight drop-shadow-xl tracking-tight">
                                     {{ $singleBanner->title }}
                                 </h3>
                             @endif
                             
                             @if($singleBanner->subtitle)
-                                <p class="text-gray-200 text-lg md:text-xl mb-8 font-light leading-relaxed max-w-lg drop-shadow-md">
+                                <p class="text-gray-300 text-lg md:text-xl mb-10 font-light leading-relaxed max-w-lg drop-shadow-md">
                                     {{ $singleBanner->subtitle }}
                                 </p>
                             @endif
                             
                             @if($singleBanner->button_text)
-                                <span class="group/btn inline-flex items-center gap-3 bg-white text-gray-900 px-8 py-4 rounded-full font-bold text-lg hover:bg-emerald-500 hover:text-white transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.4)]">
+                                <span class="group/btn inline-flex items-center gap-3 bg-white text-gray-900 px-8 py-4 rounded-full font-bold text-lg hover:bg-emerald-500 hover:text-white transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] active:scale-95">
                                     {{ $singleBanner->button_text }}
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3" />

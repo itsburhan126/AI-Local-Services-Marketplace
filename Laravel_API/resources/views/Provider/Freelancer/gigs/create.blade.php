@@ -4,145 +4,7 @@
 
 @section('content')
 <div class="w-full mx-auto pb-12 px-4 sm:px-6 lg:px-8" 
-    x-data="{ 
-        step: 1,
-        categories: {{ $categories->toJson() }},
-        selectedCategory: '{{ old('category_id') }}',
-        subCategories: [],
-        selectedSubCategory: '{{ old('sub_category_id') }}',
-        
-        // Tags
-        tags: '{{ old('tags') }}' ? '{{ old('tags') }}'.split(',') : [],
-        tagInput: '',
-        suggestedTags: ['Logo Design', 'Web Development', 'Mobile App', 'SEO', 'Content Writing', 'Digital Marketing', 'Video Editing', 'Graphic Design', 'Data Entry', 'Virtual Assistant', 'WordPress', 'Shopify', 'React', 'Flutter', 'Laravel'],
-        filteredTags: [],
-        
-        // Packages
-        activePackageTab: 'Basic',
-        
-        // Extras
-        extras: {{ json_encode(old('extras', [])) }},
-        
-        // FAQs
-        faqs: {{ json_encode(old('faqs', [['question' => '', 'answer' => '']])) }},
-        
-        // Gallery
-        thumbnailPreview: null,
-        galleryPreviews: [],
-        
-        validateStep(currentStep) {
-            const container = document.querySelector(`div[x-show="step === ${currentStep}"]`);
-            if (!container) return;
-            
-            const inputs = container.querySelectorAll('input, select, textarea');
-            let valid = true;
-            
-            for (const input of inputs) {
-                if (!input.checkValidity()) {
-                    // Handle hidden inputs (e.g., in mobile tabs)
-                    if (input.offsetParent === null) {
-                        const name = input.name;
-                        const match = name.match(/packages\[(\d+)\]/);
-                        if (match) {
-                            const index = parseInt(match[1]);
-                            const tiers = ['Basic', 'Standard', 'Premium'];
-                            if (tiers[index]) {
-                                this.activePackageTab = tiers[index];
-                                setTimeout(() => {
-                                    input.reportValidity();
-                                }, 100);
-                                valid = false;
-                                break;
-                            }
-                        }
-                    }
-                    
-                    input.reportValidity();
-                    valid = false;
-                    break;
-                }
-            }
-            
-            if (valid) {
-                this.step = currentStep + 1;
-                window.scrollTo(0, 0);
-            }
-        },
-
-        init() {
-            this.filteredTags = this.suggestedTags;
-            if (this.selectedCategory) {
-                this.updateSubCategories();
-            }
-        },
-
-        handleThumbnailChange(event) {
-            const file = event.target.files[0];
-            if (file) {
-                this.thumbnailPreview = URL.createObjectURL(file);
-            }
-        },
-
-        handleGalleryChange(event) {
-            const files = event.target.files;
-            if (files) {
-                for (let i = 0; i < files.length; i++) {
-                    this.galleryPreviews.push(URL.createObjectURL(files[i]));
-                }
-            }
-        },
-        
-        removeGalleryImage(index) {
-            this.galleryPreviews.splice(index, 1);
-        },
-
-        updateSubCategories() {
-            const category = this.categories.find(c => c.id == this.selectedCategory);
-            this.subCategories = category ? category.children : [];
-            // Reset subcategory if it doesn't belong to new category
-            if (this.subCategories.length > 0 && !this.subCategories.find(s => s.id == this.selectedSubCategory)) {
-                 // Keep selected if it's valid (e.g. on init), otherwise clear
-                 // Actually on init, selectedSubCategory comes from old(), which should be valid for the selectedCategory.
-                 // But on change, we should clear it.
-            }
-        },
-
-        filterTags() {
-            if (this.tagInput === '') {
-                this.filteredTags = this.suggestedTags;
-            } else {
-                this.filteredTags = this.suggestedTags.filter(tag => tag.toLowerCase().includes(this.tagInput.toLowerCase()));
-            }
-        },
-
-        addTag(tag) {
-            if (tag && !this.tags.includes(tag) && this.tags.length < 5) {
-                this.tags.push(tag);
-            }
-            this.tagInput = '';
-            this.filterTags();
-        },
-
-        removeTag(index) {
-            this.tags.splice(index, 1);
-        },
-
-        addExtra() {
-            this.extras.push({ title: '', price: '', additional_days: 0 });
-        },
-
-        removeExtra(index) {
-            this.extras.splice(index, 1);
-        },
-
-        addFaq() {
-            this.faqs.push({ question: '', answer: '' });
-        },
-
-        removeFaq(index) {
-            this.faqs.splice(index, 1);
-        }
-    }"
+    x-data="gigCreateForm()"
 >
     <!-- Header -->
     <div class="mb-8">
@@ -199,6 +61,114 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function gigCreateForm() {
+            return {
+                step: 1,
+                categories: @json($categories),
+                selectedCategory: @json(old('category_id')),
+                subCategories: [],
+                selectedSubCategory: @json(old('sub_category_id')),
+                tags: @json(old('tags') ? explode(',', old('tags')) : []),
+                tagInput: '',
+                suggestedTags: ['Logo Design', 'Web Development', 'Mobile App', 'SEO', 'Content Writing', 'Digital Marketing', 'Video Editing', 'Graphic Design', 'Data Entry', 'Virtual Assistant', 'WordPress', 'Shopify', 'React', 'Flutter', 'Laravel'],
+                filteredTags: [],
+                activePackageTab: 'Basic',
+                extras: @json(old('extras', [])),
+                faqs: @json(old('faqs', [['question' => '', 'answer' => '']])),
+                thumbnailPreview: null,
+                galleryPreviews: [],
+                validateStep(currentStep) {
+                    const container = document.querySelector(`div[x-show="step === ${currentStep}"]`);
+                    if (!container) return;
+                    const inputs = container.querySelectorAll('input, select, textarea');
+                    let valid = true;
+                    for (const input of inputs) {
+                        if (!input.checkValidity()) {
+                            if (input.offsetParent === null) {
+                                const name = input.name;
+                                const match = name.match(/packages\[(\d+)\]/);
+                                if (match) {
+                                    const index = parseInt(match[1]);
+                                    const tiers = ['Basic', 'Standard', 'Premium'];
+                                    if (tiers[index]) {
+                                        this.activePackageTab = tiers[index];
+                                        setTimeout(() => { input.reportValidity(); }, 100);
+                                        valid = false;
+                                        break;
+                                    }
+                                }
+                            }
+                            input.reportValidity();
+                            valid = false;
+                            break;
+                        }
+                    }
+                    if (valid) {
+                        this.step = currentStep + 1;
+                        window.scrollTo(0, 0);
+                    }
+                },
+                init() {
+                    this.filteredTags = this.suggestedTags;
+                    if (this.selectedCategory) {
+                        this.updateSubCategories();
+                    }
+                },
+                handleThumbnailChange(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        this.thumbnailPreview = URL.createObjectURL(file);
+                    }
+                },
+                handleGalleryChange(event) {
+                    const files = event.target.files;
+                    if (files) {
+                        for (let i = 0; i < files.length; i++) {
+                            this.galleryPreviews.push(URL.createObjectURL(files[i]));
+                        }
+                    }
+                },
+                removeGalleryImage(index) {
+                    this.galleryPreviews.splice(index, 1);
+                },
+                updateSubCategories() {
+                    const category = this.categories.find(c => c.id == this.selectedCategory);
+                    this.subCategories = category ? category.children : [];
+                },
+                filterTags() {
+                    if (this.tagInput === '') {
+                        this.filteredTags = this.suggestedTags;
+                    } else {
+                        this.filteredTags = this.suggestedTags.filter(tag => tag.toLowerCase().includes(this.tagInput.toLowerCase()));
+                    }
+                },
+                addTag(tag) {
+                    if (tag && !this.tags.includes(tag) && this.tags.length < 5) {
+                        this.tags.push(tag);
+                    }
+                    this.tagInput = '';
+                    this.filterTags();
+                },
+                removeTag(index) {
+                    this.tags.splice(index, 1);
+                },
+                addExtra() {
+                    this.extras.push({ title: '', price: '', additional_days: 0 });
+                },
+                removeExtra(index) {
+                    this.extras.splice(index, 1);
+                },
+                addFaq() {
+                    this.faqs.push({ question: '', answer: '' });
+                },
+                removeFaq(index) {
+                    this.faqs.splice(index, 1);
+                }
+            };
+        }
+    </script>
 
     <form action="{{ route('provider.freelancer.gigs.store') }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         @csrf
@@ -449,7 +419,15 @@
                                 <button type="button" @click="removeFaq(index)" class="absolute top-2 right-2 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <i class="fas fa-times"></i>
                                 </button>
-                                <input type="text" :name="'faqs['+index+'][question]'" x-model="faq.question" placeholder="Add a Question: e.g. Do you provide source files?" class="block w-full bg-transparent border-none p-0 text-sm font-bold text-slate-800 placeholder-slate-400 focus:ring-0 mb-2">
+                                <div class="mb-3">
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Question</label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-2.5 text-slate-400">
+                                        <i class="fas fa-question-circle"></i>
+                                        </span>
+                                        <input style="    padding-left: 45px;" type="text" :name="'faqs['+index+'][question]'" x-model="faq.question" placeholder="Add a Question: e.g. Do you provide source files?" class="block w-full pl-9 pr-3 py-3 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 bg-white focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none shadow-sm transition-all">
+                                    </div>
+                                </div>
                                 <textarea :name="'faqs['+index+'][answer]'" x-model="faq.answer" rows="2" placeholder="Add an Answer: e.g. Yes, I provide source files for all packages." class="block w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-100 focus:border-primary-500 resize-none"></textarea>
                             </div>
                         </template>

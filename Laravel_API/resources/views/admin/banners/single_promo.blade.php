@@ -75,7 +75,7 @@
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-2">Banner Image</label>
                             <div class="relative group">
-                                <div class="aspect-[3/1] w-full rounded-2xl overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center relative transition-all hover:border-indigo-400 hover:bg-gray-50 group-hover:shadow-md" id="drop-zone">
+                                <div class="w-full h-48 sm:h-64 rounded-2xl overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center relative transition-all hover:border-indigo-400 hover:bg-gray-50 group-hover:shadow-md" id="drop-zone">
                     @php
                         $imageUrl = $banner->image ? (\Illuminate\Support\Str::startsWith($banner->image, ['http', 'https']) ? $banner->image : asset('storage/' . $banner->image)) : 'https://placehold.co/1200x400?text=Upload+Promotional+Banner';
                     @endphp
@@ -93,8 +93,7 @@
                                     </div>
                                     
                                     <input type="file" name="image" id="banner-image-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" 
-                                           accept="image/*"
-                                           onchange="handleFileSelect(this)">
+                                           accept="image/*">
                                 </div>
                                 
                                 <div class="flex items-center justify-between mt-3 px-1">
@@ -122,6 +121,33 @@
 </div>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const input = document.getElementById('banner-image-input');
+        const dropZone = document.getElementById('drop-zone');
+
+        if (input) {
+            input.addEventListener('change', function() {
+                handleFileSelect(this);
+            });
+        }
+
+        if (dropZone) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, unhighlight, false);
+            });
+
+            dropZone.addEventListener('drop', handleDrop, false);
+        }
+    });
+
     function handleFileSelect(input) {
         var preview = document.getElementById('preview-image');
         var fileNameDisplay = document.getElementById('file-name');
@@ -157,41 +183,26 @@
             reader.readAsDataURL(file);
         }
     }
-    
-    // Drag and drop visual feedback
-    const dropZone = document.getElementById('drop-zone');
-    const input = document.getElementById('banner-image-input');
-
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, preventDefaults, false);
-    });
 
     function preventDefaults(e) {
         e.preventDefault();
         e.stopPropagation();
     }
 
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropZone.addEventListener(eventName, highlight, false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, unhighlight, false);
-    });
-
     function highlight(e) {
+        const dropZone = document.getElementById('drop-zone');
         dropZone.classList.add('border-indigo-500', 'bg-indigo-50', 'ring-4', 'ring-indigo-500/20');
     }
 
     function unhighlight(e) {
+        const dropZone = document.getElementById('drop-zone');
         dropZone.classList.remove('border-indigo-500', 'bg-indigo-50', 'ring-4', 'ring-indigo-500/20');
     }
-    
-    dropZone.addEventListener('drop', handleDrop, false);
 
     function handleDrop(e) {
         const dt = e.dataTransfer;
         const files = dt.files;
+        const input = document.getElementById('banner-image-input');
         
         if (files.length > 0) {
             input.files = files;
