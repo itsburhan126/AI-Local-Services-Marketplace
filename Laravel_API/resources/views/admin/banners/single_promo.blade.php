@@ -76,12 +76,16 @@
                             <label class="block text-sm font-bold text-gray-700 mb-2">Banner Image</label>
                             <div class="relative group">
                                 <div class="aspect-[3/1] w-full rounded-2xl overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center relative transition-all hover:border-indigo-400 hover:bg-gray-50 group-hover:shadow-md" id="drop-zone">
-                                    <img src="{{ $banner->image ? (Str::startsWith($banner->image, ['http', 'https']) ? $banner->image : asset('storage/' . $banner->image)) : 'https://placehold.co/1200x400?text=Upload+Promotional+Banner' }}" 
-                                         class="w-full h-full object-cover absolute inset-0 transition-transform duration-500" 
-                                         id="preview-image"
-                                         alt="Banner Preview">
-                                    
-                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center z-10 pointer-events-none backdrop-blur-[2px]">
+                    @php
+                        $imageUrl = $banner->image ? (\Illuminate\Support\Str::startsWith($banner->image, ['http', 'https']) ? $banner->image : asset('storage/' . $banner->image)) : 'https://placehold.co/1200x400?text=Upload+Promotional+Banner';
+                    @endphp
+                    <img src="{{ $imageUrl }}" 
+                         class="w-full h-full object-cover absolute inset-0 transition-transform duration-500" 
+                         id="preview-image"
+                         onerror="this.onerror=null;this.src='https://placehold.co/1200x400?text=Image+Not+Found';"
+                         alt="Banner Preview">
+                    
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center z-10 pointer-events-none backdrop-blur-[2px]">
                                         <div class="bg-white/20 backdrop-blur-md border border-white/30 text-white px-6 py-3 rounded-full font-medium flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform shadow-xl">
                                             <i class="fas fa-camera"></i> <span id="upload-text">Change Image</span>
                                         </div>
