@@ -12,7 +12,7 @@ class SettingsController extends Controller
     public function index()
     {
         $user = Auth::guard('web')->user();
-        return view('Customer.settings.index', compact('user'));
+        return view('Customer.freelancer.settings.index', compact('user'));
     }
 
     public function update(Request $request)

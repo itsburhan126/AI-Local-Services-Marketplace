@@ -53,7 +53,7 @@ class GigController extends Controller
         
         $categories = Category::whereNull('parent_id')->get();
 
-        return view('Customer.gigs.index', compact('gigs', 'categories'));
+        return view('Customer.freelancer.gigs.index', compact('gigs', 'categories'));
     }
 
     public function orders(Request $request)
@@ -79,7 +79,7 @@ class GigController extends Controller
 
         $orders = $query->latest()->paginate(10)->withQueryString();
 
-        return view('Customer.gigs.orders', compact('orders'));
+        return view('Customer.freelancer.gigs.orders', compact('orders'));
     }
 
     public function show($slug)
@@ -126,7 +126,7 @@ class GigController extends Controller
             ->take(4)
             ->get();
 
-        return view('Customer.gigs.show', compact('gig', 'relatedGigs', 'categories', 'subcategories', 'lastDelivery', 'providerImage'));
+        return view('Customer.freelancer.gigs.show', compact('gig', 'relatedGigs', 'categories', 'subcategories', 'lastDelivery', 'providerImage'));
     }
 
     public function checkout($slug, Request $request)
@@ -143,7 +143,7 @@ class GigController extends Controller
         $serviceFeePercentage = \App\Models\Setting::get('service_fee', 0);
         $serviceFee = round(($selectedPackage->price * $serviceFeePercentage) / 100, 2);
 
-        return view('Customer.gigs.checkout', compact('gig', 'selectedPackage', 'gateways', 'serviceFee', 'serviceFeePercentage'));
+        return view('Customer.freelancer.gigs.checkout', compact('gig', 'selectedPackage', 'gateways', 'serviceFee', 'serviceFeePercentage'));
     }
 
     public function storeOrder(Request $request)

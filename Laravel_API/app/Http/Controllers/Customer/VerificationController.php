@@ -11,7 +11,7 @@ class VerificationController extends Controller
     public function index()
     {
         $user = Auth::guard('web')->user();
-        return view('Customer.verification.index', compact('user'));
+        return view('Customer.freelancer.verification.index', compact('user'));
     }
 
     public function store(Request $request)

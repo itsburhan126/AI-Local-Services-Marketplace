@@ -105,7 +105,7 @@ class ChatController extends Controller
             }
         }
 
-        return view('Customer.chat.index', compact('conversations', 'selectedConversation', 'messages', 'categories', 'subcategories'));
+        return view('Customer.freelancer.chat.index', compact('conversations', 'selectedConversation', 'messages', 'categories', 'subcategories'));
     }
 
     /**

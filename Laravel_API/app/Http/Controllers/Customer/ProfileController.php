@@ -13,7 +13,7 @@ class ProfileController extends Controller
     public function index()
     {
         $user = Auth::guard('web')->user();
-        return view('Customer.profile.index', compact('user'));
+        return view('Customer.freelancer.profile.index', compact('user'));
     }
 
     public function update(Request $request)

@@ -71,9 +71,9 @@ class SellerController extends Controller
             ->get()
             ->groupBy('parent_id');
 
-        return view('Customer.seller.profile', compact(
+        return view('Customer.freelancer.seller.profile', compact(
             'user', 
-            'gigs', 
+            'gigs',  
             'averageRating', 
             'totalReviews',
             'categories',

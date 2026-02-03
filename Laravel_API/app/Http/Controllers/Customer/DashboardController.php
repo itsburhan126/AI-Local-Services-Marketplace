@@ -276,7 +276,7 @@ class DashboardController extends Controller
             $userInterestCategoryIds = $user->interests()->pluck('category_id')->toArray();
         }
 
-        return view('Customer.interests.index', compact('interests', 'categories', 'subcategories', 'userInterestCategoryIds'));
+        return view('Customer.freelancer.interests.index', compact('interests', 'categories', 'subcategories', 'userInterestCategoryIds'));
     }
 
     public function gigsBySubcategory($slug)
@@ -326,6 +326,6 @@ class DashboardController extends Controller
             ->get()
             ->groupBy('parent_id');
 
-        return view('Customer.gigs.index', compact('gigs', 'categories', 'subcategories', 'subcategory'));
+        return view('Customer.freelancer.gigs.index', compact('gigs', 'categories', 'subcategories', 'subcategory'));
     }
 }
