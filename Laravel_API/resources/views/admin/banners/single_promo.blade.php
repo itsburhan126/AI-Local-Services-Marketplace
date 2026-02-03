@@ -75,24 +75,20 @@
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-2">Banner Image</label>
                             <div class="relative group">
-                                <div class="aspect-video w-full rounded-2xl overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center relative">
-                                    @if($banner->image)
-                                        <img src="{{ Str::startsWith($banner->image, 'http') ? $banner->image : asset('storage/' . $banner->image) }}" 
-                                             class="w-full h-full object-cover absolute inset-0" 
-                                             id="preview-image">
-                                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <p class="text-white font-medium">Click to Change</p>
-                                        </div>
-                                    @else
-                                        <div class="text-center p-6 text-gray-400" id="placeholder-content">
-                                            <i class="fas fa-image text-4xl mb-2"></i>
-                                            <p class="text-sm">No image uploaded</p>
-                                        </div>
-                                        <img src="" class="w-full h-full object-cover absolute inset-0 hidden" id="preview-image">
-                                    @endif
+                                <div class="aspect-[3/1] w-full rounded-2xl overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center relative">
+                                    <img src="{{ $banner->image ? (Str::startsWith($banner->image, ['http', 'https']) ? $banner->image : asset('storage/' . $banner->image)) : 'https://placehold.co/1200x400?text=Upload+Promotional+Banner' }}" 
+                                         class="w-full h-full object-cover absolute inset-0 transition-transform duration-500 group-hover:scale-105" 
+                                         id="preview-image"
+                                         alt="Banner Preview">
                                     
-                                    <input type="file" name="image" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
-                                           onchange="document.getElementById('preview-image').src = window.URL.createObjectURL(this.files[0]); document.getElementById('preview-image').classList.remove('hidden'); document.getElementById('placeholder-content')?.classList.add('hidden');">
+                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10 pointer-events-none">
+                                        <div class="bg-white/20 backdrop-blur-sm border border-white/30 text-white px-6 py-3 rounded-full font-medium flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform">
+                                            <i class="fas fa-camera"></i> Change Image
+                                        </div>
+                                    </div>
+                                    
+                                    <input type="file" name="image" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" 
+                                           onchange="previewFile(this)">
                                 </div>
                                 <p class="text-xs text-gray-500 mt-2 text-center">Recommended size: 1200x400px. Max: 4MB</p>
                             </div>
@@ -109,4 +105,20 @@
         </div>
     </div>
 </div>
+
+<script>
+    function previewFile(input) {
+        var preview = document.getElementById('preview-image');
+        var file    = input.files[0];
+        var reader  = new FileReader();
+
+        reader.onloadend = function () {
+            preview.src = reader.result;
+        }
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    }
+</script>
 @endsection
