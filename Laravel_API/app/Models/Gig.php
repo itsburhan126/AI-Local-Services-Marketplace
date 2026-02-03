@@ -28,6 +28,9 @@ class Gig extends Model
         'status',
         'view_count',
         'admin_note',
+        'is_flash_sale',
+        'discount_percentage',
+        'flash_sale_end_time',
     ];
 
     protected $casts = [
@@ -37,6 +40,8 @@ class Gig extends Model
         'metadata' => 'array',
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
+        'is_flash_sale' => 'boolean',
+        'flash_sale_end_time' => 'datetime',
     ];
 
     protected $appends = ['is_favorite', 'rating', 'reviews_count'];

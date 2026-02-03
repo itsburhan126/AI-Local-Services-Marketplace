@@ -152,6 +152,96 @@
             </div>
         @endif
 
+        <!-- 3. Recently Viewed (New) -->
+        @if(isset($recentlyViewed) && $recentlyViewed->count() > 0)
+            <div class="group/section" x-data="carousel">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900 font-display">Recently Viewed</h2>
+                    <a href="#" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700">See All</a>
+                </div>
+                
+                <div class="relative">
+                    <button @click="scrollLeft" class="absolute left-0 top-1/2 -translate-y-1/2 z-30 p-3 bg-white shadow-xl rounded-full text-gray-700 hover:text-emerald-600 hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -ml-5 hidden md:flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+
+                    <div x-ref="list" 
+                         @mousedown="start"
+                         @mouseleave="stop"
+                         @mouseup="stop"
+                         @mousemove="move"
+                         class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide -mx-4 px-4">
+                        @foreach($recentlyViewed as $gig)
+                            @include('Customer.components.gig-card', ['gig' => $gig, 'cardWidth' => 'min-w-[340px] w-[340px]'])
+                        @endforeach
+                    </div>
+
+                    <button @click="scrollRight" class="absolute right-0 top-1/2 -translate-y-1/2 z-30 p-3 bg-white shadow-xl rounded-full text-gray-700 hover:text-emerald-600 hover:scale-110 transition-all opacity-0 group-hover/section:opacity-100 border border-gray-100 -mr-5 hidden md:flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        @endif
+
+        <!-- Single Promotional Banner (New) -->
+        @if(isset($singleBanner) && $singleBanner)
+            <div class="relative w-full rounded-[2.5rem] overflow-hidden shadow-2xl my-12 group">
+                 @php
+                    $img = $singleBanner->image_path ?? $singleBanner->image;
+                    $src = \Illuminate\Support\Str::startsWith($img, ['http://', 'https://']) ? $img : asset('storage/' . $img);
+                @endphp
+                
+                <a href="{{ $singleBanner->link ?? '#' }}" class="block relative h-[300px] md:h-[400px]">
+                    <!-- Background Image with Parallax-like effect on hover -->
+                    <div class="absolute inset-0 bg-gray-900">
+                        <img src="{{ $src }}" 
+                             alt="{{ $singleBanner->title ?? 'Promotion' }}" 
+                             class="w-full h-full object-cover opacity-90 transform group-hover:scale-105 transition-transform duration-1000 ease-out">
+                    </div>
+                    
+                    <!-- Gradient Overlay -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-900/40 to-transparent"></div>
+                    
+                    <!-- Content Container -->
+                    <div class="absolute inset-0 flex items-center px-8 md:px-16">
+                        <div class="max-w-2xl transform transition-all duration-700 delay-100 ease-out">
+                            
+                            <!-- Badge/Tag -->
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-xs font-bold uppercase tracking-wider mb-6">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                Featured Offer
+                            </div>
+
+                            @if($singleBanner->title)
+                                <h3 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 font-display leading-tight drop-shadow-lg">
+                                    {{ $singleBanner->title }}
+                                </h3>
+                            @endif
+                            
+                            @if($singleBanner->subtitle)
+                                <p class="text-gray-200 text-lg md:text-xl mb-8 font-light leading-relaxed max-w-lg drop-shadow-md">
+                                    {{ $singleBanner->subtitle }}
+                                </p>
+                            @endif
+                            
+                            @if($singleBanner->button_text)
+                                <span class="group/btn inline-flex items-center gap-3 bg-white text-gray-900 px-8 py-4 rounded-full font-bold text-lg hover:bg-emerald-500 hover:text-white transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.4)]">
+                                    {{ $singleBanner->button_text }}
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                    </svg>
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                </a>
+            </div>
+        @endif
+
         <!-- 4. Popular Gigs -->
         <div class="group/section" x-data="carousel">
             <div class="flex items-center justify-between mb-6">

@@ -126,7 +126,7 @@ class GigController extends Controller
             ->take(4)
             ->get();
 
-        return view('Customer.gigs.show', compact('gig', 'relatedGigs', 'categories', 'subcategories', 'lastDelivery'));
+        return view('Customer.gigs.show', compact('gig', 'relatedGigs', 'categories', 'subcategories', 'lastDelivery', 'providerImage'));
     }
 
     public function checkout($slug, Request $request)
