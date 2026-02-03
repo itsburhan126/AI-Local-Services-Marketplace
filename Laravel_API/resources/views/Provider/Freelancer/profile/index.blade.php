@@ -17,98 +17,85 @@
         <!-- Left Column: Main Profile Info -->
         <div class="lg:col-span-2 space-y-8">
             
-            <!-- 1. Profile Header Card -->
-            <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm relative group">
-                <!-- Top Right Actions -->
-                <div class="absolute top-6 right-6 flex gap-3">
-                    <button @click="navigator.clipboard.writeText('{{ route('page.show', $user->username ?? 'profile') }}'); $el.innerHTML = '<i class=\'fas fa-check mr-2\'></i> Copied!'; setTimeout(() => $el.innerHTML = '<i class=\'fas fa-share-alt mr-2\'></i> Share', 2000)" class="px-4 py-1.5 border border-slate-300 rounded text-slate-700 hover:bg-slate-50 transition-colors text-sm font-semibold flex items-center min-w-[100px] justify-center">
-                        <i class="fas fa-share-alt mr-2"></i> Share
-                    </button>
-                    <a href="{{ route('page.show', $user->username ?? 'profile') }}" target="_blank" class="px-4 py-1.5 border border-slate-300 rounded text-slate-700 hover:bg-slate-50 transition-colors text-sm font-semibold flex items-center">
-                        <i class="fas fa-eye mr-2"></i> Preview
-                    </a>
+            <!-- 1. Profile Header Card (Professional Design) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <!-- Cover Image Area -->
+                <div class="h-48 w-full bg-slate-100 relative group">
+                    @if($profile->cover_image)
+                        <img src="{{ asset('storage/'.$profile->cover_image) }}" alt="Cover" class="w-full h-full object-cover">
+                    @else
+                        <div class="w-full h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+                    @endif
+                    
+                    <!-- Top Right Actions (Overlay) -->
+                    <div class="absolute top-4 right-4 flex gap-2">
+                        <a href="{{ route('page.show', $user->username ?? 'profile') }}" target="_blank" class="px-4 py-2 bg-white/90 backdrop-blur hover:bg-white text-slate-700 rounded-lg text-sm font-semibold shadow-sm transition-all flex items-center gap-2">
+                            <i class="fas fa-eye"></i> <span class="hidden sm:inline">Preview</span>
+                        </a>
+                        <button @click="navigator.clipboard.writeText('{{ route('page.show', $user->username ?? 'profile') }}'); $el.innerHTML = '<i class=\'fas fa-check\'></i>'; setTimeout(() => $el.innerHTML = '<i class=\'fas fa-share-alt\'></i>', 2000)" class="px-4 py-2 bg-white/90 backdrop-blur hover:bg-white text-slate-700 rounded-lg text-sm font-semibold shadow-sm transition-all">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="flex flex-col md:flex-row gap-6 items-start">
-                    <!-- Avatar -->
-                    <div class="relative shrink-0">
-                        <div class="w-32 h-32 rounded-full bg-slate-100 border-4 border-white shadow-md overflow-hidden">
-                             <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
-                        </div>
-                        <div class="absolute bottom-2 right-2 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
-                    </div>
-
-                    <!-- User Info -->
-                    <div class="flex-1 pt-2 w-full pr-0 md:pr-32">
-                        
-                        <!-- Name & Username -->
-                        <div class="flex items-center gap-3 mb-1" x-data="{ editing: false, name: '{{ $user->name }}' }">
-                            <template x-if="!editing">
-                                <div class="flex items-center gap-3 group/name">
-                                    <h1 class="text-2xl font-bold text-slate-900">{{ $user->name }}</h1>
-                                    <button @click="editing = true" class="text-slate-400 hover:text-slate-600 opacity-0 group-hover/name:opacity-100 transition-opacity">
-                                        <i class="fas fa-pencil-alt"></i>
-                                    </button>
-                                </div>
-                            </template>
-                            <template x-if="editing">
-                                <form action="{{ route('provider.freelancer.profile.update') }}" method="POST" class="flex items-center gap-2">
-                                    @csrf
-                                    @method('PUT')
-                                    <input type="text" name="name" x-model="name" class="px-2 py-1 border rounded text-lg font-bold w-full max-w-xs">
-                                    <button type="submit" class="text-green-600 hover:text-green-700"><i class="fas fa-check"></i></button>
-                                    <button type="button" @click="editing = false" class="text-red-500 hover:text-red-600"><i class="fas fa-times"></i></button>
-                                </form>
-                            </template>
-                        </div>
-                        
-                        <div class="text-slate-500 text-sm mb-4">@if($user->username) {{ '@'.$user->username }} @else No username @endif</div>
-
-                        <!-- Professional Headline -->
-                        <div class="mb-4" x-data="{ editing: false, headline: '{{ $headline }}' }">
-                            <template x-if="!editing">
-                                <div class="flex items-center gap-2 group/headline">
-                                    <p class="text-slate-600 border border-transparent pl-0 py-1 rounded hover:bg-slate-50 hover:border-slate-200 transition-all cursor-pointer truncate" @click="editing = true">
-                                        {{ $headline }}
-                                        <i class="fas fa-pencil-alt ml-2 text-slate-400 opacity-0 group-hover/headline:opacity-100 text-xs"></i>
-                                    </p>
-                                </div>
-                            </template>
-                            <template x-if="editing">
-                                <form action="{{ route('provider.freelancer.profile.update') }}" method="POST" class="flex items-center gap-2 w-full">
-                                    @csrf
-                                    @method('PUT')
-                                    <input type="text" name="professional_headline" x-model="headline" class="px-2 py-1 border rounded text-slate-600 w-full">
-                                    <button type="submit" class="text-green-600 hover:text-green-700"><i class="fas fa-check"></i></button>
-                                    <button type="button" @click="editing = false" class="text-red-500 hover:text-red-600"><i class="fas fa-times"></i></button>
-                                </form>
-                            </template>
-                        </div>
-
-                        <!-- Meta Info (Location & Languages) -->
-                        <div class="flex flex-col gap-2 text-slate-500 text-sm">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-map-marker-alt w-4 text-center"></i>
-                                <span>{{ $location }}</span>
+                <!-- Profile Bar -->
+                <div class="px-8 pb-8 relative">
+                    <div class="flex flex-col lg:flex-row items-start gap-6">
+                        <!-- Avatar (Overlapping) -->
+                        <div class="-mt-16 relative shrink-0">
+                            <div class="w-32 h-32 rounded-full ring-4 ring-white bg-white overflow-hidden shadow-lg">
+                                <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
                             </div>
-                            
-                            <div class="flex items-center gap-2" x-data="{ editing: false, langs: '{{ $languages }}' }">
-                                <i class="fas fa-language w-4 text-center"></i>
-                                <template x-if="!editing">
-                                    <div class="flex items-center gap-2 group/lang cursor-pointer" @click="editing = true">
-                                        <span>Speaks {{ $languages }}</span>
-                                        <i class="fas fa-pencil-alt text-slate-400 opacity-0 group-hover/lang:opacity-100 text-xs"></i>
+                            <div class="absolute bottom-2 right-2 w-5 h-5 bg-emerald-400 border-4 border-white rounded-full" title="Online"></div>
+                        </div>
+
+                        <!-- Info Section -->
+                        <div class="flex-1 pt-4 w-full">
+                            <div class="flex flex-col lg:flex-row justify-between items-start gap-4">
+                                <div>
+                                    <div class="flex items-center gap-3 mb-1">
+                                        <h1 class="text-2xl font-bold text-slate-900">{{ $user->name }}</h1>
+                                        @if($user->kyc_status === 'verified')
+                                            <i class="fas fa-check-circle text-emerald-500 text-lg" title="Verified Identity"></i>
+                                        @endif
                                     </div>
-                                </template>
-                                <template x-if="editing">
-                                    <form action="{{ route('provider.freelancer.profile.update') }}" method="POST" class="flex items-center gap-2">
-                                        @csrf
-                                        @method('PUT')
-                                        <input type="text" name="languages" x-model="langs" class="px-2 py-0.5 border rounded text-xs w-64" placeholder="English, Spanish...">
-                                        <button type="submit" class="text-green-600 hover:text-green-700"><i class="fas fa-check"></i></button>
-                                        <button type="button" @click="editing = false" class="text-red-500 hover:text-red-600"><i class="fas fa-times"></i></button>
-                                    </form>
-                                </template>
+                                    <p class="text-slate-500 text-sm mb-3">@if($user->username) {{ '@'.$user->username }} @endif</p>
+                                    
+                                    <p class="text-lg text-slate-800 font-medium mb-4">{{ $headline }}</p>
+
+                                    <!-- Badges Row -->
+                                    <div class="flex flex-wrap gap-3 mb-4">
+                                        <!-- Seller Level -->
+                                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-100 text-xs font-semibold">
+                                            <i class="fas fa-medal"></i> {{ $profile->seller_level ?? 'Level 1' }}
+                                        </div>
+                                        
+                                        <!-- Location -->
+                                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 text-slate-600 border border-slate-100 text-xs font-semibold">
+                                            <i class="fas fa-map-marker-alt"></i> {{ $location }}
+                                        </div>
+
+                                        <!-- Language -->
+                                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 text-slate-600 border border-slate-100 text-xs font-semibold">
+                                            <i class="fas fa-language"></i> {{ $languages }}
+                                        </div>
+
+                                        <!-- Joined Date -->
+                                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 text-slate-600 border border-slate-100 text-xs font-semibold">
+                                            <i class="far fa-calendar"></i> Joined {{ optional($user->created_at)->format('M Y') }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Main Actions -->
+                                <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                                    <a href="{{ route('provider.freelancer.profile.edit') }}" class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-200 flex items-center justify-center gap-2">
+                                        <i class="fas fa-edit"></i> Edit Profile
+                                    </a>
+                                    <a href="{{ route('provider.freelancer.verification.index') }}" class="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-lg font-semibold hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                                        <i class="fas fa-shield-alt"></i> Verification
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -116,36 +103,100 @@
             </div>
 
             <!-- 2. About Section -->
-            <div class="bg-white rounded-xl border border-slate-200 p-8 shadow-sm" x-data="{ editing: false, description: `{{ $about }}` }">
+            <div class="bg-white rounded-xl border border-slate-200 p-8 shadow-sm">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-bold text-slate-900">About</h2>
                 </div>
-
-                <template x-if="!editing">
-                    <div>
-                        <p class="text-slate-600 leading-relaxed whitespace-pre-line">{{ $about }}</p>
-                        <button @click="editing = true" class="mt-6 px-6 py-2 border border-slate-300 rounded-full text-slate-600 hover:bg-slate-50 font-semibold transition-colors text-sm">
-                            Edit details
-                        </button>
-                    </div>
-                </template>
-
-                <template x-if="editing">
-                    <form action="{{ route('provider.freelancer.profile.update') }}" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <textarea name="description" x-model="description" rows="8" class="w-full border border-slate-300 rounded-lg p-4 text-slate-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"></textarea>
-                        <div class="flex gap-3 mt-4">
-                            <button type="submit" class="px-6 py-2 bg-slate-900 text-white rounded-full font-bold hover:bg-slate-800 transition-colors text-sm">Save Changes</button>
-                            <button type="button" @click="editing = false" class="px-6 py-2 border border-slate-300 rounded-full text-slate-600 hover:bg-slate-50 font-semibold transition-colors text-sm">Cancel</button>
-                        </div>
-                    </form>
-                </template>
+                <div>
+                    <p class="text-slate-600 leading-relaxed whitespace-pre-line">{{ $about }}</p>
+                </div>
             </div>
 
-            <!-- KYC Verification Section -->
-            <div class="bg-white rounded-xl border border-slate-200 p-8 shadow-sm" id="kyc-section">
+            <!-- 2.0 Professional Details -->
+            <div class="bg-white rounded-xl border border-slate-200 p-8 shadow-sm">
                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-slate-900">Professional Details</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <div class="text-sm font-bold text-slate-700 mb-1">Company Name</div>
+                        <div class="text-slate-700">{{ $profile->company_name ?: '—' }}</div>
+                    </div>
+                    <div>
+                        <div class="text-sm font-bold text-slate-700 mb-1">Logo</div>
+                        @if($profile->logo)
+                            <a href="{{ asset('storage/'.$profile->logo) }}" target="_blank" class="text-indigo-600 hover:underline">View</a>
+                        @else
+                            <span class="text-slate-700">—</span>
+                        @endif
+                    </div>
+                    <div class="md:col-span-2">
+                        <div class="text-sm font-bold text-slate-700 mb-1">Cover Image</div>
+                        @if($profile->cover_image)
+                            <a href="{{ asset('storage/'.$profile->cover_image) }}" target="_blank" class="text-indigo-600 hover:underline">View</a>
+                        @else
+                            <span class="text-slate-700">—</span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2.1 Languages & Skills -->
+            <div class="bg-white rounded-xl border border-slate-200 p-8 shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-slate-900">Languages & Skills</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <div class="text-sm font-bold text-slate-700 mb-2">Languages</div>
+                        <div class="flex flex-wrap gap-2">
+                            @forelse(($profile->languages ?? []) as $l)
+                                <span class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 text-sm font-medium">{{ $l }}</span>
+                            @empty
+                                <span class="text-slate-500">—</span>
+                            @endforelse
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-sm font-bold text-slate-700 mb-2">Skills</div>
+                        <div class="flex flex-wrap gap-2">
+                            @forelse(($profile->skills ?? []) as $s)
+                                <span class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-primary-50 text-primary-700 text-sm font-medium">{{ $s }}</span>
+                            @empty
+                                <span class="text-slate-500">—</span>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2.2 Personal Details -->
+            <div class="bg-white rounded-xl border border-slate-200 p-8 shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-slate-900">Personal Details</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <div class="text-sm font-bold text-slate-700 mb-2">Phone</div>
+                        <div class="text-slate-700">{{ $user->phone ?: '—' }}</div>
+                    </div>
+                    <div>
+                        <div class="text-sm font-bold text-slate-700 mb-2">Country</div>
+                        <div class="text-slate-700">{{ $profile->country ?: '—' }}</div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <div class="text-sm font-bold text-slate-700 mb-2">Address</div>
+                        <div class="text-slate-700">{{ $profile->address ?: '—' }}</div>
+                    </div>
+                </div>
+                <div class="flex justify-end mt-6">
+                    <a href="{{ route('provider.freelancer.profile.edit') }}" class="px-6 py-2 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-100">Edit Profile</a>
+                </div>
+            </div>
+
+            <!-- Identity Verification CTA -->
+            <div class="bg-white rounded-xl border border-slate-200 p-8 shadow-sm">
+                <div class="flex items-center justify-between mb-6">
                     <div>
                         <h2 class="text-xl font-bold text-slate-900">Identity Verification</h2>
                         <p class="text-slate-500 text-sm mt-1">Verify your identity to build trust and unlock more features.</p>
@@ -156,7 +207,7 @@
                         </span>
                     @elseif($user->kyc_status === 'pending')
                         <span class="px-4 py-2 bg-amber-100 text-amber-700 rounded-full text-sm font-bold flex items-center gap-2">
-                            <i class="fas fa-clock"></i> Pending Approval
+                            <i class="fas fa-clock"></i> Pending
                         </span>
                     @else
                         <span class="px-4 py-2 bg-slate-100 text-slate-700 rounded-full text-sm font-bold flex items-center gap-2">
@@ -164,70 +215,12 @@
                         </span>
                     @endif
                 </div>
-
-                @if(!$user->kyc_status || $user->kyc_status === 'rejected')
-                    @if($user->kyc_status === 'rejected')
-                        <div class="bg-red-50 text-red-600 p-4 rounded-xl mb-6 flex items-start gap-3">
-                            <i class="fas fa-exclamation-circle mt-1"></i>
-                            <div>
-                                <p class="font-bold">Verification Rejected</p>
-                                <p class="text-sm">Your previous attempt was rejected. Please ensure your documents are clear and valid.</p>
-                            </div>
-                        </div>
-                    @endif
-
-                    <form action="{{ route('provider.freelancer.kyc.submit') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
-                        @csrf
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-2">Document Type</label>
-                                <select name="document_type" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all">
-                                    <option value="passport">Passport</option>
-                                    <option value="national_id">National ID Card</option>
-                                    <option value="driving_license">Driving License</option>
-                                </select>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-bold text-slate-700 mb-2">Phone Number</label>
-                                <input type="tel" name="phone" value="{{ old('phone', $user->phone) }}" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" placeholder="+1 234 567 8900">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:bg-slate-50 transition-colors cursor-pointer relative group/upload">
-                                <input type="file" name="document_front" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" accept="image/*" required onchange="this.nextElementSibling.classList.add('hidden'); this.nextElementSibling.nextElementSibling.classList.remove('hidden'); this.nextElementSibling.nextElementSibling.querySelector('img').src = window.URL.createObjectURL(this.files[0])">
-                                <div class="pointer-events-none group-hover/upload:scale-105 transition-transform">
-                                    <i class="fas fa-id-card text-4xl text-slate-300 mb-3"></i>
-                                    <p class="font-bold text-slate-700">Front Side</p>
-                                    <p class="text-xs text-slate-400 mt-1">Upload clear image</p>
-                                </div>
-                                <div class="hidden pointer-events-none absolute inset-0 p-2">
-                                    <img src="" class="w-full h-full object-contain rounded-lg">
-                                </div>
-                            </div>
-
-                            <div class="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:bg-slate-50 transition-colors cursor-pointer relative group/upload">
-                                <input type="file" name="document_back" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" accept="image/*" onchange="this.nextElementSibling.classList.add('hidden'); this.nextElementSibling.nextElementSibling.classList.remove('hidden'); this.nextElementSibling.nextElementSibling.querySelector('img').src = window.URL.createObjectURL(this.files[0])">
-                                <div class="pointer-events-none group-hover/upload:scale-105 transition-transform">
-                                    <i class="fas fa-id-card text-4xl text-slate-300 mb-3"></i>
-                                    <p class="font-bold text-slate-700">Back Side</p>
-                                    <p class="text-xs text-slate-400 mt-1">Upload clear image (Optional)</p>
-                                </div>
-                                <div class="hidden pointer-events-none absolute inset-0 p-2">
-                                    <img src="" class="w-full h-full object-contain rounded-lg">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex justify-end">
-                            <button type="submit" class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 transform hover:-translate-y-0.5 flex items-center gap-2">
-                                <i class="fas fa-paper-plane"></i> Submit for Verification
-                            </button>
-                        </div>
-                    </form>
-                @endif
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="text-slate-600 text-sm">Manage your verification in a dedicated page.</div>
+                    <a href="{{ route('provider.freelancer.verification.index') }}" class="px-6 py-2 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-100 flex items-center gap-2">
+                        <i class="fas fa-shield-alt"></i> Go to Verification
+                    </a>
+                </div>
             </div>
 
             <!-- 3. Portfolio Section -->
@@ -277,6 +270,15 @@
                             <span class="flex items-center gap-3">
                                 <i class="fas fa-wallet text-slate-400 group-hover:text-primary-600 transition-colors"></i>
                                 Earnings
+                            </span>
+                            <i class="fas fa-chevron-right text-xs text-slate-300 group-hover:text-primary-600 transition-colors"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('provider.freelancer.verification.index') }}" class="flex items-center justify-between text-slate-600 hover:text-primary-600 group transition-colors p-2 rounded hover:bg-slate-50">
+                            <span class="flex items-center gap-3">
+                                <i class="fas fa-shield-alt text-slate-400 group-hover:text-primary-600 transition-colors"></i>
+                                Verification
                             </span>
                             <i class="fas fa-chevron-right text-xs text-slate-300 group-hover:text-primary-600 transition-colors"></i>
                         </a>

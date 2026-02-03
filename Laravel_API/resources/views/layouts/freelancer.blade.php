@@ -69,6 +69,21 @@
             right: 1rem;
             z-index: 50;
         }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); }
+            to { transform: translateX(100%); }
+        }
+        .animate-slide-in {
+            animation: slideIn 0.5s forwards;
+        }
+        .animate-slide-out {
+            animation: slideOut 0.5s forwards;
+        }
     </style>
 </head>
 <body class="antialiased text-slate-800">
@@ -76,7 +91,7 @@
     <!-- Toast Container -->
     <div id="toast-container" class="toast-container space-y-4">
         @if (session('success'))
-        <div class="toast bg-white border-l-4 border-green-500 shadow-premium rounded-r-lg p-4 flex items-center gap-3 min-w-[300px] transform translate-x-full animate-slide-in">
+        <div class="toast bg-white border-l-4 border-green-500 shadow-premium rounded-r-lg p-4 flex items-center gap-3 min-w-[300px] animate-slide-in">
             <div class="text-green-500">
                 <i class="fas fa-check-circle text-xl"></i>
             </div>
@@ -91,7 +106,7 @@
         @endif
         
         @if (session('error'))
-        <div class="toast bg-white border-l-4 border-red-500 shadow-premium rounded-r-lg p-4 flex items-center gap-3 min-w-[300px] transform translate-x-full animate-slide-in">
+        <div class="toast bg-white border-l-4 border-red-500 shadow-premium rounded-r-lg p-4 flex items-center gap-3 min-w-[300px] animate-slide-in">
             <div class="text-red-500">
                 <i class="fas fa-exclamation-circle text-xl"></i>
             </div>
@@ -162,7 +177,7 @@
                 title = 'Info';
             }
             
-            toast.className = `toast bg-white border-l-4 ${borderColor} shadow-premium rounded-r-lg p-4 flex items-center gap-3 min-w-[300px] transform translate-x-full animate-slide-in`;
+            toast.className = `toast bg-white border-l-4 ${borderColor} shadow-premium rounded-r-lg p-4 flex items-center gap-3 min-w-[300px] animate-slide-in`;
             toast.innerHTML = `
                 <div class="${iconColor}">
                     <i class="fas ${icon} text-xl"></i>

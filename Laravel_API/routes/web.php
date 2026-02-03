@@ -170,7 +170,10 @@ Route::prefix('freelancer')->name('provider.freelancer.')->group(function () {
     Route::get('/analytics', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'analytics'])->middleware('auth:web')->name('analytics');
     Route::get('/earnings', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'earnings'])->middleware('auth:web')->name('earnings');
     Route::get('/profile', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'profile'])->middleware('auth:web')->name('profile');
+    Route::get('/profile/edit', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'editProfile'])->middleware('auth:web')->name('profile.edit');
     Route::put('/profile/update', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'updateProfile'])->middleware('auth:web')->name('profile.update');
+    Route::post('/profile/phone/send-otp', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'sendPhoneOtp'])->middleware('auth:web')->name('profile.phone.send_otp');
+    Route::post('/profile/phone/verify-otp', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'verifyPhoneOtp'])->middleware('auth:web')->name('profile.phone.verify_otp');
     
     // Settings & KYC
     Route::get('/settings', [\App\Http\Controllers\Provider\Freelancer\DashboardController::class, 'settings'])->middleware('auth:web')->name('settings');

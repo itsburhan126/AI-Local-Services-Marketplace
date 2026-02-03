@@ -55,7 +55,7 @@
 
                 <!-- Profile Dropdown -->
                 <div class="relative ml-2" x-data="{ open: false }">
-                    <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 focus:outline-none">
+                    <button @click="open = !open" @click.outside="open = false" class="flex items-center gap-2 focus:outline-none">
                         <div class="h-8 w-8 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
                             <img src="{{ Auth::guard('web')->user()->profile_photo_url }}" alt="Profile" class="h-full w-full object-cover">
                         </div>
@@ -79,7 +79,8 @@
                         
                         <a href="{{ route('provider.freelancer.profile') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Profile</a>
                         <a href="{{ route('provider.freelancer.settings') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Settings</a>
-                        <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Billing</a>
+                        <a href="{{ route('provider.freelancer.payout.index') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Billing</a>
+                        <a href="{{ route('provider.freelancer.verification.index') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Verification</a>
                         <div class="border-t border-slate-100 my-1"></div>
                         <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">English <span class="float-right text-slate-400">🌐</span></a>
                         <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">USD <span class="float-right text-slate-400">$</span></a>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Provider\Freelancer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Gig;
@@ -12,6 +13,8 @@ use App\Models\GigOrder;
 use App\Models\Message;
 use App\Models\Review;
 use App\Models\WalletTransaction;
+use App\Mail\OtpMail;
+use App\Models\Country;
 
 class DashboardController extends Controller
 {
@@ -211,7 +214,16 @@ class DashboardController extends Controller
 
     public function profile()
     {
-        return view('Provider.Freelancer.profile.index');
+        $countries = Country::where('is_active', true)->orderBy('name')->get(['name','code','flag_emoji']);
+        return view('Provider.Freelancer.profile.index', compact('countries'));
+    }
+
+    public function editProfile()
+    {
+        $countries = Country::where('is_active', true)->orderBy('name')->get(['name','code','flag_emoji']);
+        $languages = \App\Models\Language::where('is_active', true)->orderBy('name')->get(['name','code']);
+        $skills = \App\Models\Skill::where('is_active', true)->orderBy('name')->get(['name','type']);
+        return view('Provider.Freelancer.profile.edit', compact('countries','languages','skills'));
     }
 
     public function updateProfile(Request $request)
@@ -232,6 +244,10 @@ class DashboardController extends Controller
         if ($request->has('professional_headline')) {
             $profile->company_name = $request->professional_headline;
         }
+        
+        if ($request->has('company_name')) {
+            $profile->company_name = $request->company_name;
+        }
 
         if ($request->has('description')) {
             $profile->about = $request->description;
@@ -245,8 +261,32 @@ class DashboardController extends Controller
             $profile->languages = $langs;
         }
         
+        if ($request->has('skills')) {
+            $skills = $request->skills;
+            if (is_string($skills)) {
+                $skills = array_map('trim', explode(',', $skills));
+            }
+            $profile->skills = $skills;
+        }
+        
         if ($request->has('location')) {
              $profile->address = $request->location;
+        }
+        
+        if ($request->has('country')) {
+             $profile->country = $request->country;
+        }
+        
+        if ($request->has('phone')) {
+            session(['phone_otp_target' => $request->phone]);
+        }
+        
+        if ($request->hasFile('logo')) {
+            $profile->logo = $request->file('logo')->store('provider/logo', 'public');
+        }
+        
+        if ($request->hasFile('cover_image')) {
+            $profile->cover_image = $request->file('cover_image')->store('provider/cover', 'public');
         }
 
         $profile->save();
@@ -313,5 +353,45 @@ class DashboardController extends Controller
         $user->save();
 
         return back()->with('success', 'KYC verification request submitted successfully.');
+    }
+
+    public function sendPhoneOtp(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|string',
+        ]);
+        $user = Auth::user();
+        $otp = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        session([
+            'phone_otp' => $otp,
+            'phone_otp_expires' => now()->addMinutes(10),
+            'phone_otp_target' => $request->phone,
+        ]);
+        Mail::to($user->email)->send(new OtpMail($otp));
+        return back()->with('success', 'OTP sent to your email.');
+    }
+
+    public function verifyPhoneOtp(Request $request)
+    {
+        $request->validate([
+            'otp' => 'required|string',
+        ]);
+        $user = Auth::user();
+        $storedOtp = session('phone_otp');
+        $expires = session('phone_otp_expires');
+        $target = session('phone_otp_target');
+        if (!$storedOtp || !$expires || !$target) {
+            return back()->withErrors(['otp' => 'No OTP request found.']);
+        }
+        if (now()->greaterThan($expires)) {
+            return back()->withErrors(['otp' => 'OTP expired.']);
+        }
+        if ($request->otp !== $storedOtp) {
+            return back()->withErrors(['otp' => 'Invalid OTP.']);
+        }
+        $user->phone = $target;
+        $user->save();
+        session()->forget(['phone_otp', 'phone_otp_expires', 'phone_otp_target']);
+        return back()->with('success', 'Phone verified and updated.');
     }
 }

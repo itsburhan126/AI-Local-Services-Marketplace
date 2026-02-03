@@ -81,13 +81,13 @@
                     </a>
 
                     <div class="mb-10">
-                        <h2 class="text-3xl font-bold text-gray-900 mb-2">Log In</h2>
-                        <p class="text-gray-500">Welcome back! Please enter your details.</p>
+                        <h2 class="text-3xl font-bold text-slate-900 mb-2">Log In</h2>
+                        <p class="text-slate-500">Welcome back! Please enter your details.</p>
                     </div>
 
                     <!-- Google Button -->
-                    <button type="button" class="w-full flex items-center justify-center px-4 py-3 border border-gray-200 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors mb-8">
-                        <svg class="h-5 w-5 mr-2" viewBox="0 0 24 24">
+                    <button type="button" onclick="toastr.info('Google Login coming soon!', 'Info')" class="w-full flex items-center justify-center px-4 py-3.5 border border-slate-200 rounded-xl shadow-sm bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 mb-8 group">
+                        <svg class="h-5 w-5 mr-3 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 24 24">
                             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -98,69 +98,85 @@
 
                     <div class="relative mb-8">
                         <div class="absolute inset-0 flex items-center">
-                            <div class="w-full border-t border-gray-200"></div>
+                            <div class="w-full border-t border-slate-200"></div>
                         </div>
                         <div class="relative flex justify-center text-sm">
-                            <span class="px-2 bg-white text-gray-500">Or log in with email</span>
+                            <span class="px-4 bg-white text-slate-500 font-medium">Or log in with email</span>
                         </div>
                     </div>
 
-                    <form action="{{ route('customer.login.submit') }}" method="POST" class="space-y-5">
+                    <form action="{{ route('customer.login.submit') }}" method="POST" class="space-y-6">
                         @csrf
                         
                         <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <label for="email" class="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
+                            <div class="relative group">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>
                                 </div>
                                 <input type="email" name="email" id="email" value="{{ old('email') }}" required 
-                                    class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-primary focus:border-primary sm:text-sm transition-colors bg-gray-50 focus:bg-white placeholder-gray-400" 
+                                    class="block w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 sm:text-sm transition-all duration-200 bg-white placeholder-slate-400 text-slate-900 shadow-sm" 
                                     placeholder="name@example.com">
                             </div>
                             @error('email')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                <p class="mt-1 text-sm text-red-600 font-medium flex items-center gap-1">
+                                    <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                </p>
                             @enderror
                         </div>
 
                         <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                                <a href="#" class="text-sm font-medium text-primary hover:text-indigo-500">Forgot password?</a>
+                            <div class="flex items-center justify-between mb-2">
+                                <label for="password" class="block text-sm font-semibold text-slate-700">Password</label>
                             </div>
-                            <div class="relative" x-data="{ show: false }">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div class="relative group" x-data="{ show: false }">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                     </svg>
                                 </div>
                                 <input :type="show ? 'text' : 'password'" name="password" id="password" required 
-                                    class="block w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:ring-primary focus:border-primary sm:text-sm transition-colors bg-gray-50 focus:bg-white placeholder-gray-400" 
+                                    class="block w-full pl-11 pr-11 py-3.5 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 sm:text-sm transition-all duration-200 bg-white placeholder-slate-400 text-slate-900 shadow-sm" 
                                     placeholder="••••••••">
-                                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                                    <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-4 flex items-center">
+                                    <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 hover:text-slate-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                     </svg>
-                                    <svg x-show="show" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+                                    <svg x-show="show" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500 hover:text-indigo-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                                     </svg>
                                 </button>
                             </div>
                             @error('password')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                <p class="mt-1 text-sm text-red-600 font-medium flex items-center gap-1">
+                                    <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                </p>
                             @enderror
                         </div>
 
-                        <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-primary hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <input id="remember_me" name="remember" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded transition-colors">
+                                <label for="remember_me" class="ml-2 block text-sm text-slate-600">Remember me</label>
+                            </div>
+                            <div class="text-sm">
+                                <a href="#" class="font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">Forgot password?</a>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg shadow-indigo-200 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-100 transition-all duration-200 transform hover:-translate-y-0.5">
                             Log In
                         </button>
                     </form>
 
-                    <div class="mt-6 text-center text-sm text-gray-500">
-                        Don't have an account? <a href="{{ route('customer.register') }}" class="font-medium text-primary hover:text-indigo-500">Sign up</a>
+                    <div class="mt-8 text-center">
+                        <p class="text-sm text-slate-600">
+                            Don't have an account? 
+                            <a href="{{ route('customer.register') }}" class="font-bold text-indigo-600 hover:text-indigo-700 transition-colors">Sign up</a>
+                        </p>
                     </div>
                 </div>
             </div>
