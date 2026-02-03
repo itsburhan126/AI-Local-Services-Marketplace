@@ -356,6 +356,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('promotions', \App\Http\Controllers\Admin\PromotionController::class);
         Route::resource('banners', \App\Http\Controllers\Admin\BannerController::class)->only(['index', 'store', 'destroy']);
         
+        // Single Promotional Banner Management
+        Route::get('banners/single-promo', [\App\Http\Controllers\Admin\SinglePromoBannerController::class, 'edit'])->name('banners.single-promo');
+        Route::put('banners/single-promo', [\App\Http\Controllers\Admin\SinglePromoBannerController::class, 'update'])->name('banners.single-promo.update');
+        
         // Flash Sale
         Route::get('flash-sale/activity', [\App\Http\Controllers\Admin\FlashSaleController::class, 'activity'])->name('flash-sale.activity');
         Route::get('flash-sale/analytics', [\App\Http\Controllers\Admin\FlashSaleController::class, 'analytics'])->name('flash-sale.analytics');

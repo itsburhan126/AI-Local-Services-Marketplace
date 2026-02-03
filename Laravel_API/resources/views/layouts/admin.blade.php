@@ -233,9 +233,14 @@
                     <span>Promotions</span>
                 </a>
 
-                <a href="{{ route('admin.banners.index') }}" class="nav-item flex items-center px-4 py-3.5 text-sm font-medium rounded-xl group {{ request()->routeIs('admin.banners.*') ? 'nav-item-active' : 'text-slate-400' }}">
-                    <i class="fas fa-images w-6 text-lg {{ request()->routeIs('admin.banners.*') ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300' }}"></i>
+                <a href="{{ route('admin.banners.index') }}" class="nav-item flex items-center px-4 py-3.5 text-sm font-medium rounded-xl group {{ request()->routeIs('admin.banners.index') ? 'nav-item-active' : 'text-slate-400' }}">
+                    <i class="fas fa-images w-6 text-lg {{ request()->routeIs('admin.banners.index') ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300' }}"></i>
                     <span>App Banners</span>
+                </a>
+
+                <a href="{{ route('admin.banners.single-promo') }}" class="nav-item flex items-center px-4 py-3.5 text-sm font-medium rounded-xl group {{ request()->routeIs('admin.banners.single-promo') ? 'nav-item-active' : 'text-slate-400' }}">
+                    <i class="fas fa-ad w-6 text-lg {{ request()->routeIs('admin.banners.single-promo') ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-300' }}"></i>
+                    <span>Single Promo Banner</span>
                 </a>
 
                 <a href="{{ route('admin.flash-sale.index') }}" class="nav-item flex items-center px-4 py-3.5 text-sm font-medium rounded-xl group {{ request()->routeIs('admin.flash-sale.*') ? 'nav-item-active' : 'text-slate-400' }}">

@@ -189,14 +189,14 @@
 
         <!-- Single Promotional Banner (New) -->
         @if(isset($singleBanner) && $singleBanner)
-            <div class="relative w-full rounded-[2.5rem] overflow-hidden shadow-2xl my-12 group">
+            <div class="relative w-full rounded-[2.5rem] overflow-hidden shadow-2xl my-12 group block">
                  @php
-                    $img = $singleBanner->image_path ?? $singleBanner->image;
+                    $img = !empty($singleBanner->image_path) ? $singleBanner->image_path : $singleBanner->image;
                     $src = \Illuminate\Support\Str::startsWith($img, ['http://', 'https://']) ? $img : asset('storage/' . $img);
                 @endphp
                 
                 <a href="{{ $singleBanner->link ?? '#' }}" class="block relative h-[300px] md:h-[400px]">
-                    <!-- Background Image with Parallax-like effect on hover -->
+                    <!-- Background Image -->
                     <div class="absolute inset-0 bg-gray-900">
                         <img src="{{ $src }}" 
                              alt="{{ $singleBanner->title ?? 'Promotion' }}" 
@@ -208,7 +208,7 @@
                     
                     <!-- Content Container -->
                     <div class="absolute inset-0 flex items-center px-8 md:px-16">
-                        <div class="max-w-2xl transform transition-all duration-700 delay-100 ease-out">
+                        <div class="max-w-2xl transform transition-all duration-700 ease-out">
                             
                             <!-- Badge/Tag -->
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-xs font-bold uppercase tracking-wider mb-6">
