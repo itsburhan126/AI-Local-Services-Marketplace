@@ -9,6 +9,9 @@
             <h1 class="text-2xl font-bold text-slate-800">Pages</h1>
             <p class="text-slate-500 text-sm mt-1">Manage static pages like Privacy Policy, Terms, etc.</p>
         </div>
+        <a href="{{ route('admin.pages.create') }}" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm shadow-indigo-200 transition-all font-medium flex items-center gap-2">
+            <i class="fas fa-plus"></i> Create New Page
+        </a>
     </div>
 
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -48,6 +51,13 @@
                                 <a href="{{ route('admin.pages.edit', $page->id) }}" class="p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all" title="Edit Page">
                                     <i class="fas fa-edit"></i>
                                 </a>
+                                <form action="{{ route('admin.pages.destroy', $page->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this page?');" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all" title="Delete Page">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>

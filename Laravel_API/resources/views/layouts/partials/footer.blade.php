@@ -49,9 +49,18 @@
                 <div class="col-span-1">
                     <h4 class="font-bold text-gray-900 mb-5 text-base">Business Solutions</h4>
                     <ul class="space-y-3">
-                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-all duration-300 text-sm block transform hover:translate-x-1">Findlancer Pro</a></li>
-                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-all duration-300 text-sm block transform hover:translate-x-1">Project Management</a></li>
-                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-all duration-300 text-sm block transform hover:translate-x-1">Talent Sourcing</a></li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-gray-400 text-sm cursor-not-allowed">Findlancer Pro</span>
+                            <span class="text-[10px] font-bold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full border border-indigo-100">Coming Soon</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-gray-400 text-sm cursor-not-allowed">Project Management</span>
+                            <span class="text-[10px] font-bold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full border border-indigo-100">Coming Soon</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-gray-400 text-sm cursor-not-allowed">Talent Sourcing</span>
+                            <span class="text-[10px] font-bold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full border border-indigo-100">Coming Soon</span>
+                        </li>
                     </ul>
                 </div>
 
@@ -59,12 +68,12 @@
                 <div class="col-span-1">
                     <h4 class="font-bold text-gray-900 mb-5 text-base">Company</h4>
                     <ul class="space-y-3">
-                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-all duration-300 text-sm block transform hover:translate-x-1">About Findlancer</a></li>
-                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-all duration-300 text-sm block transform hover:translate-x-1">Help Center</a></li>
-                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-all duration-300 text-sm block transform hover:translate-x-1">Careers</a></li>
-                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-all duration-300 text-sm block transform hover:translate-x-1">Terms of Service</a></li>
-                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-all duration-300 text-sm block transform hover:translate-x-1">Privacy Policy</a></li>
-                        <li><a href="#" class="text-gray-500 hover:text-emerald-600 hover:underline transition-all duration-300 text-sm block transform hover:translate-x-1">Partnerships</a></li>
+                        <li><a href="{{ route('page.show', 'about-findlancer') }}" class="text-gray-500 hover:text-emerald-600 hover:underline transition-all duration-300 text-sm block transform hover:translate-x-1">About Findlancer</a></li>
+                        <li><a href="{{ route('page.show', 'help-center') }}" class="text-gray-500 hover:text-emerald-600 hover:underline transition-all duration-300 text-sm block transform hover:translate-x-1">Help Center</a></li>
+                        <li><a href="{{ route('page.show', 'careers') }}" class="text-gray-500 hover:text-emerald-600 hover:underline transition-all duration-300 text-sm block transform hover:translate-x-1">Careers</a></li>
+                        <li><a href="{{ route('page.show', 'terms-of-service') }}" class="text-gray-500 hover:text-emerald-600 hover:underline transition-all duration-300 text-sm block transform hover:translate-x-1">Terms of Service</a></li>
+                        <li><a href="{{ route('page.show', 'privacy-policy') }}" class="text-gray-500 hover:text-emerald-600 hover:underline transition-all duration-300 text-sm block transform hover:translate-x-1">Privacy Policy</a></li>
+                        <li><a href="{{ route('page.show', 'partnerships') }}" class="text-gray-500 hover:text-emerald-600 hover:underline transition-all duration-300 text-sm block transform hover:translate-x-1">Partnerships</a></li>
                     </ul>
                 </div>
 

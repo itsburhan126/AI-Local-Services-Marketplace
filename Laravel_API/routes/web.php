@@ -346,9 +346,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
 
         // Static Pages Management
-        Route::get('pages', [\App\Http\Controllers\Admin\PageController::class, 'index'])->name('pages.index');
-        Route::get('pages/{id}/edit', [\App\Http\Controllers\Admin\PageController::class, 'edit'])->name('pages.edit');
-        Route::put('pages/{id}', [\App\Http\Controllers\Admin\PageController::class, 'update'])->name('pages.update');
+        Route::resource('pages', \App\Http\Controllers\Admin\PageController::class);
 
         // Zones
         Route::resource('zones', \App\Http\Controllers\Admin\ZoneController::class);
